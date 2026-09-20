@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlexiDiet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/home.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+
+<div id="home-view">
+
+  <header>
+    <div class="wrap">
+      <div class="brand"><span class="brand-mark"></span>FlexiDiet</div>
+      <nav class="main-nav">
+        <a href="#intro">Trang chủ</a>
+        <a href="#features">Chức năng</a>
+        <a href="#guide">Hướng dẫn</a>
+        <a href="#faq">Câu hỏi thường gặp</a>
+        <a href="#about">Về chúng tôi</a>
+      </nav>
+      <nav class="auth-buttons">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Chuyển sáng/tối" title="Chuyển sáng/tối">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button class="btn btn-ghost" id="open-signin">Đăng nhập</button>
+        <button class="btn btn-solid" id="open-signup">Đăng ký</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Giới thiệu -->
+  <section class="hero wrap" id="intro">
+    <div>
+      <div class="kicker">Quản lý calo linh hoạt</div>
+      <h1>Ăn uống thoải mái,<br>vẫn <em>đạt mục tiêu.</em></h1>
+      <p class="lede">FlexiDiet tự động điều chỉnh ngân sách calo mỗi ngày dựa trên lượng vận động thực tế của bạn. Không thực đơn cứng nhắc, không cấm món ăn nào — chỉ cần ghi lại và để hệ thống tính toán phần còn lại.</p>
+      <div class="hero-actions">
+        <button class="btn btn-solid btn-lg" id="open-signup-2">Bắt đầu miễn phí</button>
+        <a href="#guide" class="btn btn-ghost btn-lg" style="text-decoration:none; display:inline-flex; align-items:center;">Xem hướng dẫn</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="budget-row">
+        <div><span class="num">1,240</span> <span class="label">kcal còn lại hôm nay</span></div>
+      </div>
+      <div class="bar-track"><div class="bar-fill"></div></div>
+      <div class="macro-grid">
+        <div class="macro-chip"><b>82g</b><span>Protein</span></div>
+        <div class="macro-chip"><b>140g</b><span>Carb</span></div>
+        <div class="macro-chip"><b>45g</b><span>Fat</span></div>
+      </div>
+      <div class="visual-footnote"><span class="dot"></span>Cập nhật tự động sau mỗi bữa ăn & buổi tập</div>
+    </div>
+  </section>
+
+  <!-- Chức năng -->
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Chức năng</div>
+        <h2>Mọi công cụ bạn cần, trong một nơi</h2>
+        <p>Các tính năng bên dưới sẽ mở khoá đầy đủ ngay sau khi bạn đăng nhập vào tài khoản của mình.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v13H4z"/><path d="M9 3h6v4H9z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <h3>Nhận diện món ăn bằng AI</h3>
+          <p>Chụp ảnh hoặc mô tả món ăn bằng lời, AI sẽ ước tính calo và dinh dưỡng chỉ trong vài giây.</p>
+          <ul class="feature-details">
+            <li>Nhận diện món ăn Việt Nam quen thuộc từ ảnh chụp</li>
+            <li>Cho phép chỉnh sửa khẩu phần trước khi lưu</li>
+            <li>Lưu món yêu thích để ghi nhận nhanh lần sau</li>
+          </ul>
+          <span class="feature-lock">Mở khoá sau khi đăng nhập</span>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18"/><path d="M3 6h12"/><path d="M3 18h8"/></svg>
+          </div>
+          <h3>Ngân sách calo động</h3>
+          <p>Calo khả dụng mỗi ngày tự điều chỉnh theo lượng vận động thực tế, giúp bạn ăn linh hoạt hơn.</p>
+          <ul class="feature-details">
+            <li>Tự tính BMR & TDEE dựa trên chỉ số cơ thể</li>
+            <li>Cộng thêm calo khi bạn vận động nhiều hơn</li>
+            <li>Theo dõi Protein / Carb / Fat còn lại trong ngày</li>
+          </ul>
+          <span class="feature-lock">Mở khoá sau khi đăng nhập</span>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+          </div>
+          <h3>Theo dõi luyện tập</h3>
+          <p>Ghi nhận các buổi tập (chạy bộ, gym, đạp xe...) và tự động cộng calo tiêu hao vào ngân sách ngày.</p>
+          <ul class="feature-details">
+            <li>Thư viện hơn 20 loại hình vận động phổ biến</li>
+            <li>Tự tính calo tiêu hao theo thời lượng & cường độ</li>
+            <li>Lịch sử luyện tập theo tuần và theo tháng</li>
+          </ul>
+          <span class="feature-lock">Mở khoá sau khi đăng nhập</span>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <h3>Gợi ý món ăn thông minh</h3>
+          <p>Nhận gợi ý món ăn phù hợp với lượng calo và protein còn thiếu trong ngày của bạn.</p>
+          <ul class="feature-details">
+            <li>Lọc theo món Việt, nhiều protein, hoặc dưới 400 kcal</li>
+            <li>Gợi ý cập nhật theo thời gian thực trong ngày</li>
+            <li>Đề xuất công thức dễ làm tại nhà</li>
+          </ul>
+          <span class="feature-lock">Mở khoá sau khi đăng nhập</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hướng dẫn sử dụng -->
+  <section id="guide">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Hướng dẫn sử dụng</div>
+        <h2>Bắt đầu chỉ với 4 bước</h2>
+        <p>Xem video hướng dẫn nhanh hoặc làm theo các bước chi tiết bên dưới.</p>
+      </div>
+      <div class="guide-layout">
+        <div>
+          <div class="video-frame">
+            <video controls poster="" id="guide-video"></video>
+            <div class="video-placeholder" id="video-placeholder">
+              <div class="play-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#EDEAE0"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <small>Video hướng dẫn sẽ được cập nhật tại đây</small>
+            </div>
+          </div>
+          <p class="video-caption">Video dài khoảng 3 phút, hướng dẫn từ lúc đăng ký đến khi ghi nhận bữa ăn đầu tiên bằng AI.</p>
+        </div>
+        <ol class="steps">
+          <li>
+            <div>
+              <h4>Đăng ký & khai báo chỉ số</h4>
+              <p>Tạo tài khoản và nhập chiều cao, cân nặng, mức độ vận động, mục tiêu (giảm cân / duy trì / tăng cân) để hệ thống tính ngân sách calo phù hợp.</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h4>Ghi nhận bữa ăn</h4>
+              <p>Chụp ảnh hoặc mô tả món ăn bằng lời — AI tự động ước tính calo và dinh dưỡng, bạn có thể chỉnh sửa trước khi lưu vào nhật ký.</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h4>Ghi nhận buổi tập</h4>
+              <p>Thêm bài tập trong ngày (chạy bộ, gym, đạp xe...) kèm thời lượng để calo tiêu hao được cộng thẳng vào ngân sách ăn uống.</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h4>Theo dõi & nhận gợi ý</h4>
+              <p>Xem tiến trình trên dashboard, theo dõi biểu đồ cân nặng dài hạn và nhận gợi ý món ăn phù hợp cho bữa tiếp theo.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Câu hỏi thường gặp</div>
+        <h2>Còn thắc mắc gì không?</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>FlexiDiet có miễn phí không?<span class="faq-icon">+</span></summary>
+          <p>Có. Bạn có thể đăng ký và sử dụng đầy đủ các tính năng cơ bản hoàn toàn miễn phí, bao gồm ghi nhận bữa ăn bằng AI, theo dõi luyện tập và nhận gợi ý món ăn.</p>
+        </details>
+        <details class="faq-item">
+          <summary>AI nhận diện món ăn Việt Nam chính xác đến mức nào?<span class="faq-icon">+</span></summary>
+          <p>AI được huấn luyện trên thư viện món ăn Việt Nam phổ biến với độ chính xác khoảng 98%. Bạn luôn có thể chỉnh sửa khẩu phần hoặc thành phần trước khi lưu để đảm bảo số liệu đúng nhất.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Ngân sách calo động hoạt động như thế nào?<span class="faq-icon">+</span></summary>
+          <p>Hệ thống tính calo mục tiêu ban đầu dựa trên chỉ số cơ thể của bạn, sau đó cộng thêm calo tiêu hao từ các buổi tập bạn ghi nhận trong ngày — giúp bạn ăn linh hoạt hơn mà vẫn theo đúng mục tiêu.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Dữ liệu sức khoẻ của tôi có được bảo mật không?<span class="faq-icon">+</span></summary>
+          <p>Mọi thông tin cá nhân và chỉ số sức khoẻ đều được mã hoá và chỉ dùng để cá nhân hoá trải nghiệm của bạn trên FlexiDiet, không chia sẻ cho bên thứ ba.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Tôi có thể dùng FlexiDiet trên điện thoại không?<span class="faq-icon">+</span></summary>
+          <p>Có. FlexiDiet hoạt động tốt trên trình duyệt di động, giúp bạn ghi nhận bữa ăn và buổi tập ngay khi đang di chuyển.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- About us -->
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Về chúng tôi</div>
+        <h2>Vì sao chúng tôi làm FlexiDiet</h2>
+      </div>
+      <div class="about-layout">
+        <div class="about-card">
+          <p>FlexiDiet ra đời từ một trải nghiệm rất thật: hầu hết các app đếm calo đều khiến việc ăn uống trở nên căng thẳng thay vì dễ chịu hơn.</p>
+          <p>Chúng tôi tin rằng quản lý cân nặng nên linh hoạt theo cuộc sống thật của bạn — có ngày vận động nhiều, có ngày ít — chứ không phải ép bạn vào một thực đơn cố định.</p>
+          <p>Đội ngũ FlexiDiet gồm các kỹ sư phần mềm, chuyên gia dinh dưỡng và huấn luyện viên thể hình, cùng xây dựng sản phẩm dựa trên trải nghiệm thực tế của chính mình.</p>
+          <div class="team-row">
+            <div class="team-chip"><span class="avatar"></span><div><b>Đội ngũ kỹ thuật</b><span>AI & sản phẩm</span></div></div>
+            <div class="team-chip"><span class="avatar"></span><div><b>Chuyên gia dinh dưỡng</b><span>Cố vấn nội dung</span></div></div>
+          </div>
+        </div>
+        <div class="value-list">
+          <div class="value-item">
+            <span class="value-dot"></span>
+            <div>
+              <h4>Linh hoạt là ưu tiên số một</h4>
+              <p>Ngân sách calo thay đổi theo vận động thực tế, không có món ăn nào bị "cấm".</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <span class="value-dot"></span>
+            <div>
+              <h4>Công nghệ đơn giản hoá thói quen</h4>
+              <p>AI giúp việc ghi nhận bữa ăn nhanh và chính xác, không tốn thời gian tra cứu thủ công.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <span class="value-dot"></span>
+            <div>
+              <h4>Minh bạch trong dữ liệu</h4>
+              <p>Bạn luôn thấy rõ cách hệ thống tính toán calo và có thể chỉnh sửa bất cứ lúc nào.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <span class="value-dot"></span>
+            <div>
+              <h4>Đồng hành lâu dài</h4>
+              <p>Sản phẩm được xây dựng để bạn duy trì thói quen bền vững, không chỉ dùng vài ngày rồi bỏ.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2>Sẵn sàng ăn uống thoải mái hơn?</h2>
+        <p>Tạo tài khoản miễn phí và nhận ngân sách calo cá nhân hoá ngay hôm nay.</p>
+        <button class="btn btn-solid btn-lg" id="open-signup-3">Bắt đầu miễn phí</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-about">
+          <div class="brand"><span class="brand-mark"></span>FlexiDiet</div>
+          <p>Ứng dụng quản lý calo linh hoạt, giúp bạn ăn uống thoải mái mà vẫn đạt được mục tiêu sức khoẻ của mình.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Sản phẩm</h5>
+          <ul>
+            <li><a href="#features">Chức năng</a></li>
+            <li><a href="#guide">Hướng dẫn sử dụng</a></li>
+            <li><a href="#faq">Câu hỏi thường gặp</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Liên hệ</h5>
+          <ul>
+            <li><a href="mailto:hello@flexidiet.app">hello@flexidiet.app</a></li>
+            <li><a href="#">Fanpage Facebook</a></li>
+            <li><a href="#">Instagram</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="copyright">© 2026 FlexiDiet. Mọi quyền được bảo lưu.</div>
+        <div class="footer-links" style="display:flex; gap:20px;">
+          <a href="#" style="font-size:12.5px; color:var(--text-soft); text-decoration:none;">Điều khoản</a>
+          <a href="#" style="font-size:12.5px; color:var(--text-soft); text-decoration:none;">Bảo mật</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Sign up: full page -->
+<div class="page register-page" id="signup-page">
+  <div class="register-shell">
+    <div class="brand"><span class="brand-mark"></span>FlexiDiet</div>
+    <button class="back-link" id="back-home">&larr; Quay lại trang chủ</button>
+
+        <div class="onboarding-wrapper">
+          <!-- Step Progress Indicator -->
+          <div class="step-indicator-bar">
+            <div class="step-item active" id="step-node-1" onclick="goToStep(1)">
+              <div class="step-circle">1</div>
+              <div class="step-meta">
+                <span class="s-title">Tài Khoản</span>
+                <span class="s-sub">Họ tên & Email</span>
+              </div>
+            </div>
+            <div class="step-line" id="step-line-1"></div>
+            <div class="step-item" id="step-node-2" onclick="goToStep(2)">
+              <div class="step-circle">2</div>
+              <div class="step-meta">
+                <span class="s-title">Thể Chất</span>
+                <span class="s-sub">Cao, cân nặng, PAL</span>
+              </div>
+            </div>
+            <div class="step-line" id="step-line-2"></div>
+            <div class="step-item" id="step-node-3" onclick="goToStep(3)">
+              <div class="step-circle">3</div>
+              <div class="step-meta">
+                <span class="s-title">Mục Tiêu</span>
+                <span class="s-sub">Giảm cân / Tăng cơ</span>
+              </div>
+            </div>
+            <div class="step-line" id="step-line-3"></div>
+            <div class="step-item" id="step-node-4" onclick="goToStep(4)">
+              <div class="step-circle">4</div>
+              <div class="step-meta">
+                <span class="s-title">Kế Hoạch</span>
+                <span class="s-sub">BMR, TDEE & Budget</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step Panes Container -->
+          <div class="onboarding-card-box">
+            
+            <!-- STEP 1 -->
+            <div class="step-pane active" id="step-pane-1">
+              <div class="pane-header">
+                <h3><i class="fa-solid fa-user-shield"></i> Bước 1: Thông Tin Tài Khoản</h3>
+                <p>Hồ sơ cá nhân dùng để đồng bộ hóa nhật ký calo và bài tập.</p>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label>Họ và Tên</label>
+                  <input type="text" id="su-name" placeholder="Nguyễn Văn A" class="jira-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" id="su-email" placeholder="ban@vidu.com" class="jira-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Mật Khẩu</label>
+                  <input type="password" id="su-pass" placeholder="Tối thiểu 8 ký tự" class="jira-input" required>
+                </div>
+              </div>
+              <div class="step-nav-actions right-only">
+                <button class="btn-jira-create" onclick="goToStep(2)">
+                  <span>Tiếp tục: Chỉ số thể chất</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step-pane" id="step-pane-2">
+              <div class="pane-header">
+                <h3><i class="fa-solid fa-heart-pulse"></i> Bước 2: Chỉ Số Cơ Thể & Mức Độ Vận Động (PAL)</h3>
+                <p>Công thức Mifflin-St Jeor sử dụng các thông số này để tính mức trao đổi chất BMR.</p>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label>Giới Tính Sinh Học</label>
+                  <div class="gender-selector">
+                    <label class="gender-card active" id="gender-male" onclick="selectGender('male')">
+                      <input type="radio" name="gender" value="male" checked>
+                      <i class="fa-solid fa-mars"></i> Nam (Male)
+                    </label>
+                    <label class="gender-card" id="gender-female" onclick="selectGender('female')">
+                      <input type="radio" name="gender" value="female">
+                      <i class="fa-solid fa-venus"></i> Nữ (Female)
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Tuổi</label>
+                  <input type="number" id="ob-age" value="24" class="jira-input">
+                </div>
+                <div class="form-group">
+                  <label>Chiều Cao (cm)</label>
+                  <input type="number" id="ob-height" value="172" class="jira-input">
+                </div>
+                <div class="form-group full-width">
+                  <label>Cân Nặng Hiện Tại (kg)</label>
+                  <input type="number" id="ob-weight" value="68.5" step="0.1" class="jira-input">
+                </div>
+              </div>
+              <div class="step-nav-actions">
+                <button class="btn-jira-tool" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
+                <button class="btn-jira-create" onclick="goToStep(3)"><span>Tiếp tục: Mục tiêu</span> <i class="fa-solid fa-arrow-right"></i></button>
+              </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step-pane" id="step-pane-3">
+              <div class="pane-header">
+                <h3><i class="fa-solid fa-bullseye"></i> Bước 3: Xác Định Mục Tiêu Thể Hình</h3>
+                <p>Lựa chọn mức thâm hụt hoặc thặng dư Calo để điều chỉnh vóc dáng.</p>
+              </div>
+              <div class="goal-cards-grid">
+                <div class="goal-card active" onclick="selectGoal('lose', -500, this)">
+                  <div class="goal-icon text-orange"><i class="fa-solid fa-fire"></i></div>
+                  <h4>Giảm Cân & Đốt Mỡ</h4>
+                  <p>Thâm hụt -500 kcal/ngày</p>
+                </div>
+                <div class="goal-card" onclick="selectGoal('maintain', 0, this)">
+                  <div class="goal-icon text-blue"><i class="fa-solid fa-scale-balanced"></i></div>
+                  <h4>Duy Trì Vóc Dáng</h4>
+                  <p>Cân bằng Calo Nạp = Tiêu</p>
+                </div>
+                <div class="goal-card" onclick="selectGoal('gain', 400, this)">
+                  <div class="goal-icon text-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                  <h4>Tăng Cân Sạch</h4>
+                  <p>Thặng dư +400 kcal/ngày</p>
+                </div>
+                <div class="goal-card" onclick="selectGoal('recomp', -200, this)">
+                  <div class="goal-icon text-purple"><i class="fa-solid fa-hand-fist"></i></div>
+                  <h4>Tăng Cơ Giảm Mỡ</h4>
+                  <p>Giàu Đạm, Ít Tinh Bột</p>
+                </div>
+              </div>
+              <div class="step-nav-actions" style="margin-top: 20px;">
+                <button class="btn-jira-tool" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
+                <button class="btn-jira-create" onclick="calculateAndShowStep4()"><i class="fa-solid fa-calculator"></i> Tính Toán Kết Quả</button>
+              </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="step-pane" id="step-pane-4">
+              <div class="pane-header text-center">
+                <div class="success-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+                <h3>Kế Hoạch Dinh Dưỡng Của Bạn Đã Hoàn Tất!</h3>
+                <p>Công thức Mifflin-St Jeor & TDEE theo PAL:</p>
+              </div>
+              <div class="results-dashboard-card">
+                <div class="metrics-row">
+                  <div class="metric-box">
+                    <span class="m-label">Chỉ Số BMR</span>
+                    <span class="m-val" id="res-bmr">1,640 <small>kcal</small></span>
+                  </div>
+                  <div class="metric-box">
+                    <span class="m-label">Chỉ Số TDEE</span>
+                    <span class="m-val text-blue" id="res-tdee">2,255 <small>kcal</small></span>
+                  </div>
+                  <div class="metric-box highlight-metric">
+                    <span class="m-label">🎯 Ngân Sách Calo Khuyến Nghị</span>
+                    <span class="m-val text-green big" id="res-target">1,755 <small>kcal/ngày</small></span>
+                  </div>
+                </div>
+              </div>
+              <div class="step-nav-actions center-actions" style="margin-top: 24px;">
+                <button class="btn-jira-create btn-lg" onclick="finishOnboardingToDashboard()">
+                  <i class="fa-solid fa-rocket"></i> Bắt Đầu Sử Dụng FlexiDiet
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+    <p class="switch-line" style="margin-top:18px;">Đã có tài khoản? <a id="to-signin">Đăng nhập</a></p>
+  </div>
+</div>
+
+<!-- Sign in: small modal near top (có kèm luồng quên mật khẩu) -->
+<div class="overlay" id="signin-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Đăng nhập</h2>
+      <button class="close-x" id="close-signin" aria-label="Đóng">&times;</button>
+    </div>
+
+    <!-- Đăng nhập -->
+    <div id="signin-pane">
+      <form id="signin-form" onsubmit="return false;">
+        <label for="si-email">Email</label>
+        <input type="email" id="si-email" placeholder="ban@vidu.com" required>
+        <div class="label-row">
+          <label for="si-pass">Mật khẩu</label>
+          <button type="button" class="link-btn" id="open-forgot">Quên mật khẩu?</button>
+        </div>
+        <input type="password" id="si-pass" placeholder="Mật khẩu" required>
+        <button type="submit" class="btn btn-solid">Đăng nhập</button>
+      </form>
+      <p class="switch-line">Chưa có tài khoản? <a id="to-signup">Đăng ký</a></p>
+    </div>
+
+    <!-- Quên mật khẩu -->
+    <div id="forgot-pane" hidden>
+      <form id="forgot-form" onsubmit="return false;">
+        <p class="modal-desc">Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết để bạn đặt lại mật khẩu.</p>
+        <label for="fp-email">Email</label>
+        <input type="email" id="fp-email" placeholder="ban@vidu.com" required>
+        <button type="submit" class="btn btn-solid">Gửi liên kết đặt lại</button>
+      </form>
+      <div class="forgot-success" id="forgot-success" hidden>
+        <div class="success-mark">&#10003;</div>
+        <p>Nếu <b id="fp-sent-email"></b> đã được đăng ký, bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu trong ít phút.</p>
+        <p class="hint">Chưa thấy email? Hãy kiểm tra cả mục Spam.</p>
+      </div>
+      <p class="switch-line"><a id="back-to-signin">&larr; Quay lại đăng nhập</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/home.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+/* FlexiDiet - bảng màu dùng chung cho trang chủ (index.html) và app (app.html) */
+:root {
+  color-scheme: light;
+  --primary: #166534;
+  --secondary: #65A30D;
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --text: #1C1917;
+  --text-soft: #6B7280;
+  --line: #E5E7EB;
+  --accent: #F59E0B;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14170F;
+  --surface: #1A1E14;
+  --card: #1D2117;
+  --text: #F1EFE6;
+  --text-soft: #B4AF9E;
+  --line: #33372A;
+  --primary: #4ADE80;
+  --secondary: #A3E635;
+  --accent: #FBBF24;
+}

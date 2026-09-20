@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlexiDiet - Smart Diet & Workout Tracker with AI</title>
+  <meta name="description" content="FlexiDiet - Nền tảng quản lý dinh dưỡng và luyện tập thông minh, nhận diện món ăn AI Vision, tính BMR/TDEE, gợi ý thực đơn và biểu đồ trực quan.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Pro Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    // Chưa đăng nhập thì về trang chủ. Đặt REQUIRE_LOGIN = false để mở thẳng app khi đang test.
+    // Chỉ kiểm tra khi chạy qua http(s): mở bằng file:// một số trình duyệt không chia sẻ localStorage giữa các file.
+    (function () {
+      var REQUIRE_LOGIN = true;
+      try {
+        if (REQUIRE_LOGIN && location.protocol !== 'file:' && !localStorage.getItem('flexidiet-user')) {
+          location.replace('index.html');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP GLOBAL APP BAR (GIỐNG ẢNH: SEARCH, + CREATE, NOTIFICATIONS, SETTINGS, AVATAR) -->
+  <!-- ========================================================================= -->
+  <header class="jira-top-bar">
+    <div class="top-bar-left">
+      <!-- App Switcher / Brand -->
+      <div class="app-switcher-brand" onclick="switchTab('board')">
+        <div class="app-brand-icon">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <span class="app-brand-name">Flexi<span class="highlight">Diet</span></span>
+      </div>
+
+      <!-- Global Search Box -->
+      <div class="global-search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" placeholder="Tìm kiếm..." id="globalSearchInput" oninput="handleGlobalSearch(this.value)">
+      </div>
+    </div>
+
+    <div class="top-bar-right">
+      <!-- + Create Button (Blue Jira style) -->
+      <button class="btn-jira-create" onclick="openCreateQuickModal()">
+        <i class="fa-solid fa-plus"></i>
+        <span>Thêm mới</span>
+      </button>
+
+      <!-- Public Landing Page Shortcut -->
+      <button class="btn-top-landing" onclick="location.href='index.html'" title="Về trang chủ giới thiệu">
+        <i class="fa-solid fa-globe"></i>
+        <span>Trang chủ</span>
+      </button>
+
+      <!-- Chuyển giao diện sáng / tối -->
+      <div class="top-icon-btn theme-toggle" id="theme-toggle" title="Chuyển giao diện sáng/tối">
+        <i class="fa-solid fa-sun icon-sun"></i>
+        <i class="fa-solid fa-moon icon-moon"></i>
+      </div>
+
+      <!-- Notifications Icon with Badge 3+ -->
+      <div class="top-icon-btn notification-btn" onclick="showToast('Bạn có 3 thông báo mới về mục tiêu calo!', 'info')" title="Thông báo">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge-count">3+</span>
+      </div>
+
+      <!-- Settings Icon -->
+      <div class="top-icon-btn" onclick="switchTab('profile')" title="Cài đặt hệ thống">
+        <i class="fa-solid fa-gear"></i>
+      </div>
+
+      <!-- Profile Avatar (Orange Circle with user icon) -->
+      <div class="top-avatar-btn" onclick="switchTab('profile')" title="Hồ sơ cá nhân: Nguyễn Minh Anh">
+        <div class="avatar-orange-circle">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. SPACES & PROJECT SUB-HEADER (GIỐNG ẢNH: SPACES, ICON, TEAM NAME, ACTIONS) -->
+  <!-- ========================================================================= -->
+  <section class="jira-space-header">
+    <div class="space-header-container">
+      <div class="space-title-left">
+        <span class="space-breadcrumb-label" id="greetingSub">Chúc bạn một ngày ăn uống thoải mái</span>
+        <div class="space-brand-row">
+          <h1 class="space-name" id="greetingName">Xin chào, Nguyễn Minh Anh</h1>
+        </div>
+      </div>
+
+      <!-- Right utility icons (Share, Automate/Lightning, Feedback/Chat, Fullscreen) -->
+      <div class="space-header-actions">
+        <button class="space-action-btn" title="Chia sẻ tiến trình" onclick="showToast('Đã sao chép liên kết chia sẻ!', 'info')">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+        <button class="space-action-btn" title="AI Assistant Auto-sync" onclick="showToast('AI Auto-sync đang kích hoạt!', 'success')">
+          <i class="fa-solid fa-bolt"></i>
+        </button>
+        <button class="space-action-btn" title="Trợ lý AI Chat" onclick="switchTab('food-log')">
+          <i class="fa-regular fa-comment-dots"></i>
+        </button>
+        <button class="space-action-btn" title="Toàn màn hình" onclick="toggleFullScreen()">
+          <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 3. HORIZONTAL NAVIGATION TABS BAR (GIỐNG ẢNH: GẠCH CHÂN ACTIVE MƯỢT MÀ) -->
+  <!-- ========================================================================= -->
+  <nav class="jira-tabs-bar" id="jiraTabsBar">
+    <div class="tabs-bar-container">
+      <button class="jira-tab" data-target="list" onclick="switchTab('list')">
+        <i class="fa-solid fa-list-ul"></i>
+        <span>Danh sách</span>
+      </button>
+      <button class="jira-tab active" data-target="board" onclick="switchTab('board')">
+        <i class="fa-solid fa-table-columns"></i>
+        <span>Bảng ngày</span>
+      </button>
+      <button class="jira-tab" data-target="food-log" onclick="switchTab('food-log')">
+        <i class="fa-solid fa-bowl-food"></i>
+        <span>Nhật ký ăn uống</span>
+        <span class="ai-spark-pill"><i class="fa-solid fa-wand-magic-sparkles"></i> AI</span>
+      </button>
+      <button class="jira-tab" data-target="workout-log" onclick="switchTab('workout-log')">
+        <i class="fa-solid fa-person-running"></i>
+        <span>Nhật ký luyện tập</span>
+      </button>
+      <button class="jira-tab" data-target="suggestions" onclick="switchTab('suggestions')">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Gợi ý món ăn</span>
+      </button>
+      <button class="jira-tab" data-target="profile" onclick="switchTab('profile')">
+        <i class="fa-regular fa-user"></i>
+        <span>Hồ sơ</span>
+      </button>
+      <button class="jira-tab tab-add-btn" onclick="openCreateQuickModal()" title="Thêm mục mới">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================================= -->
+  <!-- 4. SUB-TOOLBAR / FILTER BAR (GIỐNG ẢNH: SEARCH BOARD, AVATARS, FILTER, GROUP) -->
+  <!-- ========================================================================= -->
+  <div class="jira-sub-toolbar" id="jiraSubToolbar">
+    <div class="sub-toolbar-container">
+      <div class="toolbar-left">
+        <!-- Search board box -->
+        <div class="board-search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Tìm kiếm..." id="boardSearchInput" oninput="filterBoardItems(this.value)">
+        </div>
+
+        <!-- Assignee / User avatar filters -->
+        <div class="toolbar-avatars-group">
+          <div class="t-avatar active" title="Tất cả (All)">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+          <div class="t-avatar orange" title="Minh Anh (Chính)">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+
+        <!-- Filter Dropdown Button -->
+        <div class="dropdown-wrap">
+          <button class="btn-jira-tool" onclick="toggleDropdown('filterDropdown')">
+            <i class="fa-solid fa-bars-staggered"></i>
+            <span>Lọc</span>
+          </button>
+          <div class="dropdown-menu" id="filterDropdown">
+            <div class="dropdown-item" onclick="filterByMealType('all')"><i class="fa-solid fa-check"></i> Tất cả bữa ăn</div>
+            <div class="dropdown-item" onclick="filterByMealType('high-protein')"><i class="fa-solid fa-dna"></i> Nhiều Protein (>25g)</div>
+            <div class="dropdown-item" onclick="filterByMealType('low-cal')"><i class="fa-solid fa-leaf"></i> Calo Thấp (&lt;400 kcal)</div>
+            <div class="dropdown-item" onclick="filterByMealType('workout')"><i class="fa-solid fa-dumbbell"></i> Đã hoàn thành bài tập</div>
+          </div>
+        </div>
+
+        <!-- Group Dropdown Button -->
+        <div class="dropdown-wrap">
+          <button class="btn-jira-tool" onclick="toggleDropdown('groupDropdown')">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Nhóm</span>
+          </button>
+          <div class="dropdown-menu" id="groupDropdown">
+            <div class="dropdown-item" onclick="groupBoardBy('meal')"><i class="fa-solid fa-check"></i> Nhóm theo Bữa Ăn (Sáng/Trưa/Tối/Phụ)</div>
+            <div class="dropdown-item" onclick="groupBoardBy('status')"><i class="fa-solid fa-list-check"></i> Nhóm theo Tiến Độ (Cần làm / Hoàn thành)</div>
+            <div class="dropdown-item" onclick="groupBoardBy('macros')"><i class="fa-solid fa-chart-pie"></i> Nhóm theo Nhóm Dinh Dưỡng</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Quick Summary Stats Widget -->
+        <div class="quick-energy-badge" title="Calo Còn Lại = Mục tiêu (1850) + Tiêu hao (340) - Đã nạp (1240)">
+          <i class="fa-solid fa-fire-flame-curved text-warning"></i>
+          <span>Calo Còn Lại: <strong id="tbRemainingCal">950</strong> / 1,850 kcal</span>
+        </div>
+
+        <!-- Right utility buttons -->
+        <button class="btn-jira-icon" onclick="switchTab('profile')" title="Xem đồ thị & phân tích">
+          <i class="fa-solid fa-chart-simple"></i>
+        </button>
+        <button class="btn-jira-icon" onclick="switchTab('profile')" title="Cài đặt mục tiêu">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+        <button class="btn-jira-icon" onclick="showToast('Chế độ đồng bộ dữ liệu đám mây!', 'info')">
+          <i class="fa-solid fa-ellipsis"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. MAIN WORKSPACE VIEWS CONTAINER (TẤT CẢ CÁC TRANG TRÊN 1 WORKSPACE CHÍNH) -->
+  <!-- ========================================================================= -->
+  <main class="main-workspace" id="mainWorkspace">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: BOARD (KANBAN BỮA ĂN & NĂNG LƯỢNG - GIỐNG CHÍNH XÁC LAYOUT ẢNH) -->
+    <!-- ========================================================================= -->
+    <section class="page-view active" id="view-board">
+      
+      <!-- Top Energy Summary Bar -->
+      <div class="board-top-summary-strip">
+        <div class="strip-card">
+          <div class="sc-icon text-blue"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="sc-info">
+            <span class="sc-label">Mục Tiêu Ngày</span>
+            <span class="sc-value" id="boardTargetCal">1,850 <small>kcal</small></span>
+          </div>
+        </div>
+
+        <div class="strip-card">
+          <div class="sc-icon text-orange"><i class="fa-solid fa-utensils"></i></div>
+          <div class="sc-info">
+            <span class="sc-label">Đã Nạp (Food)</span>
+            <span class="sc-value" id="boardConsumedCal">1,240 <small>kcal</small></span>
+          </div>
+        </div>
+
+        <div class="strip-card">
+          <div class="sc-icon text-purple"><i class="fa-solid fa-fire"></i></div>
+          <div class="sc-info">
+            <span class="sc-label">Tiêu Hao (Workout)</span>
+            <span class="sc-value" id="boardBurnedCal">+340 <small>kcal</small></span>
+          </div>
+        </div>
+
+        <div class="strip-card highlight-card">
+          <div class="sc-icon text-green"><i class="fa-solid fa-bolt"></i></div>
+          <div class="sc-info">
+            <span class="sc-label">Calo Còn Lại (Remaining)</span>
+            <span class="sc-value text-green" id="boardRemainCal">950 <small>kcal</small></span>
+          </div>
+        </div>
+
+        <!-- Quick Water & Steps Mini Pill -->
+        <div class="strip-card mini-trackers">
+          <div class="mini-tracker-item" onclick="addWaterQuick(0.25)" title="Bấm để uống +250ml nước">
+            <i class="fa-solid fa-droplet text-blue"></i>
+            <span id="boardWaterVal">1.75 / 2.5L</span>
+            <button class="mini-plus-btn">+</button>
+          </div>
+          <div class="mini-tracker-item" onclick="switchTab('workout-log')" title="Xem chi tiết bước chân">
+            <i class="fa-solid fa-shoe-prints text-green"></i>
+            <span id="boardStepsVal">7,850 bước</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phân bổ dinh dưỡng & lời khuyên AI (gộp từ "Tổng quan" vào Dashboard) -->
+      <div class="summary-widgets-grid" style="margin-bottom: 20px;">
+        <!-- Widget 1: Calorie Balance Circle -->
+        <div class="summary-card">
+          <div class="sc-head">
+            <h3><i class="fa-solid fa-fire text-warning"></i> Cân Bằng Năng Lượng</h3>
+            <span class="badge-status-green">Đang trong ngưỡng thâm hụt</span>
+          </div>
+          <div class="energy-calc-display">
+            <div class="calc-col">
+              <span class="c-label">Mục Tiêu (TDEE Deficit)</span>
+              <span class="c-val" id="sumTarget">1,850</span>
+            </div>
+            <div class="calc-op">+</div>
+            <div class="calc-col">
+              <span class="c-label">Tiêu Hao (Tập Luyện)</span>
+              <span class="c-val text-purple" id="sumBurned">+340</span>
+            </div>
+            <div class="calc-op">-</div>
+            <div class="calc-col">
+              <span class="c-label">Đã Nạp (Thức Ăn)</span>
+              <span class="c-val text-orange" id="sumConsumed">-1,240</span>
+            </div>
+            <div class="calc-op">=</div>
+            <div class="calc-col highlight">
+              <span class="c-label">Calo Còn Lại</span>
+              <span class="c-val text-green" id="sumRemain">950 kcal</span>
+            </div>
+          </div>
+          <div class="progress-bar-lg">
+            <div class="progress-fill" style="width: 67%; background: linear-gradient(90deg, var(--secondary), var(--primary));"></div>
+          </div>
+        </div>
+
+        <!-- Widget 2: Macronutrients Breakdown -->
+        <div class="summary-card">
+          <div class="sc-head">
+            <h3><i class="fa-solid fa-chart-pie text-blue"></i> Phân Bổ Dinh Dưỡng Đa Lượng</h3>
+            <span>94g / 135g Protein</span>
+          </div>
+          <div class="macros-summary-bars">
+            <div class="m-row">
+              <div class="m-info"><span>Protein (Đạm)</span> <strong>94g / 135g (70%)</strong></div>
+              <div class="m-bar"><div class="m-fill bg-blue" style="width: 70%;"></div></div>
+            </div>
+            <div class="m-row">
+              <div class="m-info"><span>Carb (Tinh Bột)</span> <strong>145g / 205g (71%)</strong></div>
+              <div class="m-bar"><div class="m-fill bg-green" style="width: 71%;"></div></div>
+            </div>
+            <div class="m-row">
+              <div class="m-info"><span>Fat (Chất Béo Tốt)</span> <strong>36g / 52g (69%)</strong></div>
+              <div class="m-bar"><div class="m-fill bg-amber" style="width: 69%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KANBAN COLUMNS (To Do / Bữa Sáng, In Progress / Bữa Trưa, In Review / Bữa Tối, Done / Bữa Phụ) -->
+      <div class="jira-kanban-board">
+        
+        <!-- COLUMN 1: BỮA SÁNG (BREAKFAST) -->
+        <div class="kanban-column" id="col-breakfast">
+          <div class="column-header">
+            <div class="column-title">
+              <span class="status-name">Bữa Sáng</span>
+              <span class="column-count" id="count-breakfast">1</span>
+            </div>
+            <button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="kanban-cards-list" id="cards-breakfast">
+            <!-- Card 1: Phở Bò -->
+            <div class="kanban-card" onclick="openCreateQuickModal('breakfast')">
+              <div class="card-title-row">
+                <span class="card-item-title">Phở Bò Tái Nạm (Bát Vừa)</span>
+                <span class="card-key-tag">BRK-1</span>
+              </div>
+              <p class="card-desc">Bát vừa 450g, nước dùng trong, nhiều thịt bò nạc giàu đạm.</p>
+              
+              <div class="card-macros-pills">
+                <span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 485 kcal</span>
+                <span class="macro-mini p">P: 32g</span>
+                <span class="macro-mini c">C: 68g</span>
+                <span class="macro-mini f">F: 11g</span>
+              </div>
+
+              <div class="card-footer-meta">
+                <div class="card-due-tag">
+                  <i class="fa-regular fa-clock"></i> 07:30 AM
+                </div>
+                <div class="card-assignee-avatar orange" title="Minh Anh">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-create-in-column" onclick="openCreateQuickModal('breakfast')">
+            <i class="fa-solid fa-plus"></i>
+            <span>Thêm món ăn</span>
+          </button>
+        </div>
+
+        <!-- COLUMN 2: BỮA TRƯA (LUNCH) -->
+        <div class="kanban-column" id="col-lunch">
+          <div class="column-header">
+            <div class="column-title">
+              <span class="status-name">Bữa Trưa</span>
+              <span class="column-count" id="count-lunch">1</span>
+            </div>
+            <button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="kanban-cards-list" id="cards-lunch">
+            <!-- Card 2: Cơm Tấm Sườn Bì -->
+            <div class="kanban-card" onclick="openCreateQuickModal('lunch')">
+              <div class="card-title-row">
+                <span class="card-item-title">Cơm Tấm Sườn Nướng & Chả Trứng</span>
+                <span class="card-key-tag">LUN-1</span>
+              </div>
+              <p class="card-desc">1 đĩa 420g cơm tấm, sườn nướng ít mỡ, chả hấp, dưa leo.</p>
+              
+              <div class="card-macros-pills">
+                <span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 650 kcal</span>
+                <span class="macro-mini p">P: 34g</span>
+                <span class="macro-mini c">C: 82g</span>
+                <span class="macro-mini f">F: 21g</span>
+              </div>
+
+              <div class="card-footer-meta">
+                <div class="card-due-tag">
+                  <i class="fa-regular fa-clock"></i> 12:15 PM
+                </div>
+                <div class="card-assignee-avatar orange" title="Minh Anh">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-create-in-column" onclick="openCreateQuickModal('lunch')">
+            <i class="fa-solid fa-plus"></i>
+            <span>Thêm món ăn</span>
+          </button>
+        </div>
+
+        <!-- COLUMN 3: BỮA TỐI (DINNER - KẾ HOẠCH) -->
+        <div class="kanban-column" id="col-dinner">
+          <div class="column-header">
+            <div class="column-title">
+              <span class="status-name">Bữa Tối</span>
+              <span class="column-count" id="count-dinner">1</span>
+            </div>
+            <button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="kanban-cards-list" id="cards-dinner">
+            <!-- Card 3: Salad Ức Gà (Đề xuất thông minh) -->
+            <div class="kanban-card card-suggested" onclick="switchTab('suggestions')">
+              <div class="card-badge-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý AI</div>
+              <div class="card-title-row">
+                <span class="card-item-title">Salad Ức Gà Áp Chảo & Sốt Sữa Chua</span>
+                <span class="card-key-tag">DIN-1</span>
+              </div>
+              <p class="card-desc">Món ăn chuẩn Macro bù đắp 38g Protein còn thiếu hôm nay.</p>
+              
+              <div class="card-macros-pills">
+                <span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
+                <span class="macro-mini p">P: 38g</span>
+                <span class="macro-mini c">C: 14g</span>
+                <span class="macro-mini f">F: 8g</span>
+              </div>
+
+              <div class="card-footer-meta">
+                <div class="card-due-tag due-soon">
+                  <i class="fa-regular fa-clock"></i> 07:00 PM (Dự kiến)
+                </div>
+                <div class="card-assignee-avatar green" title="Khuyến nghị">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-create-in-column" onclick="openCreateQuickModal('dinner')">
+            <i class="fa-solid fa-plus"></i>
+            <span>Thêm món ăn</span>
+          </button>
+        </div>
+
+        <!-- COLUMN 4: LUYỆN TẬP & HOÀN THÀNH (DONE / WORKOUT) -->
+        <div class="kanban-column" id="col-done">
+          <div class="column-header">
+            <div class="column-title">
+              <span class="status-name">Hoàn Thành &amp; Luyện Tập</span>
+              <span class="column-count" id="count-done">2</span>
+            </div>
+            <button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="kanban-cards-list" id="cards-done">
+            <!-- Card 4: Chạy bộ ngoài trời -->
+            <div class="kanban-card card-done-workout" onclick="switchTab('workout-log')">
+              <div class="card-title-row">
+                <span class="card-item-title"><i class="fa-solid fa-person-running text-purple"></i> Chạy Bộ Ngoài Trời</span>
+                <span class="card-key-tag workout-tag">WRK-1</span>
+              </div>
+              <p class="card-desc">Thời gian 30 phút, pace 6.2 min/km. Công thức MET: 8.5.</p>
+              
+              <div class="card-macros-pills">
+                <span class="macro-mini burned"><i class="fa-solid fa-fire-flame-curved"></i> Đốt cháy: -290 kcal</span>
+                <span class="macro-mini distance">4.8 km</span>
+              </div>
+
+              <div class="card-footer-meta">
+                <div class="card-due-tag done-tag">
+                  <i class="fa-solid fa-check-circle text-green"></i> 06:30 AM (Xong)
+                </div>
+                <div class="card-assignee-avatar orange" title="Minh Anh">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5: Uống 7 ly nước -->
+            <div class="kanban-card card-done-water" onclick="addWaterQuick(0.25)">
+              <div class="card-title-row">
+                <span class="card-item-title"><i class="fa-solid fa-glass-water text-blue"></i> Uống 1.75L Nước Lọc</span>
+                <span class="card-key-tag">WAT-1</span>
+              </div>
+              <p class="card-desc">Đã hoàn thành 70% mục tiêu 2.5 Lít nước trong ngày.</p>
+              
+              <div class="mini-progress-track">
+                <div class="mini-progress-fill" style="width: 70%;"></div>
+              </div>
+
+              <div class="card-footer-meta">
+                <div class="card-due-tag done-tag">
+                  <i class="fa-solid fa-check-circle text-blue"></i> Đang duy trì
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-create-in-column" onclick="switchTab('workout-log')">
+            <i class="fa-solid fa-plus"></i>
+            <span>Ghi bài tập</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: LIST (DANH SÁCH CHI TIẾT BỮA ĂN & BÀI TẬP DẠNG BẢNG) -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="view-list">
+      <div class="view-inner-container">
+        <div class="jira-section-header">
+          <div>
+            <span class="section-tag">Nhật Ký Chi Tiết</span>
+            <h2>Danh Sách Nhật Ký Ăn Uống & Bài Tập Trong Ngày</h2>
+          </div>
+          <div class="btn-group">
+            <button class="btn-jira-create" onclick="openCreateQuickModal()"><i class="fa-solid fa-plus"></i> Thêm Món Mới</button>
+          </div>
+        </div>
+
+        <div class="jira-table-card">
+          <table class="jira-data-table">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Tên Món / Bài Tập</th>
+                <th>Bữa / Thời Gian</th>
+                <th>Khối Lượng / Thời Lượng</th>
+                <th>Calo (kcal)</th>
+                <th>Protein (g)</th>
+                <th>Carb (g)</th>
+                <th>Fat (g)</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="listTableBody">
+              <tr>
+                <td><span class="type-pill food"><i class="fa-solid fa-utensils"></i> Món Ăn</span></td>
+                <td><strong>Phở Bò Tái Nạm</strong></td>
+                <td>Bữa Sáng (07:30)</td>
+                <td>450 g</td>
+                <td><strong class="text-orange">485</strong></td>
+                <td>32.5g</td>
+                <td>68.0g</td>
+                <td>11.2g</td>
+                <td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+                <td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+              </tr>
+              <tr>
+                <td><span class="type-pill food"><i class="fa-solid fa-utensils"></i> Món Ăn</span></td>
+                <td><strong>Cơm Tấm Sườn Bì Chả</strong></td>
+                <td>Bữa Trưa (12:15)</td>
+                <td>420 g</td>
+                <td><strong class="text-orange">650</strong></td>
+                <td>34.0g</td>
+                <td>82.0g</td>
+                <td>21.5g</td>
+                <td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+                <td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+              </tr>
+              <tr>
+                <td><span class="type-pill food"><i class="fa-solid fa-apple-whole"></i> Ăn Nhẹ</span></td>
+                <td><strong>Táo Gala & Hạnh Nhân</strong></td>
+                <td>Bữa Phụ (15:30)</td>
+                <td>150 g</td>
+                <td><strong class="text-orange">105</strong></td>
+                <td>2.0g</td>
+                <td>24.0g</td>
+                <td>1.0g</td>
+                <td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+                <td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+              </tr>
+              <tr>
+                <td><span class="type-pill workout"><i class="fa-solid fa-person-running"></i> Luyện Tập</span></td>
+                <td><strong>Chạy Bộ Ngoài Trời (Pace 6.2)</strong></td>
+                <td>Buổi Sáng (06:30)</td>
+                <td>30 phút (4.8 km)</td>
+                <td><strong class="text-green">-290</strong></td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td><span class="badge-done-workout"><i class="fa-solid fa-dumbbell"></i> Đã hoàn thành</span></td>
+                <td><button class="btn-tbl-del" onclick="showToast('Đã xóa bài tập!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: FOOD LOG & AI VISION SCANNER -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="view-food-log">
+      <div class="view-inner-container">
+        <div class="jira-section-header">
+          <div>
+            <span class="section-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Vision & Food Logging</span>
+            <h2>Nhật Ký Ăn Uống & Nhận Diện Món Ăn Bằng AI</h2>
+          </div>
+          <div class="quick-filter-pills">
+            <button class="btn-jira-tool" onclick="showToast('Đang lọc theo bữa ăn...', 'info')">Tất Cả Các Bữa</button>
+          </div>
+        </div>
+
+        <!-- AI SCANNER & PROMPT SECTION -->
+        <div class="ai-scanner-card">
+          <div class="scanner-left-zone">
+            <div class="scanner-drop-area" id="dropArea" onclick="document.getElementById('foodImageInput').click()">
+              <input type="file" id="foodImageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+              <div class="drop-content" id="dropAreaContent">
+                <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                <h4>Kéo thả hoặc tải ảnh món ăn lên</h4>
+                <p>AI Vision sẽ quét hình dạng, ước tính khối lượng và bóc tách Calories & Macros</p>
+                <span class="btn-select-file"><i class="fa-solid fa-camera"></i> Chọn Ảnh Chụp</span>
+              </div>
+              <!-- Image preview box -->
+              <div class="image-preview-wrap" id="imagePreviewWrap" style="display: none;">
+                <img id="scannedImagePreview" src="" alt="Scanned Food">
+                <div class="laser-scanner" id="laserScanner"></div>
+              </div>
+            </div>
+
+            <!-- Quick Demo Food Photos for 1-Click Testing -->
+            <div class="demo-samples-row">
+              <span class="sample-lbl">Ảnh mẫu thử nhanh:</span>
+              <button class="sample-btn" onclick="loadFoodSample('pho_bo')">🍜 Phở Bò</button>
+              <button class="sample-btn" onclick="loadFoodSample('com_tam')">🍖 Cơm Tấm</button>
+              <button class="sample-btn" onclick="loadFoodSample('bun_cha')">🥗 Bún Chả</button>
+              <button class="sample-btn" onclick="loadFoodSample('banh_mi')">🥖 Bánh Mì</button>
+              <button class="sample-btn" onclick="loadFoodSample('salad_ga')">🥗 Salad Gà</button>
+              <button class="sample-btn" onclick="loadFoodSample('goi_cuon')">🍤 Gỏi Cuốn</button>
+            </div>
+          </div>
+
+          <!-- Prompt description and AI Result Box -->
+          <div class="scanner-right-zone">
+            <div class="prompt-box">
+              <label><i class="fa-solid fa-pen-to-square"></i> Hoặc mô tả bữa ăn tự nhiên (Prompt):</label>
+              <div class="prompt-input-row">
+                <input type="text" id="foodPromptInput" placeholder="Ví dụ: 1 bát cơm trắng, 150g ức gà áp chảo, 1 đĩa rau cải luộc...">
+                <button class="btn-ai-analyze" onclick="triggerAIAnalysis()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Phân Tích AI</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- AI Result Card (Interactive Correction) -->
+            <div class="ai-result-panel" id="aiResultPanel">
+              <div class="arp-header">
+                <div class="arp-title">
+                  <span class="badge-ai-acc"><i class="fa-solid fa-check"></i> Độ chính xác: <strong id="resConfidence">98.5%</strong></span>
+                  <h3 id="resFoodName">Phở Bò Tái Nạm (Bát Vừa)</h3>
+                </div>
+                <div class="arp-meal-select">
+                  <select id="resMealType" class="jira-select">
+                    <option value="breakfast" selected>Bữa Sáng</option>
+                    <option value="lunch">Bữa Trưa</option>
+                    <option value="dinner">Bữa Tối</option>
+                    <option value="snack">Bữa Phụ</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="arp-macros-grid">
+                <div class="macro-box">
+                  <span class="mb-label">Calo</span>
+                  <span class="mb-val text-orange" id="resCal">485 <small>kcal</small></span>
+                </div>
+                <div class="macro-box">
+                  <span class="mb-label">Protein</span>
+                  <span class="mb-val text-blue" id="resProt">32.5 <small>g</small></span>
+                </div>
+                <div class="macro-box">
+                  <span class="mb-label">Carb</span>
+                  <span class="mb-val text-green" id="resCarb">68.0 <small>g</small></span>
+                </div>
+                <div class="macro-box">
+                  <span class="mb-label">Fat</span>
+                  <span class="mb-val text-amber" id="resFat">11.2 <small>g</small></span>
+                </div>
+              </div>
+
+              <!-- Grams Correction Slider -->
+              <div class="arp-grams-adjust">
+                <div class="adjust-header">
+                  <span>Điều chỉnh khối lượng thực tế:</span>
+                  <strong id="gramsDisplay">450 g</strong>
+                </div>
+                <input type="range" id="gramsSlider" min="50" max="1000" step="10" value="450" oninput="adjustGrams(this.value)">
+              </div>
+
+              <div class="arp-actions">
+                <button class="btn-jira-create btn-full" onclick="saveScannedFoodToLog()">
+                  <i class="fa-solid fa-plus"></i> Lưu Vào Nhật Ký & Cập Nhật Calo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thư viện món ăn & Tìm kiếm (bổ sung theo spec) -->
+        <div class="jira-card-box" style="margin-top: 20px;">
+          <div class="box-head">
+            <h3><i class="fa-solid fa-book-open text-green"></i> Thư Viện Món Ăn Việt Nam & Món Của Tôi</h3>
+            <span class="sub-muted">Tìm món có sẵn hoặc thêm món ăn tự tạo (My Foods)</span>
+          </div>
+          <div class="form-group full-width" style="margin-bottom: 14px;">
+            <div class="input-unit-wrap">
+              <i class="fa-solid fa-magnifying-glass" style="opacity:.5; margin-right:6px;"></i>
+              <input type="text" id="foodLibrarySearch" class="jira-input" placeholder="Tìm món ăn, ví dụ: bún chả, cơm tấm..." style="border:none; padding-left:0;">
+            </div>
+          </div>
+          <div class="food-library-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); gap:12px;">
+            <div class="wh-item"><div class="wh-icon bg-purple"><i class="fa-solid fa-bowl-rice"></i></div><div class="wh-meta"><h4>Phở Bò Tái Nạm</h4><span class="wh-sub">485 kcal · 32g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+            <div class="wh-item"><div class="wh-icon bg-blue"><i class="fa-solid fa-drumstick-bite"></i></div><div class="wh-meta"><h4>Cơm Tấm Sườn Bì</h4><span class="wh-sub">650 kcal · 34g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+            <div class="wh-item"><div class="wh-icon bg-purple"><i class="fa-solid fa-utensils"></i></div><div class="wh-meta"><h4>Bún Chả Hà Nội</h4><span class="wh-sub">510 kcal · 28g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+            <div class="wh-item"><div class="wh-icon bg-blue"><i class="fa-solid fa-baguette"></i></div><div class="wh-meta"><h4>Bánh Mì Thịt</h4><span class="wh-sub">450 kcal · 20g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+            <div class="wh-item" style="border-style:dashed; cursor:pointer;" onclick="openCreateQuickModal('breakfast')"><div class="wh-icon bg-purple"><i class="fa-solid fa-plus"></i></div><div class="wh-meta"><h4>Tạo món của tôi</h4><span class="wh-sub">Lưu món cá nhân (My Foods)</span></div></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 5: WORKOUT LOG (NHẬT KÝ LUYỆN TẬP & MET CALCULATOR) -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="view-workout-log">
+      <div class="view-inner-container">
+        <div class="jira-section-header">
+          <div>
+            <span class="section-tag">Luyện Tập &amp; Calo Tiêu Hao</span>
+            <h2>Nhật Ký Luyện Tập & Tính Calo Tiêu Hao (Công Thức MET)</h2>
+          </div>
+          <span class="badge-status-green"><i class="fa-solid fa-fire"></i> Hôm nay đã đốt: +340 kcal</span>
+        </div>
+
+        <div class="workout-logging-grid">
+          <!-- Workout Form -->
+          <div class="jira-card-box">
+            <div class="box-head">
+              <h3><i class="fa-solid fa-dumbbell text-purple"></i> Ghi Nhận Buổi Tập Mới</h3>
+              <p>Calo = MET × Cân nặng (68.5kg) × Thời gian (giờ)</p>
+            </div>
+
+            <form id="workoutForm" onsubmit="handleWorkoutSubmit(event)">
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label>Chọn Môn Thể Thao / Hoạt Động</label>
+                  <select class="jira-select" id="sportSelect" onchange="updateMETPreview()">
+                    <option value="running" data-met="8.5" selected>Chạy bộ vừa (8.5 METs)</option>
+                    <option value="cycling" data-met="7.5">Đạp xe ngoài trời (7.5 METs)</option>
+                    <option value="gym" data-met="5.0">Tập Gym / Nâng tạ kháng lực (5.0 METs)</option>
+                    <option value="swimming" data-met="8.0">Bơi lội tự do (8.0 METs)</option>
+                    <option value="hiit" data-met="10.0">HIIT Cardio cường độ cao (10.0 METs)</option>
+                    <option value="jump_rope" data-met="11.0">Nhảy dây tốc độ cao (11.0 METs)</option>
+                    <option value="walking" data-met="3.5">Đi bộ nhanh 5km/h (3.5 METs)</option>
+                    <option value="yoga" data-met="2.8">Yoga / Dãn cơ phục hồi (2.8 METs)</option>
+                    <option value="badminton" data-met="6.0">Đánh cầu lông (6.0 METs)</option>
+                    <option value="football" data-met="9.0">Đá bóng sân cỏ (9.0 METs)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Thời Lượng Tập (Phút)</label>
+                  <div class="input-unit-wrap">
+                    <input type="number" id="workoutDuration" value="30" min="5" max="300" oninput="calculateBurnedCalPreview()">
+                    <span class="unit-tag">phút</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Quãng Đường (Nếu có)</label>
+                  <div class="input-unit-wrap">
+                    <input type="number" id="workoutDistance" value="4.8" step="0.1" min="0">
+                    <span class="unit-tag">km</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Burned Calorie Preview Box -->
+              <div class="burned-preview-card">
+                <div class="bpc-left">
+                  <span class="bpc-label">Ước Tính Calo Đốt Cháy:</span>
+                  <div class="bpc-val"><strong id="previewBurnedVal">291</strong> <small>kcal</small></div>
+                </div>
+                <div class="bpc-right">
+                  <i class="fa-solid fa-fire-flame-curved fire-anim"></i>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-jira-create btn-full" style="margin-top: 16px;">
+                <i class="fa-solid fa-plus"></i> Thêm Vào Lịch Sử Luyện Tập
+              </button>
+            </form>
+          </div>
+
+          <!-- Workout History Table -->
+          <div class="jira-card-box">
+            <div class="box-head">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Các Buổi Tập Gần Đây</h3>
+              <span class="sub-muted">Cộng trực tiếp vào ngân sách Calo</span>
+            </div>
+
+            <div class="workout-history-list" id="workoutHistoryList">
+              <!-- Item 1 -->
+              <div class="wh-item">
+                <div class="wh-icon bg-purple"><i class="fa-solid fa-person-running"></i></div>
+                <div class="wh-meta">
+                  <h4>Chạy Bộ Ngoài Trời</h4>
+                  <span class="wh-sub">Hôm nay, 06:30 AM • 30 phút • 4.8 km</span>
+                </div>
+                <div class="wh-cal text-purple">+290 kcal</div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="wh-item">
+                <div class="wh-icon bg-blue"><i class="fa-solid fa-dumbbell"></i></div>
+                <div class="wh-meta">
+                  <h4>Tập Tạ Kháng Lực (Upper Body)</h4>
+                  <span class="wh-sub">Hôm qua, 17:30 PM • 45 phút</span>
+                </div>
+                <div class="wh-cal text-purple">+255 kcal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 6: SUGGESTIONS (GỢI Ý MÓN ĂN THÔNG MINH) -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="view-suggestions">
+      <div class="view-inner-container">
+        <!-- Smart Alert Banner -->
+        <div class="smart-alert-banner">
+          <div class="sab-icon"><i class="fa-solid fa-lightbulb"></i></div>
+          <div class="sab-content">
+            <h3>Gợi Ý Bữa Ăn Theo Khoảng Calo Còn Thiếu</h3>
+            <p>Ngân sách calo còn lại hôm nay: <strong class="text-green">950 kcal</strong> và bạn còn thiếu <strong class="text-blue">41g Protein</strong>. Dưới đây là các món ăn tối ưu nhất!</p>
+          </div>
+          <div class="sab-actions">
+            <button class="btn-jira-tool" onclick="filterSuggestions('high_prot')"><i class="fa-solid fa-dna"></i> Lọc High-Protein</button>
+          </div>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="suggestions-filter-bar">
+          <button class="s-filter-btn active" onclick="filterSuggestions('all', this)">Tất Cả Món Gợi Ý</button>
+          <button class="s-filter-btn" onclick="filterSuggestions('high_prot', this)">🍗 Nhiều Đạm (> 25g Protein)</button>
+          <button class="s-filter-btn" onclick="filterSuggestions('viet', this)">🇻🇳 Món Việt Thơm Ngon</button>
+          <button class="s-filter-btn" onclick="filterSuggestions('quick', this)">⚡ Nhanh Gọn (&lt; 15 Phút)</button>
+          <button class="s-filter-btn" onclick="filterSuggestions('low_cal', this)">🥗 Ít Calo (&lt; 350 kcal)</button>
+        </div>
+
+        <!-- Suggestions Cards Grid -->
+        <div class="suggestions-cards-grid" id="suggestionsGrid">
+          <!-- Card 1: Salad Ức Gà -->
+          <div class="suggest-card" data-tags="high_prot quick low_cal">
+            <div class="sc-img-wrap">
+              <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80" alt="Salad Ức Gà">
+              <span class="sc-badge match-high">Khớp 99% Mục Tiêu</span>
+              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15 phút</span>
+            </div>
+            <div class="sc-body">
+              <h4>Salad Ức Gà Áp Chảo Rau Củ Healthy</h4>
+              <p class="sc-desc">Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.</p>
+              <div class="sc-nutrition-chips">
+                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
+                <span class="snc snc-prot">P: 38g</span>
+                <span class="snc snc-carb">C: 14g</span>
+                <span class="snc snc-fat">F: 8g</span>
+              </div>
+            </div>
+            <div class="sc-footer">
+              <button class="btn-jira-create btn-full" onclick="quickAddFood('Salad Ức Gà Áp Chảo', 340, 38, 14, 8)">
+                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Bún Chả -->
+          <div class="suggest-card" data-tags="viet high_prot">
+            <div class="sc-img-wrap">
+              <img src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&auto=format&fit=crop&q=80" alt="Bún Chả">
+              <span class="sc-badge match-med">Món Việt Quen Thuộc</span>
+              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 20 phút</span>
+            </div>
+            <div class="sc-body">
+              <h4>Bún Chả Hà Nội Nướng Than Hoa</h4>
+              <p class="sc-desc">Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.</p>
+              <div class="sc-nutrition-chips">
+                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 510 kcal</span>
+                <span class="snc snc-prot">P: 28g</span>
+                <span class="snc snc-carb">C: 64g</span>
+                <span class="snc snc-fat">F: 16g</span>
+              </div>
+            </div>
+            <div class="sc-footer">
+              <button class="btn-jira-create btn-full" onclick="quickAddFood('Bún Chả Hà Nội', 510, 28, 64, 16)">
+                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: Gỏi Cuốn Tôm Thịt -->
+          <div class="suggest-card" data-tags="viet quick low_cal">
+            <div class="sc-img-wrap">
+              <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&auto=format&fit=crop&q=80" alt="Gỏi Cuốn">
+              <span class="sc-badge match-high">Ăn Nhẹ & Thanh Lọc</span>
+              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 10 phút</span>
+            </div>
+            <div class="sc-body">
+              <h4>Gỏi Cuốn Tôm Thịt (3 Cuốn)</h4>
+              <p class="sc-desc">Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.</p>
+              <div class="sc-nutrition-chips">
+                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 280 kcal</span>
+                <span class="snc snc-prot">P: 22g</span>
+                <span class="snc snc-carb">C: 34g</span>
+                <span class="snc snc-fat">F: 6g</span>
+              </div>
+            </div>
+            <div class="sc-footer">
+              <button class="btn-jira-create btn-full" onclick="quickAddFood('Gỏi Cuốn Tôm Thịt', 280, 22, 34, 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 9: PROFILE (HỒ SƠ CÁ NHÂN & CẬP NHẬT CHỈ SỐ) -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="view-profile">
+      <div class="view-inner-container">
+        <div class="jira-section-header">
+          <div>
+            <span class="section-tag">Tài Khoản &amp; Chỉ Số</span>
+            <h2>Hồ Sơ Cá Nhân & Quản Lý Chỉ Số Thể Chất</h2>
+          </div>
+          <button class="btn-top-landing" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng Xuất Về Trang Chủ</button>
+        </div>
+
+        <!-- Biểu đồ tiến trình (chuyển từ "Tiến trình" gộp vào Hồ sơ) -->
+        <div class="charts-two-col-grid" style="margin-bottom: 24px;">
+          <div class="jira-card-box">
+            <div class="box-head">
+              <h3><i class="fa-solid fa-chart-line text-blue"></i> Tiến Trình Cân Nặng (kg)</h3>
+              <div class="chart-time-filter">
+                <button class="ct-btn active" onclick="changeWeightTimeRange('7d', this)">7 Ngày</button>
+                <button class="ct-btn" onclick="changeWeightTimeRange('30d', this)">30 Ngày</button>
+                <button class="ct-btn" onclick="changeWeightTimeRange('90d', this)">3 Tháng</button>
+              </div>
+            </div>
+            <div class="chart-canvas-box" style="height:200px;">
+              <svg viewBox="0 0 320 140" preserveAspectRatio="none" style="width:100%; height:100%;">
+                <polyline points="10,30 60,42 110,50 160,54 210,60 260,64 310,68" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="10" cy="30" r="4" fill="var(--primary)"/><circle cx="60" cy="42" r="4" fill="var(--primary)"/>
+                <circle cx="110" cy="50" r="4" fill="var(--primary)"/><circle cx="160" cy="54" r="4" fill="var(--primary)"/>
+                <circle cx="210" cy="60" r="4" fill="var(--primary)"/><circle cx="260" cy="64" r="4" fill="var(--primary)"/>
+                <circle cx="310" cy="68" r="4" fill="var(--primary)"/>
+              </svg>
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:6px;">
+                <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="jira-card-box">
+            <div class="box-head">
+              <h3><i class="fa-solid fa-chart-simple text-green"></i> Mức Độ Tuân Thủ Calo Tuần Này</h3>
+              <span class="badge-tag">Mục tiêu: 1,850 kcal/ngày</span>
+            </div>
+            <div class="chart-canvas-box" style="height:200px; display:flex; align-items:flex-end; gap:10px; padding-top:10px;">
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:150px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T2</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:158px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T3</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:145px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T4</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:160px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T5</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:165px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T6</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:152px; background:var(--primary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">T7</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:105px; background:var(--secondary); border-radius:6px 6px 0 0;"></div><span style="font-size:11px; color:var(--text-muted);">CN</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-two-col-grid">
+          <!-- Profile Card -->
+          <div class="jira-card-box">
+            <div class="profile-user-hero">
+              <div class="profile-avatar-orange-lg">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="puh-info">
+                <h3 id="profileName">Nguyễn Minh Anh</h3>
+                <span class="puh-email" id="profileEmail">minhanh@gmail.com</span>
+                <div class="puh-badges">
+                  <span class="badge-streak"><i class="fa-solid fa-fire"></i> Chuỗi: 7 Ngày</span>
+                  <span class="badge-level"><i class="fa-solid fa-shield-halved"></i> Thành Viên Pro</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="jira-divider">
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Cân Nặng Hiện Tại (kg)</label>
+                <input type="number" id="prof-weight" value="68.5" step="0.1" class="jira-input">
+              </div>
+              <div class="form-group">
+                <label>Chiều Cao (cm)</label>
+                <input type="number" id="prof-height" value="172" class="jira-input">
+              </div>
+              <div class="form-group">
+                <label>Mục Tiêu Thể Hình</label>
+                <select id="prof-goal" class="jira-select">
+                  <option value="lose" selected>Giảm cân (-500 kcal/ngày)</option>
+                  <option value="maintain">Duy trì vóc dáng</option>
+                  <option value="gain">Tăng cân (+400 kcal/ngày)</option>
+                  <option value="recomp">Tăng cơ giảm mỡ</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Cân Nặng Mục Tiêu (kg)</label>
+                <input type="number" id="prof-target-weight" value="63.0" step="0.5" class="jira-input">
+              </div>
+            </div>
+
+            <button class="btn-jira-create btn-full" style="margin-top: 16px;" onclick="updateProfileMetrics()">
+              <i class="fa-solid fa-floppy-disk"></i> Lưu & Cập Nhật Lại BMR/TDEE
+            </button>
+          </div>
+
+          <!-- Account Settings & Preferences -->
+          <div class="jira-card-box">
+            <div class="box-head">
+              <h3><i class="fa-solid fa-sliders"></i> Tùy Chọn Ứng Dụng FlexiDiet</h3>
+            </div>
+            <div class="pref-list">
+              <div class="pref-item">
+                <div>
+                  <h4>Giao Diện Nền Tối</h4>
+                  <p>Tối ưu thị giác khi làm việc ban đêm.</p>
+                </div>
+                <input type="checkbox" checked disabled class="jira-toggle">
+              </div>
+              <div class="pref-item">
+                <div>
+                  <h4>Nhắc Nhở Uống Nước Tự Động</h4>
+                  <p>Gửi thông báo nhắc nhở mỗi 2 tiếng.</p>
+                </div>
+                <input type="checkbox" checked class="jira-toggle" onchange="showToast('Đã cập nhật nhắc nhở uống nước!', 'info')">
+              </div>
+              <div class="pref-item">
+                <div>
+                  <h4>Tự Động Phân Tích AI Vision</h4>
+                  <p>Tự động nhận diện sau khi chọn ảnh.</p>
+                </div>
+                <input type="checkbox" checked class="jira-toggle" onchange="showToast('Đã kích hoạt AI Vision auto-scan!', 'info')">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 6. MODAL: QUICK CREATE ITEM (+ CREATE BUTTON) -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="createQuickModal" onclick="handleCreateModalBackdrop(event)">
+    <div class="modal-dialog quick-create-box">
+      <div class="modal-head-row">
+        <h3><i class="fa-solid fa-plus text-blue"></i> Create Food or Workout Log</h3>
+        <button class="modal-close-btn" onclick="closeCreateQuickModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="create-type-tabs">
+        <button class="ct-tab active" id="ctTabFood" onclick="switchCreateTab('food')"><i class="fa-solid fa-utensils"></i> Ghi Món Ăn</button>
+        <button class="ct-tab" id="ctTabWorkout" onclick="switchCreateTab('workout')"><i class="fa-solid fa-person-running"></i> Ghi Bài Tập</button>
+      </div>
+
+      <!-- Food Form -->
+      <form id="quickFoodForm" onsubmit="handleQuickFoodSubmit(event)">
+        <div class="form-group">
+          <label>Tên Món Ăn</label>
+          <input type="text" id="qfName" placeholder="VD: Bún Chả, Cơm Gà..." required class="jira-input">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bữa Ăn</label>
+            <select id="qfMeal" class="jira-select">
+              <option value="breakfast">Bữa Sáng</option>
+              <option value="lunch" selected>Bữa Trưa</option>
+              <option value="dinner">Bữa Tối</option>
+              <option value="snack">Bữa Phụ</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Calories (kcal)</label>
+            <input type="number" id="qfCal" value="450" required class="jira-input">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Protein (g)</label>
+            <input type="number" id="qfProt" value="25" class="jira-input">
+          </div>
+          <div class="form-group">
+            <label>Carb (g)</label>
+            <input type="number" id="qfCarb" value="50" class="jira-input">
+          </div>
+          <div class="form-group">
+            <label>Fat (g)</label>
+            <input type="number" id="qfFat" value="12" class="jira-input">
+          </div>
+        </div>
+        <button type="submit" class="btn-jira-create btn-full" style="margin-top: 14px;">
+          <i class="fa-solid fa-plus"></i> Thêm Vào Board Ngay
+        </button>
+      </form>
+
+      <!-- Workout Form -->
+      <form id="quickWorkoutForm" style="display:none;" onsubmit="handleQuickWorkoutSubmit(event)">
+        <div class="form-group">
+          <label>Môn Thể Thao</label>
+          <select id="qwSport" class="jira-select">
+            <option value="Chạy bộ (Running)">Chạy bộ (8.5 METs)</option>
+            <option value="Đạp xe (Cycling)">Đạp xe (7.5 METs)</option>
+            <option value="Tập Gym (Weight Lifting)">Tập Gym (5.0 METs)</option>
+            <option value="Bơi lội (Swimming)">Bơi lội (8.0 METs)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Thời Gian Tập (phút)</label>
+            <input type="number" id="qwDuration" value="30" class="jira-input">
+          </div>
+          <div class="form-group">
+            <label>Calo Đốt Cháy (kcal)</label>
+            <input type="number" id="qwBurned" value="280" class="jira-input">
+          </div>
+        </div>
+        <button type="submit" class="btn-jira-create btn-full" style="margin-top: 14px;">
+          <i class="fa-solid fa-plus"></i> Thêm Vào Luyện Tập
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
