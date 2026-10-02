@@ -50,8 +50,24 @@ Midterm/
 │   ├── 03_construction/          # Nhật ký phát triển & Test cases
 │   └── 04_transition/            # Báo cáo tổng kết, hướng dẫn & tài liệu bàn giao
 ├── skills/                       # Chuẩn phương pháp luận UP (Ian Sommerville)
-└── repo/                         # Mã nguồn ứng dụng
-    └── FlexiDiet/                # Giao diện Web App (HTML/CSS/JS)
+└── repo/                         # MÃ NGUỒN PHÁT TRIỂN (MVC / 3-Tier)
+    └── FlexiDiet/
+        ├── public/               # Web Root (Apache/XAMPP)
+        │   ├── index.html        # Landing page & Onboarding Multi-step
+        │   ├── app.html          # Web App Workspace
+        │   └── assets/           # CSS & JS đã phân loại
+        ├── backend/              # Core PHP Backend (PDO, Controllers, Models, APIs)
+        │   ├── config/           # Database.php (PDO Singleton)
+        │   ├── controllers/      # Business Controllers
+        │   ├── models/           # Data Models
+        │   ├── services/         # EnergyEngine, AIServiceCaller
+        │   └── api/              # RESTful API Endpoints
+        ├── database/             # Quản lý Database MySQL
+        │   ├── schema.sql        # CSDL MySQL (Snapshot + 2 Tầng)
+        │   └── seeds/            # Script nạp 30-50 món chuẩn & nguyên liệu (D25)
+        └── ai_service/           # Microservice AI Python (FastAPI + ONNX)
+            ├── app.py            # FastAPI Inference Server
+            └── requirements.txt  # Thư viện Python
 ```
 
 ---
