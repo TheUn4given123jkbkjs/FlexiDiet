@@ -559,8 +559,8 @@ sequenceDiagram
 
     U->>P: PUT /api/profile (chỉ số, mục tiêu, công thức BMR, chính sách)
     P->>P: Kiểm tra hợp lệ
-    P->>P: Energy Engine: BMR (Strategy) -> Baseline -> ngân sách mục tiêu (áp sàn calo)
-    P->>D: Transaction: cập nhật user_profiles (không gồm cân nặng), weight_logs (nếu cân nặng thay đổi) và daily_budgets (hôm nay, kèm chính sách calo tập; tính lại calo tập được cộng)
+    P->>P: Energy Engine: BMR (Strategy) → Baseline → ngân sách mục tiêu (áp sàn calo)
+    P->>D: Transaction: cập nhật user_profiles (không gồm cân nặng), weight_logs (nếu có cân nặng mới) và daily_budgets (hôm nay, kèm chính sách calo tập, tính lại calo tập được cộng)
     P-->>U: Ngân sách mới + cảnh báo nếu chạm sàn
 ```
 
