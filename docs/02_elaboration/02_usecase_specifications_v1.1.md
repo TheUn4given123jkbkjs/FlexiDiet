@@ -1,7 +1,7 @@
 # FlexiDiet: Đặc Tả Use Case Chi Tiết – Bản nháp
 
 > **Pha 2 – Elaboration, E1.** Nguồn: `01_business_modeling.md` (mục 8), `02_srs_requirements.md`.
-> **Trạng thái:** Bản nháp. Cả 14 Use Case của 01 đều được đặc tả đầy đủ (mục 3). README Pha 2 ghi "6 Use Case cốt lõi"; UC03, UC04, UC05, UC07 là các UC *architecturally significant* theo 01 và có sequence diagram ở mục 4. Các vấn đề còn mở ghi ở SRS (mục 6).
+> **Trạng thái:** Hoàn thiện. Cả 14 Use Case đều được đặc tả đầy đủ (mục 3). Mục 4 cung cấp đầy đủ 7 Sequence Diagrams trực quan cho toàn bộ các luồng trọng yếu (UC01 đến UC14). Các vấn đề còn mở ghi ở SRS (mục 6).
 > Giá trị gắn **[CẦN CHỐT]** chưa có căn cứ.
 > **v1.1:** đồng bộ với SRS v1.1 (Baseline hệ số cố định, calo tập tính ở cấp ngày, quy tắc sửa mục nhật ký, server tự tính calo). Xem mục 5.
 
@@ -562,6 +562,136 @@ sequenceDiagram
     P->>P: Energy Engine: BMR (Strategy) → Baseline → ngân sách mục tiêu (áp sàn calo)
     P->>D: Transaction: cập nhật user_profiles (không gồm cân nặng), weight_logs (nếu có cân nặng mới) và daily_budgets (hôm nay, kèm chính sách calo tập, tính lại calo tập được cộng)
     P-->>U: Ngân sách mới + cảnh báo nếu chạm sàn
+```
+
+### 4.4. UC01 – Đăng ký và khảo sát (Wizard 4 bước & Transaction khởi tạo)
+
+```mermaid
+sequenceDiagram
+    actor G as Guest (trình duyệt)
+    participant P as PHP API
+    participant D as MySQL
+
+    G->>P: POST /api/register (bước 1-4: email, mật khẩu, tên, giới tính, ngày sinh, chiều cao, cân nặng, mục tiêu)
+    P->>P: Validate: tuổi từ 18 đến 80, chiều cao và cân nặng hợp lệ, email đúng định dạng
+    P->>D: Kiểm tra email đã đăng ký chưa
+    alt Email đã tồn tại
+        P-->>G: 400 Lỗi email đã được sử dụng
+    else Thông tin hợp lệ
+        P->>P: Băm mật khẩu bằng password_hash
+        P->>P: Energy Engine: Tính BMR ban đầu, Baseline, Target Kcal (áp sàn calo an toàn)
+        P->>D: BEGIN TRANSACTION
+        P->>D: INSERT users (email, password_hash, display_name, role='member')
+        P->>D: INSERT user_profiles (không gồm cân nặng, các chỉ số sinh học, bmr_formula, credit_policy)
+        P->>D: INSERT weight_logs (user_id, log_date=hôm nay, weight_kg)
+        P->>D: INSERT daily_budgets (hôm nay: weight_kg_used, bmr, baseline, target_kcal, credit_policy)
+        P->>D: COMMIT TRANSACTION
+        P->>P: Thiết lập phiên đăng nhập (Session cookie)
+        P-->>G: 201 Created, trả ngân sách ngày đầu và chuyển hướng vào Dashboard
+    end
+```
+
+### 4.5. UC06 – Tìm, ghi món thủ công và sửa mục nhật ký (Server tính calo & Snapshot)
+
+```mermaid
+sequenceDiagram
+    actor U as Member (trình duyệt)
+    participant P as PHP API
+    participant D as MySQL
+
+    Note over U,D: Giai đoạn 1: Tra cứu & Chọn món hoặc nguyên liệu
+    U->>P: GET /api/foods/search (từ khóa món hoặc nguyên liệu)
+    P->>D: SELECT từ ingredients (hệ thống + cá nhân) và dishes
+    P-->>U: Danh sách kết quả gợi ý kèm đơn vị quy đổi portion_units
+
+    Note over U,D: Giai đoạn 2: Lưu nhật ký ăn uống (Snapshot)
+    U->>P: POST /api/meals (danh sách món, gram, buổi, ngày - không gửi calo)
+    P->>D: Tra cứu giá trị dinh dưỡng hiện hành của từng nguyên liệu
+    P->>P: NutritionCalculator: Server tự tính kcal, protein, carb, fat theo gram
+    P->>D: BEGIN TRANSACTION
+    P->>D: INSERT meal_entries (lưu tổng kcal và macro, meal_type, entry_date)
+    P->>D: INSERT meal_entry_items (snapshot cố định tên nguyên liệu, gram, kcal, macro)
+    P->>D: COMMIT TRANSACTION
+    P-->>U: 201 Created kèm dữ liệu bữa ăn đã lưu
+
+    Note over U,D: Giai đoạn 3: Sửa mục nhật ký (Quy tắc giữ giá trị cũ FR-03.19)
+    U->>P: PUT /api/meals/{id} (sửa gram hoặc đổi nguyên liệu)
+    P->>D: Đọc meal_entry_items hiện tại của mục này
+    loop Với từng dòng món ăn
+        P->>P: Dòng không đổi gram giữ nguyên kcal và macro cũ, dòng sửa gram thì tính lại
+    end
+    P->>D: BEGIN TRANSACTION
+    P->>D: UPDATE meal_entries (cập nhật tổng mới)
+    P->>D: Thay thế meal_entry_items
+    P->>D: COMMIT TRANSACTION
+    P-->>U: 200 OK kèm ngân sách còn lại mới
+```
+
+### 4.6. UC08 + UC09 – Dashboard & Tính toán ngân sách động (Xem còn lại, ghi nước, cân nặng)
+
+```mermaid
+sequenceDiagram
+    actor U as Member (trình duyệt)
+    participant P as PHP API
+    participant D as MySQL
+
+    U->>P: GET /api/dashboard (date = hôm nay)
+    P->>D: SELECT daily_budgets của ngày yêu cầu
+    alt Chưa có dòng ngân sách ngày hôm nay (ensureDay)
+        P->>D: Lấy cân nặng mới nhất từ weight_logs và hồ sơ từ user_profiles
+        P->>P: Energy Engine: Tính BMR, Baseline, Target Kcal
+        P->>D: INSERT daily_budgets (hôm nay, credit_policy mặc định từ hồ sơ)
+    end
+    P->>D: SELECT SUM(total_kcal), SUM(protein), SUM(carb), SUM(fat) FROM meal_entries (trong ngày)
+    P->>D: SELECT SUM(amount_ml) FROM water_logs (trong ngày)
+    P->>P: Tính: Calo còn lại = target_kcal + exercise_credit_kcal - calo_đã_nạp
+    P-->>U: Dữ liệu Dashboard (thanh năng lượng, macro, tổng nước, danh sách món)
+
+    Note over U,D: Luồng A1: Ghi nước uống nhanh
+    U->>P: POST /api/water (log_date, amount_ml)
+    P->>D: INSERT water_logs
+    P-->>U: Cập nhật tổng lượng nước trong ngày
+
+    Note over U,D: Luồng A2: Cập nhật cân nặng
+    U->>P: POST /api/weight (log_date, weight_kg)
+    P->>D: INSERT weight_logs ON DUPLICATE KEY UPDATE weight_kg (mỗi ngày tối đa 1 bản ghi)
+    Note over P,D: Không đổi ngân sách đã lưu hôm nay, ngày mới dùng cân nặng mới
+    P-->>U: Vẽ lại biểu đồ cân nặng tiến trình
+```
+
+### 4.7. UC12 + UC13 + UC14 – Quản lý món cá nhân & Ghi nhanh từ món đã lưu
+
+```mermaid
+sequenceDiagram
+    actor U as Member (trình duyệt)
+    participant P as PHP API
+    participant D as MySQL
+
+    alt UC12: Tạo món tự chế mới từ nguyên liệu
+        U->>P: POST /api/custom-dishes (tên món, serving_label, danh sách nguyên liệu + gram)
+        P->>P: Kiểm tra: nguyên liệu cấu thành phải là của hệ thống hoặc chính chủ tạo
+        P->>D: BEGIN TRANSACTION
+        P->>D: INSERT dishes (owner_user_id=user_id, origin='custom', name, name_norm)
+        P->>D: INSERT dish_ingredients (dish_id, ingredient_id, grams)
+        P->>D: COMMIT TRANSACTION
+        P-->>U: 201 Created Món tự chế đã sẵn sàng sử dụng
+    else UC13: Lưu món từ nhật ký ăn uống vào danh mục cá nhân
+        U->>P: POST /api/saved-dishes (meal_entry_id, tên món mới)
+        P->>D: Đọc các dòng nguyên liệu trong meal_entry_items của bữa ăn nhật ký
+        P->>D: BEGIN TRANSACTION
+        P->>D: INSERT dishes (owner_user_id=user_id, origin='saved', name, name_norm)
+        P->>D: INSERT dish_ingredients (chuyển các dòng snapshot thành công thức món chuẩn)
+        P->>D: COMMIT TRANSACTION
+        P-->>U: 201 Created Đã lưu món vào danh mục cá nhân
+    else UC14: Ghi nhanh từ món đã lưu
+        U->>P: POST /api/meals/from-saved (dish_id, serving_factor, meal_type, date)
+        P->>D: Lấy công thức dish_ingredients của món nhân với serving_factor
+        P->>P: NutritionCalculator: Máy chủ tự tính tổng kcal và macro
+        P->>D: BEGIN TRANSACTION
+        P->>D: INSERT meal_entries + meal_entry_items (snapshot bất biến)
+        P->>D: COMMIT TRANSACTION
+        P-->>U: 201 Created Ghi nhật ký thành công
+    end
 ```
 
 ---
