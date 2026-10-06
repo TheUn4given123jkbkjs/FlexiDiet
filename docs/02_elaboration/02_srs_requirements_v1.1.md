@@ -1,7 +1,8 @@
 # FlexiDiet: Đặc Tả Yêu Cầu Phần Mềm (SRS) – Bản nháp
 
 > **Pha:** 2 – Elaboration, Iteration E1 (05/10 – 11/10/2026)
-> **Trạng thái:** Bản nháp, chờ nhóm rà soát. Mốc hoàn tất SRS: **07/10/2026**.
+> **Trạng thái:** Bản nháp v1.1, chờ nhóm rà soát. Mốc hoàn tất SRS: **07/10/2026**.
+> **v1.1:** sửa Baseline (hệ số sinh hoạt cố định, bỏ khảo sát mức vận động), calo tập tính ở cấp ngày, quy tắc sửa mục nhật ký và tính calo ở server. Xem mục 8.
 > **Nguồn:** `01_business_modeling.md` (v1.1), `idea.md`, `pages.md`, `SKILL.md`.
 > Mục có nhãn **[CẦN CHỐT]** là giá trị chưa có căn cứ, phải chốt bằng tài liệu tham khảo hoặc kết quả PoC trước khi coi là yêu cầu chính thức.
 
@@ -22,10 +23,14 @@ FlexiDiet là web app tiếng Việt, responsive (mobile-first), giúp người 
 | Thuật ngữ | Giải thích |
 |---|---|
 | BMR | Năng lượng chuyển hóa cơ bản |
-| Baseline | BMR × hệ số sinh hoạt (calo duy trì trong ngày, chưa gồm tập luyện có chủ đích) |
-| Ngân sách | Baseline ± điều chỉnh mục tiêu + Σ (calo tập × hệ số chính sách) |
+| Baseline | BMR × hệ số sinh hoạt **cố định** (calo duy trì trong ngày, chưa gồm tập luyện có chủ đích) |
+| Ngân sách | Baseline ± điều chỉnh mục tiêu + calo tập được cộng của ngày |
+| Calo thô | Calo tiêu hao của một buổi tập, chưa áp chính sách cộng. Là thứ duy nhất được lưu trên bản ghi buổi tập |
+| Calo tập được cộng | Phần calo tập cộng vào ngân sách, **tính ở cấp ngày** từ Σ calo thô theo chính sách của ngày |
+| Số buổi tập mục tiêu | Số buổi người dùng muốn tập mỗi tuần (0–7). Chỉ dùng để nhắc nhở, **không đi vào công thức ngân sách** |
 | MET | Đương lượng chuyển hóa của bài tập |
 | Active calories | Calo tiêu hao do vận động, không gồm BMR |
+| Cân nặng hiện tại | Bản ghi mới nhất trong `weight_logs`. `user_profiles` không lưu cột cân nặng; tránh lệch giữa hai nguồn |
 | Danh mục hệ thống | Nguyên liệu, công thức chuẩn, bảng quy đổi khẩu phần do Admin quản lý |
 | Danh mục cá nhân | Nguyên liệu/món tự tạo và "Món đã lưu" của từng người dùng |
 | Snapshot | Bản ghi bất biến của một bữa ăn tại thời điểm ghi |
@@ -53,11 +58,13 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 - Mô hình AI suy luận phía server, không chạy trên trình duyệt (D14).
 - Món đã ghi nhận lưu dạng snapshot; món đã lưu lưu theo nguyên liệu + gram (D23, 01 mục 9.4).
 - Không có luồng Admin duyệt món người dùng (D22).
+- Cân nặng lưu duy nhất trong `weight_logs` (mỗi ngày một bản ghi); `user_profiles` không giữ cột cân nặng.
 
 ### 2.4. Giả định
 - A1. Người dùng có điện thoại chụp ảnh và trình duyệt hiện đại.
 - A2. Số món có công thức chuẩn ở v1 là 30–50 (mức tối thiểu chấp nhận do nhóm ghi ra ở mốc 07/10, D26).
 - A3. Người dùng tự nhập calo tiêu hao từ thiết bị (không đồng bộ tự động).
+- A4. Hệ số sinh hoạt là một giá trị cố định cho mọi người dùng. Người có công việc chân tay có thể bị ước tính ngân sách hơi thấp; sai về phía thận trọng nên chấp nhận ở v1. Mọi calo tập luyện chỉ đi vào ngân sách qua các buổi tập đã ghi (UC07).
 
 ---
 
@@ -72,10 +79,10 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-01.1 | Guest đăng ký tài khoản qua form nhiều bước: tài khoản → chỉ số thể chất → mục tiêu → khởi tạo ngân sách | M |
 | FR-01.2 | Email là duy nhất; mật khẩu được băm trước khi lưu | M |
 | FR-01.3 | Đăng nhập bằng Email/Mật khẩu qua modal trên trang chủ; đăng xuất | M |
-| FR-01.4 | Thu thập: giới tính, tuổi, chiều cao, cân nặng, mức độ vận động, mục tiêu (giảm cân / duy trì / tăng cân / tăng cơ), cân nặng mong muốn; % mỡ cơ thể (tùy chọn, chỉ cần khi dùng Katch-McArdle) | M |
+| FR-01.4 | Thu thập: giới tính, tuổi, chiều cao, cân nặng, mục tiêu (giảm cân / duy trì / tăng cân / tăng cơ), cân nặng mong muốn, **số buổi tập mục tiêu mỗi tuần (0–7, chỉ dùng cho nhắc nhở, không ảnh hưởng ngân sách)**; % mỡ cơ thể (tùy chọn, chỉ cần khi dùng Katch-McArdle). **Không hỏi mức độ vận động** | M |
 | FR-01.5 | Tính BMR theo Mifflin-St Jeor (mặc định) và Katch-McArdle (tùy chọn, cần % mỡ), thiết kế theo Strategy | M |
-| FR-01.6 | Baseline = BMR × hệ số sinh hoạt; ngân sách mục tiêu = Baseline ± điều chỉnh theo mục tiêu | M |
-| FR-01.7 | Member sửa hồ sơ; hệ thống tính lại ngân sách từ thời điểm sửa, không đổi ngân sách các ngày đã qua | M |
+| FR-01.6 | Baseline = BMR × **hệ số sinh hoạt cố định cho mọi người dùng** (ví dụ 1,2 **[CẦN CHỐT: dẫn nguồn]**). Ngân sách mục tiêu = Baseline ± điều chỉnh theo mục tiêu, lấy từ bảng tham số (ví dụ giảm cân −15%, duy trì 0, tăng cân/tăng cơ +10% Baseline **[CẦN CHỐT: dẫn nguồn]**) | M |
+| FR-01.7 | Member sửa hồ sơ; khi cập nhật cân nặng, ghi vào `weight_logs` (mỗi ngày một bản ghi, ghi lại thì thay thế); `user_profiles` không giữ cột cân nặng, "cân nặng hiện tại" luôn lấy từ bản ghi mới nhất. Hệ thống tính lại ngân sách từ thời điểm sửa, không đổi ngân sách các ngày đã qua | M |
 | FR-01.8 | Member chọn công thức BMR và chính sách cộng calo tập (xem FR-04.4) | M |
 | FR-01.9 | Ngân sách mục tiêu của ngày không được thấp hơn **sàn calo tối thiểu**: mặc định **1.500 kcal (nam) / 1.200 kcal (nữ)**. Khi tính ra thấp hơn thì đặt bằng sàn và hiển thị cảnh báo. Cấu hình được; cần tra nguồn y tế để trích dẫn trước khi đưa vào báo cáo chính thức (xem mục 7) | M |
 | FR-01.10 | Hiển thị disclaimer: ứng dụng không thay thế tư vấn y tế | M |
@@ -86,7 +93,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 
 | ID | Yêu cầu | Ưu tiên |
 |---|---|---|
-| FR-02.1 | Với mỗi ngày, hệ thống tính: `Ngân sách = Baseline ± điều chỉnh mục tiêu + Σ(calo tập × hệ số chính sách)` và `Còn lại = Ngân sách − Calo đã nạp` | M |
+| FR-02.1 | Với mỗi ngày, hệ thống tính: `Ngân sách = Baseline ± điều chỉnh mục tiêu + Calo tập được cộng` và `Còn lại = Ngân sách − Calo đã nạp`. `Calo tập được cộng` tính **ở cấp ngày** từ tổng calo thô các buổi tập theo chính sách của ngày đó (FR-04.4) | M |
 | FR-02.2 | Hiển thị Còn lại cập nhật ngay sau khi ghi, sửa hoặc xóa món/bài tập, trên thanh năng lượng ngày ở đầu Dashboard và đầu trang Nhật ký ăn uống. Thành phần này thuộc Must, không bị cắt khi rút gọn Dashboard (FR-06) | M |
 | FR-02.3 | Hiển thị rõ các thành phần: ngân sách gốc, calo tập được cộng, calo đã nạp | M |
 | FR-02.4 | Khi Còn lại < 0, hiển thị trạng thái vượt ngân sách, không chặn người dùng | M |
@@ -114,6 +121,8 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-03.16 | Khi Member sửa kết quả AI và **đồng ý**, lưu cặp (món dự đoán, món đã sửa) để đánh giá/huấn luyện lại ngoại tuyến; không tự đưa vào CSDL chung | C |
 | FR-03.17 | **Ghép công thức chuẩn với mô tả (đường nhận diện):** bản nháp = công thức chuẩn của món AI đoán + điều chỉnh từ mô tả. Nguyên liệu trong mô tả khớp nguyên liệu của công thức thì dùng gram từ mô tả thay cho gram công thức; nguyên liệu của công thức không được nhắc thì giữ gram công thức nhân hệ số khẩu phần món (mặc định ×1); nguyên liệu trong mô tả mà công thức không có thì thêm thành dòng bổ sung gắn nhãn "từ mô tả". Phủ định như "không hành" chưa tách tự động ở v1, Member xóa dòng ở bước xác nhận | M |
 | FR-03.18 | **Xử lý ảnh tải lên:** ảnh chỉ dùng tạm để phân tích và bị xóa ngay khi trả bản nháp. Chỉ giữ lại khi Member chủ động chọn lúc tải lên "Lưu ảnh vào nhật ký" hoặc "Cho phép dùng ảnh để cải thiện mô hình" (mặc định tắt cả hai). Ảnh giữ tạm gắn với bản nháp và bị dọn khi quá hạn nếu Member không xác nhận | M |
+| FR-03.19 | **Sửa mục nhật ký đã ghi:** dòng nguyên liệu giữ nguyên nguyên liệu và gram thì **giữ giá trị dinh dưỡng đã lưu**; chỉ dòng bị sửa gram hoặc thêm mới dùng giá trị dinh dưỡng hiện hành; dòng bị gỡ thì xóa | M |
+| FR-03.20 | **Server luôn tự tính** calo và macro từ nguyên liệu + gram (hoặc món + hệ số khẩu phần) khi ghi và khi sửa. Trình duyệt chỉ gửi mã nguyên liệu/món, gram, buổi và (với dòng đã lưu) mã dòng; không nhận giá trị dinh dưỡng do trình duyệt gửi | M |
 
 ### FR-04. Theo dõi luyện tập (UC07)
 
@@ -122,9 +131,10 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-04.1 | Member ghi bài tập: loại (chạy bộ, đạp xe, gym, bơi...), ngày, thời lượng, quãng đường (nếu có) | M |
 | FR-04.2 | Hai nguồn calo tiêu hao: (a) nhập từ thiết bị, ghi rõ là **active calories**; (b) tính MET × cân nặng × thời gian (mặc định) | M |
 | FR-04.3 | Mỗi bản ghi mang nhãn độ tin cậy theo nguồn (thiết bị: cao; MET: trung bình) | M |
-| FR-04.4 | Chính sách cộng calo tập vào ngân sách do Member chọn, thiết kế theo Strategy. Ba chính sách: **cộng toàn bộ**; **cộng một phần** (**mặc định, hệ số 0,5**); **có trần** (tổng calo tập được cộng trong một ngày **không quá 500 kcal**). Hệ số và trần cấu hình được; đây là lựa chọn thiết kế để hạn chế ăn bù quá mức (R1), chưa có tài liệu tham khảo | M |
+| FR-04.4 | Chính sách cộng calo tập vào ngân sách do Member chọn, thiết kế theo Strategy, áp **ở cấp ngày** lên tổng calo thô Σ của các buổi tập trong ngày: **cộng toàn bộ** = Σ; **cộng một phần** = 0,5 × Σ (**mặc định**); **có trần** = min(Σ, **500 kcal**). Chính sách và hệ số của ngày được lưu trên bản ghi ngân sách của ngày đó. Đổi chính sách chỉ áp cho hôm nay trở đi, các ngày đã qua không đổi. Hệ số và trần cấu hình được; đây là lựa chọn thiết kế để hạn chế ăn bù quá mức (R1), chưa có tài liệu tham khảo | M |
 | FR-04.5 | Bước chân/quãng đường không là nguồn riêng; dùng để chọn MET theo tốc độ cho buổi đi bộ/chạy | M |
 | FR-04.6 | Xem lịch sử buổi tập theo tuần/tháng; sửa, xóa buổi tập | M |
+| FR-04.7 | Bản ghi buổi tập chỉ lưu **calo thô**, nguồn, MET, cân nặng đã dùng; **không lưu hệ số cộng**. Khi thêm, sửa, xóa buổi tập hoặc đổi chính sách, hệ thống tính lại calo tập được cộng của cả ngày | M |
 
 ### FR-05. Gợi ý món ăn (UC10)
 
@@ -146,6 +156,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-06.4 | Ghi và hiển thị lượng nước uống trong ngày | S |
 | FR-06.5 | Biểu đồ cân nặng theo tuần/tháng; Member cập nhật cân nặng | S |
 | FR-06.6 | Biểu đồ mức tuân thủ ngân sách theo ngày/tuần | S |
+| FR-06.7 | Hiển thị số buổi tập đã ghi trong tuần so với số buổi mục tiêu; khi tụt so với tiến độ tuần (cách tính **[CẦN CHỐT]**) thì hiện nhắc nhở trung tính trong ứng dụng, tắt được. Không ảnh hưởng ngân sách. Nằm trong phần bị cắt đầu tiên của Dashboard nếu trễ tiến độ | S |
 
 *Nếu trễ tiến độ, rút gọn xuống biểu đồ calo và macro trong ngày (01, 11.3).*
 
@@ -175,7 +186,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | NFR-07 | Bảo mật | Trang protected chỉ truy cập sau đăng nhập; phiên có thời hạn | Kiểm thử hệ thống |
 | NFR-08 | Quyền riêng tư | Lưu trữ tối thiểu: ảnh bị xóa ngay sau phân tích trừ khi Member chọn giữ (FR-03.18); Member có thể xóa toàn bộ dữ liệu của mình | Kiểm thử chức năng xóa |
 | NFR-09 | An toàn sức khỏe | Có sàn calo tối thiểu và disclaimer y tế; không cắt các cảnh báo này khi cắt phạm vi (R2) | Kiểm tra giao diện |
-| NFR-10 | Tính toàn vẹn dữ liệu | Nhật ký là snapshot bất biến theo nguồn; hoạt động ghi nhiều bước dùng transaction | Kiểm thử hồi quy |
+| NFR-10 | Tính toàn vẹn dữ liệu | Nhật ký là snapshot bất biến theo nguồn, **trừ các dòng bị chính Member sửa (FR-03.19)**; hoạt động ghi nhiều bước dùng transaction | Kiểm thử hồi quy |
 | NFR-11 | Khả dụng | Responsive, mobile-first; tiếng Việt; thao tác chính (chụp, mô tả, xác nhận) làm được bằng một tay trên điện thoại | Kiểm thử trên điện thoại |
 | NFR-12 | Độ tin cậy | Khi dịch vụ AI lỗi, các chức năng còn lại vẫn dùng được (fallback nhập thủ công) | Tắt dịch vụ AI và kiểm thử |
 | NFR-13 | Bảo trì | Tách dịch vụ AI khỏi PHP qua hợp đồng API cố định; Energy Engine dùng Strategy cho công thức BMR và chính sách calo tập | Review thiết kế |
@@ -188,20 +199,20 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 
 | UC | Tên | Ưu tiên | Yêu cầu liên quan |
 |---|---|---|---|
-| UC01 | Đăng ký và khảo sát | Must | FR-01.1, 01.2, 01.4 – 01.6, 01.10, 01.11, NFR-06 |
+| UC01 | Đăng ký và khảo sát | Must | FR-01.1, 01.2, 01.4 – 01.6, 01.10, 01.11, NFR-06, FR-01.9 |
 | UC02 | Đăng nhập (modal) | Must | FR-01.3, NFR-06, NFR-07 |
 | UC03 | Thiết lập hồ sơ, công thức BMR, chính sách calo | Must | FR-01.4 – 01.11, FR-04.4 |
 | UC04 | Ghi món bằng ảnh + mô tả | Must | FR-03.1 – 03.6, 03.8, 03.15, 03.17, 03.18, NFR-02 – 04 |
-| UC05 | Xác nhận/chỉnh sửa kết quả AI | Must | FR-03.7, 03.10, 03.16, 03.18 |
-| UC06 | Tìm và ghi món thủ công | Must | FR-03.6, 03.9 – 03.11 |
-| UC07 | Ghi bài tập và quy đổi calo | Must | FR-04.1–04.6 |
+| UC05 | Xác nhận/chỉnh sửa kết quả AI | Must | FR-03.7, 03.10, 03.16, 03.18, 03.20 |
+| UC06 | Tìm và ghi món thủ công | Must | FR-03.6, 03.9 – 03.11, 03.19, 03.20 |
+| UC07 | Ghi bài tập và quy đổi calo | Must | FR-04.1–04.7 |
 | UC08 | Xem ngân sách còn lại | Must | FR-02.1–02.5 |
-| UC09 | Dashboard và tiến trình (gồm ghi nước, cập nhật cân nặng) | Should | FR-06.1 – 06.6 |
+| UC09 | Dashboard và tiến trình (gồm ghi nước, cập nhật cân nặng) | Should | FR-06.1 – 06.7 |
 | UC10 | Gợi ý món bữa tiếp theo | Could | FR-05.1 – 05.3 |
 | UC11 | Quản lý danh mục hệ thống | Must (seed) / Should (UI) | FR-07.1–07.4 |
 | UC12 | Tạo món/nguyên liệu tự chế | Must | FR-03.12 |
 | UC13 | Lưu món vào danh mục cá nhân | Must | FR-03.13 |
-| UC14 | Ghi nhanh từ "Món đã lưu" | Must | FR-03.10, 03.13, 03.14 |
+| UC14 | Ghi nhanh từ "Món đã lưu" | Must | FR-03.10, 03.13, 03.14, 03.20 |
 
 ---
 
@@ -221,5 +232,18 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 
 | # | Việc | Hạn |
 |---|---|---|
-| T1 | Tra nguồn y tế để trích dẫn sàn calo (1.500/1.200 kcal), hệ số 0,5 và trần 500 kcal | Trước khi viết báo cáo chính thức |
-| T2 | Cập nhật `pages.md` (và `idea.md`): bỏ "bước chân" và "lịch tập trong ngày" ở Dashboard theo 01 v1.1 | 07/10 |
+| T1 | Tra nguồn để trích dẫn sàn calo (1.500/1.200 kcal), hệ số 0,5 và trần 500 kcal, **hệ số sinh hoạt cố định và bảng điều chỉnh theo mục tiêu** | Trước khi viết báo cáo chính thức |
+| T2 | Cập nhật `pages.md` (và `idea.md`): bỏ "bước chân" và "lịch tập trong ngày" ở Dashboard theo 01 v1.1; **bỏ "mức độ vận động" khỏi form khảo sát (idea.md Module 1)**, thay bằng số buổi tập mục tiêu | 07/10 |
+
+---
+
+## 8. Lịch sử thay đổi (v1.0 → v1.1)
+
+| Nhóm | Thay đổi |
+|---|---|
+| Baseline | Bỏ khảo sát "mức độ vận động"; Baseline = BMR × hệ số sinh hoạt cố định (FR-01.4, FR-01.6, A4). Thêm bảng điều chỉnh theo mục tiêu (giá trị ví dụ, chờ chốt) |
+| Calo tập | Buổi tập chỉ lưu calo thô; calo được cộng tính ở cấp ngày theo chính sách của ngày (FR-02.1, FR-04.4, FR-04.7) |
+| Nhắc nhở | Số buổi tập mục tiêu chỉ dùng để nhắc nhở (FR-06.7), không đi vào công thức |
+| Nhật ký | Quy tắc sửa mục đã ghi (FR-03.19); server tự tính calo, không nhận giá trị dinh dưỡng từ trình duyệt (FR-03.20); NFR-10 chỉnh lại |
+| Cân nặng | Bỏ cột cân nặng khỏi `user_profiles`; "cân nặng hiện tại" = bản ghi mới nhất trong `weight_logs` (FR-01.7). Một nguồn duy nhất, tránh lệch |
+| Chưa áp dụng | Chặn mục tiêu cân nặng nguy hiểm (nhóm quyết định bỏ qua); các lỗ hổng nhỏ và gợi ý O1–O5 trong nhận xét trước chưa đưa vào |

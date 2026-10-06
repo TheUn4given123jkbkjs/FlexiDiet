@@ -3,6 +3,7 @@
 > **Pha 2 – Elaboration, E1.** Nguồn: `01_business_modeling.md` (mục 8), `02_srs_requirements.md`.
 > **Trạng thái:** Bản nháp. Cả 14 Use Case của 01 đều được đặc tả đầy đủ (mục 3). README Pha 2 ghi "6 Use Case cốt lõi"; UC03, UC04, UC05, UC07 là các UC *architecturally significant* theo 01 và có sequence diagram ở mục 4. Các vấn đề còn mở ghi ở SRS (mục 6).
 > Giá trị gắn **[CẦN CHỐT]** chưa có căn cứ.
+> **v1.1:** đồng bộ với SRS v1.1 (Baseline hệ số cố định, calo tập tính ở cấp ngày, quy tắc sửa mục nhật ký, server tự tính calo). Xem mục 5.
 
 ---
 
@@ -69,11 +70,11 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 **Luồng chính**
 1. Guest bấm "Đăng ký" ở trang chủ; hệ thống mở trang đăng ký nhiều bước.
 2. **Bước 1 – Tài khoản:** Guest nhập email, mật khẩu, tên hiển thị. Hệ thống kiểm tra định dạng email, độ dài tối thiểu của mật khẩu và email chưa được dùng.
-3. **Bước 2 – Chỉ số thể chất:** Guest nhập giới tính, ngày sinh, chiều cao, cân nặng hiện tại, mức độ vận động. Hệ thống kiểm tra khoảng hợp lệ, trong đó tuổi phải từ 18 đến 80.
+3. **Bước 2 – Chỉ số thể chất:** Guest nhập giới tính, ngày sinh, chiều cao, cân nặng hiện tại, số buổi tập mục tiêu mỗi tuần (0 – 7, chỉ dùng để nhắc nhở). Hệ thống kiểm tra khoảng hợp lệ, trong đó tuổi phải từ 18 đến 80.
 4. **Bước 3 – Mục tiêu:** Guest chọn mục tiêu (giảm cân / duy trì / tăng cân / tăng cơ) và cân nặng mong muốn.
-5. **Bước 4 – Khởi tạo:** hệ thống tính thử (chưa lưu) và hiển thị BMR, Baseline và ngân sách calo mục tiêu mỗi ngày, theo công thức Mifflin-St Jeor và chính sách calo tập mặc định, kèm disclaimer y tế.
+5. **Bước 4 – Khởi tạo:** hệ thống tính thử (chưa lưu) và hiển thị BMR, Baseline và ngân sách calo mục tiêu mỗi ngày, theo công thức Mifflin-St Jeor, hệ số sinh hoạt cố định (FR-01.6) và chính sách calo tập mặc định, kèm disclaimer y tế.
 6. Guest xác nhận.
-7. Hệ thống tính lại ở server, rồi trong một transaction tạo tài khoản (mật khẩu được băm), hồ sơ, bản ghi cân nặng ban đầu và ngân sách của hôm nay.
+7. Hệ thống tính lại ở server, rồi trong một transaction tạo tài khoản (mật khẩu được băm), hồ sơ (không gồm cân nặng), bản ghi cân nặng ban đầu trong `weight_logs` và ngân sách của hôm nay (kèm chính sách calo tập của ngày).
 8. Hệ thống tạo phiên đăng nhập và chuyển Guest vào Dashboard.
 
 **Luồng thay thế**
@@ -133,13 +134,13 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 **Luồng chính**
 1. Member mở trang Hồ sơ.
 2. Hệ thống hiển thị thông tin hiện tại.
-3. Member sửa chỉ số (giới tính, tuổi, chiều cao, cân nặng, mức vận động) và mục tiêu (giảm / duy trì / tăng / tăng cơ, cân nặng mong muốn).
+3. Member sửa chỉ số (giới tính, tuổi, chiều cao, cân nặng) và mục tiêu (kể cả số buổi tập mục tiêu mỗi tuần) (giảm / duy trì / tăng / tăng cơ, cân nặng mong muốn).
 4. Member chọn công thức BMR (Mifflin-St Jeor mặc định hoặc Katch-McArdle).
 5. Member chọn chính sách cộng calo tập (xem FR-04.4).
 6. Member bấm Lưu.
 7. Hệ thống kiểm tra tính hợp lệ.
 8. Hệ thống tính BMR → Baseline → ngân sách mục tiêu (Strategy theo lựa chọn ở bước 4).
-9. Hệ thống lưu hồ sơ và ghi ngân sách ngày hôm nay vào bảng ngân sách theo ngày.
+9. Hệ thống lưu hồ sơ (cân nặng qua `weight_logs`, không lưu trên `user_profiles`) và ghi ngân sách ngày hôm nay vào bảng ngân sách theo ngày, kèm chính sách calo tập đã chọn. Calo tập được cộng của hôm nay được tính lại theo chính sách mới; các ngày đã qua không đổi.
 10. Hệ thống hiển thị ngân sách mới và thành phần tính toán.
 
 **Luồng thay thế**
@@ -206,7 +207,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 2. Member xem và chỉnh khi cần: đổi món, thêm/bớt nguyên liệu, sửa gram, đổi buổi.
 3. Hệ thống tính lại tổng calo/macro ngay khi Member sửa.
 4. Member bấm Xác nhận.
-5. Hệ thống ghi mục nhật ký trong một transaction: tổng calo/macro, tên món, từng nguyên liệu với gram và giá trị dinh dưỡng **tại thời điểm ghi**.
+5. Hệ thống **tự tính lại** calo/macro từ nguyên liệu + gram (không dùng giá trị dinh dưỡng do trình duyệt gửi, FR-03.20), rồi ghi mục nhật ký trong một transaction: tổng calo/macro, tên món, từng nguyên liệu với gram và giá trị dinh dưỡng **tại thời điểm ghi**.
 6. Hệ thống hiển thị ngân sách còn lại mới (UC08).
 
 **Luồng thay thế**
@@ -246,7 +247,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 - A1 (bước 3): không có kết quả → gợi ý tạo nguyên liệu hoặc món tự chế (UC12).
 - A2 (bước 2): Member chọn từ "Món đã lưu" → thực hiện UC14.
 - A3: UC06 được mở từ gợi ý của UC04 khi AI lỗi, quá tải hoặc không nhận ra; buổi và ngày đã chọn được giữ.
-- A4: **Sửa mục đã ghi.** Member chọn một mục trong nhật ký, đổi gram, thêm hoặc bớt nguyên liệu hoặc đổi buổi, rồi lưu → hệ thống tạo lại snapshot từ dữ liệu Member gửi lên trong một transaction và cập nhật ngân sách còn lại của ngày đó.
+- A4: **Sửa mục đã ghi.** Member chọn một mục trong nhật ký, đổi gram, thêm hoặc bớt nguyên liệu hoặc đổi buổi, rồi lưu → trình duyệt chỉ gửi mã dòng đã lưu, gram và nguyên liệu mới (nếu có); hệ thống tính lại trong một transaction theo quy tắc (FR-03.19, FR-03.20): dòng giữ nguyên nguyên liệu và gram thì **giữ giá trị dinh dưỡng đã lưu**; dòng bị sửa gram hoặc thêm mới thì dùng giá trị dinh dưỡng hiện hành; dòng bị gỡ thì xóa. Sau đó cập nhật ngân sách còn lại của ngày đó.
 - A5: **Xóa mục đã ghi.** Member bấm Xóa và xác nhận → hệ thống xóa mục cùng các dòng nguyên liệu của nó và cập nhật ngân sách còn lại của ngày đó.
 
 **Luồng ngoại lệ**
@@ -263,8 +264,8 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 | Actor | Member |
 | Mục tiêu | Ghi buổi tập, tính calo tiêu hao và phần được cộng vào ngân sách |
 | Tiền điều kiện | Member đã đăng nhập và có cân nặng trong hồ sơ |
-| Hậu điều kiện | Có bản ghi buổi tập kèm nguồn, độ tin cậy, chính sách áp dụng; ngân sách ngày được cập nhật |
-| Yêu cầu liên quan | FR-04.1 – FR-04.6, FR-02.5 |
+| Hậu điều kiện | Có bản ghi buổi tập kèm nguồn, độ tin cậy và **calo thô**; ngân sách ngày được tính lại theo chính sách của ngày |
+| Yêu cầu liên quan | FR-04.1 – FR-04.7, FR-02.5 |
 
 **Luồng chính**
 1. Member mở trang Nhật ký luyện tập, chọn loại bài tập (chạy bộ, đạp xe, gym, bơi...) và ngày.
@@ -273,14 +274,14 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 4. Với MET: hệ thống chọn MET theo loại bài tập (và tốc độ nếu có quãng đường), tính `MET × cân nặng (kg) × giờ`.
 5. Hệ thống hiển thị calo tiêu hao, nhãn độ tin cậy và phần calo được cộng theo chính sách hiện chọn.
 6. Member bấm Lưu.
-7. Hệ thống lưu buổi tập cùng cân nặng đã dùng, nguồn, MET, chính sách và hệ số áp dụng.
-8. Hệ thống cập nhật ngân sách ngày.
+7. Hệ thống lưu buổi tập cùng cân nặng đã dùng, nguồn, MET và **calo thô** (không lưu hệ số cộng, FR-04.7).
+8. Hệ thống tính lại calo tập được cộng của ngày: áp chính sách của ngày lên tổng calo thô các buổi, rồi cập nhật ngân sách ngày (FR-04.4).
 
 **Luồng thay thế**
 - A1 (bước 3): chọn "Nhập từ thiết bị" → Member nhập **active calories** (giao diện ghi chú rõ là không gồm BMR); độ tin cậy "cao".
 - A2 (bước 2): bài tập đi bộ hoặc chạy có quãng đường → tính tốc độ trung bình và chọn MET theo khoảng tốc độ. Số bước chân (nếu nhập) chỉ dùng để quy ra quãng đường, không là nguồn calo riêng (D12).
 - A3: Member sửa hoặc xóa buổi tập → ngân sách ngày tính lại.
-- A4: với chính sách "có trần" (cộng tối đa 500 kcal mỗi ngày), khi thêm, sửa hoặc xóa buổi tập, phần calo được cộng của các buổi trong cùng ngày được tính lại.
+- A4: calo được cộng luôn tính **ở cấp ngày** từ tổng calo thô Σ của các buổi (cộng toàn bộ: Σ; một phần: 0,5 × Σ; có trần: min(Σ, 500 kcal)), nên không có việc cắt phần vượt trần cho từng buổi. Thêm, sửa hoặc xóa buổi tập, hoặc đổi chính sách, thì tính lại cho cả ngày.
 
 **Luồng ngoại lệ**
 - E1 (bước 2): thời lượng ≤ 0 hoặc vượt mức hợp lý **[CẦN CHỐT]** → báo lỗi.
@@ -301,8 +302,8 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 
 **Luồng chính**
 1. Member mở Dashboard hoặc thanh năng lượng ngày.
-2. Hệ thống đọc ngân sách mục tiêu của ngày (bản đã lưu theo ngày), các buổi tập kèm calo được cộng, các mục nhật ký ăn của ngày.
-3. Hệ thống tính: `Ngân sách = mục tiêu + Σ calo tập được cộng`; `Còn lại = Ngân sách − Σ calo đã nạp`.
+2. Hệ thống đọc ngân sách mục tiêu của ngày (bản đã lưu theo ngày, kèm chính sách calo tập của ngày), các buổi tập (calo thô) và các mục nhật ký ăn của ngày.
+3. Hệ thống tính: `Ngân sách = mục tiêu + calo tập được cộng` (tính ở cấp ngày từ Σ calo thô theo chính sách của ngày); `Còn lại = Ngân sách − Σ calo đã nạp`.
 4. Hệ thống hiển thị Còn lại cùng ba thành phần, cập nhật mỗi khi ghi/sửa/xóa món hoặc bài tập.
 
 **Luồng thay thế**
@@ -322,12 +323,12 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 | Mục tiêu | Nắm tình hình trong ngày và xu hướng dài hạn; ghi nhanh lượng nước và cân nặng |
 | Tiền điều kiện | Member đã đăng nhập và có hồ sơ |
 | Hậu điều kiện | Khi chỉ xem, không đổi dữ liệu. Khi ghi nước hoặc cân nặng, bản ghi tương ứng được thêm |
-| Yêu cầu liên quan | FR-06.1 – FR-06.6 |
+| Yêu cầu liên quan | FR-06.1 – FR-06.7 |
 | Ưu tiên | Should |
 
 **Luồng chính**
 1. Member mở Dashboard (mặc định là hôm nay).
-2. Hệ thống hiển thị thanh năng lượng ngày (ngân sách, calo tập được cộng, calo đã nạp, còn lại; UC08), biểu đồ protein/carb/fat trong ngày, danh sách các món đã ăn và tổng lượng nước.
+2. Hệ thống hiển thị thanh năng lượng ngày (ngân sách, calo tập được cộng, calo đã nạp, còn lại; UC08), biểu đồ protein/carb/fat trong ngày, danh sách các món đã ăn, tổng lượng nước và tiến độ buổi tập trong tuần (số buổi đã tập / mục tiêu).
 3. Member chọn khoảng xem (tuần hoặc tháng).
 4. Hệ thống hiển thị biểu đồ cân nặng và biểu đồ mức tuân thủ ngân sách theo ngày hoặc tuần.
 
@@ -335,7 +336,8 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 - A1 (bước 2): **Ghi nước.** Member bấm nút thêm nước và chọn lượng (ml) → hệ thống lưu và cập nhật tổng trong ngày.
 - A2 (bước 2): **Cập nhật cân nặng.** Member nhập cân nặng và ngày → hệ thống lưu vào nhật ký cân nặng (mỗi ngày một bản ghi, ghi lại thì thay thế) và vẽ lại biểu đồ. Việc này **không đổi ngân sách đã lưu của hôm nay**; ngân sách của các ngày mới dùng cân nặng mới nhất. Muốn tính lại ngay, Member lưu hồ sơ ở UC03.
 - A3 (bước 1): Member chọn ngày khác → hiển thị dữ liệu của ngày đó.
-- A4: khi trễ tiến độ và phải cắt phạm vi, Dashboard rút gọn còn biểu đồ calo và macro trong ngày (01, mục 11.3); thanh "Còn lại" luôn được giữ (FR-02.2).
+- A4: khi trễ tiến độ và phải cắt phạm vi, Dashboard rút gọn còn biểu đồ calo và macro trong ngày (01, mục 11.3); thanh "Còn lại" luôn được giữ (FR-02.2). Phần nhắc nhở tần suất (A5) bị cắt đầu tiên.
+- A5: **Nhắc nhở tần suất.** Khi số buổi tập trong tuần thấp hơn tiến độ so với mục tiêu (cách tính **[CẦN CHỐT]**) → hiển thị nhắc nhở trung tính (ví dụ "Tuần này bạn mới tập 1/3 buổi"), Member tắt được. Việc này **không đổi ngân sách** và không gắn với chuyện được ăn thêm (FR-06.7).
 
 **Luồng ngoại lệ**
 - E1 (bước 2): chưa có dữ liệu → hiển thị trạng thái trống kèm hướng dẫn ghi món đầu tiên.
@@ -523,7 +525,8 @@ sequenceDiagram
         P-->>U: Bản nháp (nguyên liệu, gram, kcal, macro, nhãn nguồn)
     end
     U->>U: Xem, chỉnh gram / món / buổi
-    U->>P: POST /api/meals (bản nháp đã xác nhận)
+    U->>P: POST /api/meals (bản nháp đã xác nhận: món/nguyên liệu + gram + buổi, không gồm kcal)
+    P->>P: Tự tính calo/macro từ nguyên liệu + gram (FR-03.20)
     P->>D: Transaction: lưu meal_entries và meal_entry_items (snapshot)
     P-->>U: Thành công + ngân sách còn lại mới
 ```
@@ -537,11 +540,12 @@ sequenceDiagram
     participant D as MySQL
 
     U->>P: POST /api/workouts/estimate (loại, thời lượng, quãng đường, nguồn)
-    P->>D: Lấy cân nặng hiện tại, MET theo loại / tốc độ, chính sách calo tập
-    P->>P: Tính calo tiêu hao (MET hoặc thiết bị) + phần được cộng
+    P->>D: Lấy cân nặng hiện tại (bản ghi mới nhất trong weight_logs), MET theo loại / tốc độ, chính sách calo tập
+    P->>P: Tính calo thô (MET hoặc thiết bị) + phần cộng dự kiến theo chính sách của ngày
     P-->>U: Calo tiêu hao, nhãn độ tin cậy, phần cộng vào ngân sách
     U->>P: POST /api/workouts (xác nhận)
-    P->>D: INSERT workouts (nguồn, MET, cân nặng đã dùng, chính sách, hệ số, calo được cộng)
+    P->>D: INSERT workouts (nguồn, MET, cân nặng đã dùng, calo thô)
+    P->>D: Tính lại calo tập được cộng của ngày (Σ calo thô × chính sách) và cập nhật daily_budgets
     P-->>U: Thành công + ngân sách ngày mới
 ```
 
@@ -556,6 +560,20 @@ sequenceDiagram
     U->>P: PUT /api/profile (chỉ số, mục tiêu, công thức BMR, chính sách)
     P->>P: Kiểm tra hợp lệ
     P->>P: Energy Engine: BMR (Strategy) -> Baseline -> ngân sách mục tiêu (áp sàn calo)
-    P->>D: Transaction: cập nhật user_profiles, daily_budgets (hôm nay) và weight_logs
+    P->>D: Transaction: cập nhật user_profiles (không gồm cân nặng), weight_logs (nếu cân nặng thay đổi) và daily_budgets (hôm nay, kèm chính sách calo tập; tính lại calo tập được cộng)
     P-->>U: Ngân sách mới + cảnh báo nếu chạm sàn
 ```
+
+---
+
+## 5. Lịch sử thay đổi (v1.0 → v1.1)
+
+| UC / mục | Thay đổi |
+|---|---|
+| UC01, UC03 | Bỏ trường "mức độ vận động", thay bằng số buổi tập mục tiêu (chỉ nhắc nhở); Baseline dùng hệ số sinh hoạt cố định; ngân sách ngày lưu kèm chính sách calo tập |
+| UC05, UC06 | Server tự tính calo (FR-03.20); UC06 A4 thêm quy tắc giữ giá trị cũ cho dòng không sửa (FR-03.19) |
+| UC07 | Buổi tập chỉ lưu calo thô; calo được cộng tính ở cấp ngày (bỏ việc cắt trần theo từng buổi) |
+| UC08 | Công thức hiển thị theo calo tập được cộng cấp ngày |
+| UC09 | Thêm tiến độ buổi tập và nhắc nhở tần suất (A5, Should, bị cắt đầu tiên) |
+| Sequence 4.1 – 4.3 | Cập nhật theo các thay đổi trên |
+| Cân nặng | `user_profiles` không giữ cột cân nặng; "cân nặng hiện tại" = bản ghi mới nhất trong `weight_logs`. UC01/UC03/UC07/UC09 đều ghi hoặc đọc từ `weight_logs` |

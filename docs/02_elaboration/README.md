@@ -26,9 +26,9 @@ Theo chuẩn **Unified Process (Ian Sommerville, Chapter 2.4)**, pha Elaboration
 
 | Tên tài liệu | Nội dung chính | Trạng thái |
 | :--- | :--- | :---: |
-| `02_srs_requirements.md` | Đặc tả yêu cầu chức năng (FR-01 đến FR-06) & phi chức năng (NFR) | Đang thực hiện |
-| `02_usecase_specifications.md` | Kịch bản chi tiết 6 Use Cases cốt lõi & Sequence Diagrams | Chuẩn bị |
-| `02_architecture_design.md` | SAD (Software Architecture Document): Cấu trúc 3-Tier, REST API specs | Chuẩn bị |
+| `02_srs_requirements_v1.1.md` | Đặc tả yêu cầu chức năng (FR-01 đến FR-06) & phi chức năng (NFR) | Hoàn thành |
+| `02_usecase_specifications_v1.1.md` | Kịch bản chi tiết Use Cases & Sequence Diagrams | Hoàn thành |
+| `02_architecture_design.md` | SAD (Software Architecture Document): Cấu trúc 3-Tier, REST API specs | Đang thực hiện |
 | `02_database_design.md` | Lược đồ CSDL quan hệ ERD, Data Dictionary, Chiến lược Snapshot nhật ký | Chuẩn bị |
 | `02_ai_service_poc.md` | Tài liệu nghiên cứu & PoC AI Model nhận diện món ăn Việt | Chuẩn bị |
 
