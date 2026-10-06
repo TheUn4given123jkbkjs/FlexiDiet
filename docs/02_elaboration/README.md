@@ -18,7 +18,7 @@ Theo chuẩn **Unified Process (Ian Sommerville, Chapter 2.4)**, pha Elaboration
    * Lược đồ tương tác (Sequence Diagrams & Component Diagrams).
 3. **Implementation & Testing (Thực nghiệm nền tảng / PoC):**
    * Xây dựng khung mã nguồn nền tảng (*Architectural Prototype / Skeleton*).
-   * PoC thành công pipeline gọi AI Vision Model (FastAPI + ONNX / Gemini Vision) cho ẩm thực Việt Nam.
+   * PoC thành công pipeline gọi AI Vision Model (FastAPI + ONNX) cho ẩm thực Việt Nam.
 
 ---
 
@@ -29,7 +29,7 @@ Theo chuẩn **Unified Process (Ian Sommerville, Chapter 2.4)**, pha Elaboration
 | `02_srs_requirements_v1.1.md` | Đặc tả yêu cầu chức năng (FR-01 đến FR-06) & phi chức năng (NFR) | Hoàn thành |
 | `02_usecase_specifications_v1.1.md` | Kịch bản chi tiết Use Cases & Sequence Diagrams | Hoàn thành |
 | `02_architecture_design.md` | SAD (Software Architecture Document): Cấu trúc 3-Tier, REST API specs | Đang thực hiện |
-| `02_database_design.md` | Lược đồ CSDL quan hệ ERD, Data Dictionary, Chiến lược Snapshot nhật ký | Chuẩn bị |
+| `02_database_design.md` | Lược đồ CSDL quan hệ ERD, Data Dictionary, Chiến lược Snapshot nhật ký | Hoàn thành |
 | `02_ai_service_poc.md` | Tài liệu nghiên cứu & PoC AI Model nhận diện món ăn Việt | Chuẩn bị |
 
 ---
