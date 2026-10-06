@@ -5,7 +5,7 @@
 > **Hệ quản trị CSDL mục tiêu:** MySQL >= 8.0.16 hoặc MariaDB >= 10.2.1 (đảm bảo mệnh đề `CHECK` có hiệu lực thực thi).  
 > **Bộ mã & Định dạng:** Engine `InnoDB`, Collation `utf8mb4_unicode_ci`. Múi giờ chuẩn: Việt Nam `UTC+07:00` (`SET time_zone = '+07:00'` trong PDO).  
 > **Kịch bản DDL nguồn:** [`../../database/schema.sql`](../../database/schema.sql)  
-> **Hồ sơ chi tiết phân hệ:** Đã được chia nhỏ tại thư mục [database_design/](./database_design/README.md) để tối ưu hiệu năng đọc và render.
+> **Hồ sơ chi tiết phân hệ:** Đã được chia nhỏ tại thư mục `database_design/` gồm 5 file tương ứng với 5 phân hệ dữ liệu.
 
 ---
 
@@ -17,7 +17,6 @@ Tài liệu này đặc tả kiến trúc cơ sở dữ liệu quan hệ (RDBMS)
 docs/02_elaboration/
 ├── 02_database_design.md               <-- Tài liệu tổng quan kiến trúc & chuỗi liên kết bảng
 └── database_design/                     <-- Thư mục chi tiết từng phân hệ
-    ├── README.md                       <-- Lược đồ chuỗi liên kết toàn bộ 18 bảng & Transactions
     ├── 01_user_management.md           <-- Phân hệ 1: Tài khoản, Hồ sơ BMR & Cân nặng (3 bảng)
     ├── 02_budget_and_workouts.md       <-- Phân hệ 2: Ngân sách Calo Ngày & Tập luyện (4 bảng)
     ├── 03_nutrition_and_dishes.md      <-- Phân hệ 3: Dinh dưỡng, Quy đổi & Món ăn AI (5 bảng)
