@@ -178,7 +178,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | ID | Nhóm | Yêu cầu | Cách kiểm chứng |
 |---|---|---|---|
 | NFR-01 | Hiệu năng | Ghi một bữa từ lúc mở form đến khi lưu: mục tiêu dưới 30 giây (chỉ số thành công, 01 mục 4) | Đo thủ công khi thử nghiệm |
-| NFR-02 | Hiệu năng | Thời gian phản hồi của dịch vụ AI trên CPU **[CẦN CHỐT: ngưỡng, từ PoC]** | Đo ở PoC 07/10–11/10 |
+| NFR-02 | Hiệu năng | Thời gian phản hồi dịch vụ AI: **mục tiêu SLA tổng (end-to-end) ≤ 3 giây** trên CPU; **timeout cứng (circuit breaker) = 10.0 giây** (vượt thì chuyển sang ghi thủ công UC06). Mục tiêu suy luận ONNX ≤ 500 ms. Cần đo thực tế trên model thật | Đo ở PoC và load test C2 |
 | NFR-03 | Hiệu năng | Dịch vụ AI dùng hàng đợi và giới hạn tốc độ. Mặc định: **10 yêu cầu phân tích/phút/người dùng**, **hàng đợi tối đa 20 yêu cầu** (đầy thì trả 429). Cấu hình được, điều chỉnh sau load test nhẹ ở C2 | Load test nhẹ |
 | NFR-04 | Độ chính xác | Độ đúng top-1 và tỉ lệ chuyển đúng sang đường nguyên liệu đo trên ảnh tự chụp bằng điện thoại **[CẦN CHỐT: ngưỡng, ghi ở mốc 07/10]** | Cổng go/no-go 11/10 |
 | NFR-05 | Minh bạch | Mọi con số calo hiển thị kèm nhãn nguồn/độ tin cậy (AI, công thức chuẩn, tự nhập, thiết bị, MET) | Kiểm tra giao diện |

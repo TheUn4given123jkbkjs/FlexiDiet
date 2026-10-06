@@ -678,12 +678,12 @@ flowchart TD
         T1C --> T1D["INSERT daily_budgets (Ngân sách ngày đầu)"]
     end
 
-    subgraph T2["Transaction 2: Ghi / Sửa Nhật ký Ăn (UC04/05/06/07)"]
+    subgraph T2["Transaction 2: Ghi / Sửa Nhật ký Ăn (UC05/UC06/UC14)"]
         T2A["INSERT/UPDATE meal_entries (Tổng calo/macro)"] --> T2B["DELETE cũ (nếu sửa) & INSERT meal_entry_items"]
         T2B --> T2C["UPDATE/DELETE draft_images (Dọn ảnh tạm)"]
     end
 
-    subgraph T3["Transaction 3: Ghi Buổi tập & Tái tính Calo ngày (UC08/10)"]
+    subgraph T3["Transaction 3: Ghi Buổi tập & Tái tính Calo ngày (UC07)"]
         T3A["INSERT/UPDATE/DELETE workouts"] --> T3B["SELECT SUM(raw_kcal) FROM workouts"]
         T3B --> T3C["Áp chính sách ngày & UPDATE daily_budgets (raw + credit)"]
     end
@@ -715,5 +715,5 @@ flowchart TD
 ## 7. Kịch bản DDL Triển khai
 
 Toàn bộ kịch bản DDL SQL chính thức được lưu trữ độc lập tại mã nguồn CSDL để phục vụ khởi tạo môi trường phát triển và kiểm thử:
-👉 [`schema.sql`](file:///d:/record_by_me/tdtu/WEB/Midterm/repo/FlexiDiet/database/schema.sql)
+👉 [`schema.sql`](../../database/schema.sql)
 

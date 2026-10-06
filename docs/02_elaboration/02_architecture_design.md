@@ -1,8 +1,8 @@
 # FlexiDiet: Thiết Kế Kiến Trúc (Architecture Design) – Bản nháp
 
-> **Pha 2 – Elaboration, E1.** Nguồn: `01_business_modeling.md` (v1.1), `02_srs_requirements` (v1.1), `02_usecase_specifications` (v1.1).
-> **Trạng thái:** Bản nháp, chờ nhóm rà soát. Giá trị gắn **[CẦN CHỐT]** là số khởi điểm, phải chỉnh theo PoC và load test ở C2.
-> Phần mô hình dữ liệu chi tiết (ERD, cột, khóa) nằm ở `02_database_design.md`; tài liệu này chỉ nêu các quyết định kiến trúc về dữ liệu (mục 9).
+> **Pha 2 – Elaboration, E1/E2.** Nguồn: `01_business_modeling.md` (v1.1), `02_srs_requirements_v1.1.md`, `02_usecase_specifications_v1.1.md`, `02_database_design.md`, `02_ai_service_poc.md`.
+> **Trạng thái:** Đã đồng bộ với thiết kế PoC. Các thông số tích hợp AI (kích thước ảnh, timeout 10.0s, ánh xạ nhãn động) đã được chốt. Kết quả đo kiểm PoC thực tế sẽ được bổ sung sau giai đoạn Construction (C1/C2).
+> Phần mô hình dữ liệu chi tiết (ERD, cột, khóa) nằm ở `02_database_design.md`; phần kiểm chứng kỹ thuật AI nằm ở `02_ai_service_poc.md`.
 
 ---
 
@@ -315,7 +315,7 @@ Giao dịch (transaction) bắt buộc cho: ghi hoặc sửa mục nhật ký, �
 
 | Trường | Kiểu | Ghi chú |
 |---|---|---|
-| `image` | tệp JPEG/PNG | Dung lượng tối đa **[CẦN CHỐT]** |
+| `image` | tệp JPEG/PNG | Dung lượng tối đa **≤ 2 MB** (ảnh client thu nhỏ cạnh dài nhất **≤ 1024 px**, theo PoC) |
 | `top_k` | số nguyên, tùy chọn | Mặc định 3 |
 
 **Header:** `X-Service-Key` (bắt buộc), `X-Request-Id` (khuyến nghị).
@@ -324,7 +324,7 @@ Giao dịch (transaction) bắt buộc cho: ghi hoặc sửa mục nhật ký, �
 
 ```json
 {
-  "model_version": "v0.1",
+  "model_version": "v1.0.0",
   "is_unknown": false,
   "predictions": [
     { "dish_code": "com_tam_suon", "confidence": 0.82 },
@@ -335,8 +335,8 @@ Giao dịch (transaction) bắt buộc cho: ghi hoặc sửa mục nhật ký, �
 }
 ```
 
-- `is_unknown = true` khi mô hình xếp ảnh vào lớp "không nhận ra" (FR-03.5); khi đó PHP đi đường nguyên liệu bất kể độ tin cậy.
-- `dish_code` phải khớp `dish_code` của món trong danh mục hệ thống (UC11 A4). Bảng ánh xạ nhãn các bộ dữ liệu → `dish_code` thuộc `02_ai_service_poc.md`.
+- `is_unknown = true` khi độ tin cậy thấp hơn ngưỡng an toàn của dịch vụ AI (`UNKNOWN_THRESHOLD`, mặc định 0.40) hoặc khi mô hình xếp ảnh vào lớp "không nhận ra" nếu được huấn luyện với lớp này (FR-03.5); khi đó PHP đi đường nguyên liệu bất kể độ tin cậy. Ngưỡng phân luồng đường nhận diện / đường nguyên liệu (`CONFIDENCE_THRESHOLD`, mặc định 0.65) được áp **ở PHP** (AD7).
+- `dish_code` được nạp động từ tệp `labels.json` (sinh ra sau khi huấn luyện) và phải khớp `dish_code` của món trong bảng `dishes` (MySQL). Cơ chế ánh xạ nhãn động và quy trình kiểm thử chi tiết thuộc `02_ai_service_poc.md`.
 
 **Lỗi:**
 
@@ -367,7 +367,7 @@ request → [kiểm tra khóa, hợp lệ ảnh] → hàng chờ (tối đa Q)
 ```
 
 - `W` suy luận cùng lúc, hàng chờ chứa tối đa `Q` request đang đợi; vượt thì từ chối ngay thay vì để treo.
-- Thời gian chờ tối đa phía PHP **[CẦN CHỐT, theo NFR-02]**, khởi điểm 10 giây; hết hạn thì coi như `503`.
+- Thời gian chờ tối đa phía PHP: **10.0 giây** (theo NFR-02 và PoC); quá thời gian thì coi như `503`, ném `AiUnavailableException` để chuyển sang UC06 (ghi thủ công).
 
 ### 10.5. Chế độ Stub
 
@@ -405,7 +405,7 @@ flowchart LR
 Hai quyết định thiết kế (chờ bạn xác nhận):
 
 - **Ánh xạ nhãn làm lúc huấn luyện.** Các lớp đầu ra của mô hình **đã là `dish_code`** của món trong danh mục hệ thống, nên dịch vụ AI trả thẳng `dish_code` và PHP không cần bảng ánh xạ lúc chạy.
-- **Mô hình chỉ có lớp cho món đã có công thức chuẩn.** Ảnh thuộc món chưa có công thức (hoặc ngoài danh sách) được gom vào lớp "không nhận ra" khi huấn luyện, để luồng đi sang đường nguyên liệu (FR-03.5). Như vậy mọi `dish_code` mô hình trả ra đều tính được calo; không có trường hợp nhận ra món nhưng không có số liệu.
+- **Mô hình chỉ có lớp cho món đã có công thức chuẩn.** Ảnh thuộc món chưa có công thức (hoặc ngoài danh sách) sẽ bị dịch vụ AI gán `is_unknown = true` nhờ ngưỡng `UNKNOWN_THRESHOLD` (mặc định 0.40). Nếu dataset có ảnh không-phải-thức-ăn, có thể bổ sung lớp "unknown" khi huấn luyện để cải thiện; **quyết định này chờ kết quả huấn luyện thực tế**. Dù cách nào, mọi `dish_code` mô hình trả ra đều tính được calo; không có trường hợp nhận ra món nhưng không có số liệu.
 
 Cần một script kiểm tra **độ phủ nhãn** (`scripts/check_label_coverage`) chạy khi triển khai: mọi nhãn trong `labels.json` phải khớp một món đang hoạt động có công thức đầy đủ. Lệch thì dừng triển khai, tránh lỗi chỉ lộ ra khi người dùng gặp món đó.
 
@@ -540,7 +540,7 @@ Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/an
 | AD8 | Render trang ở server + JS gọi API JSON | SPA framework (React/Vue); chỉ form tải lại trang | SPA ngoài stack đã chốt; form tải lại trang kém cho luồng ghi món |
 | AD9 | Router nhỏ tự viết + front controller, không framework | Laravel và tương tự | Đã chốt PHP thuần (D16) |
 | AD10 | Dịch vụ AI không trạng thái, không lưu ảnh | Lưu ảnh ở dịch vụ AI | Quyền riêng tư (NFR-08), dễ nhân bản |
-| AD11 | Mô hình tự huấn luyện ngoại tuyến; ánh xạ nhãn → `dish_code` lúc huấn luyện; chỉ huấn luyện cho món có công thức chuẩn | Gọi API ngoài làm bộ nhận diện chính; ánh xạ nhãn lúc chạy | Khớp UVP và D17; calo luôn tính được; API ngoài chỉ để so sánh trong PoC |
+| AD11 | Mô hình tự huấn luyện ngoại tuyến; ánh xạ nhãn → `dish_code` lúc huấn luyện; chỉ huấn luyện cho món có công thức chuẩn; lớp "unknown" xác định sau khi huấn luyện | Gọi API ngoài làm bộ nhận diện chính; ánh xạ nhãn lúc chạy | Khớp UVP và D17; calo luôn tính được; API ngoài chỉ để so sánh trong PoC |
 
 ---
 
@@ -551,9 +551,9 @@ Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/an
 | K1 | Có dùng **Composer** (chỉ để autoload PSR-4) không, hay tự viết autoloader ngắn | Autoloader tự viết khoảng chục dòng nếu muốn "PHP thuần" nghiêm ngặt |
 | K2 | **Nginx + PHP-FPM** (cần để tách pool `analyze`) hay Apache. Hosting chưa chốt | Chốt Nginx; nếu hosting buộc Apache thì tách pool khó hơn |
 | K3 | `docker compose` hay cài trực tiếp | Docker compose, nếu cả nhóm dùng được |
-| K4 | Giới hạn upload, kích thước ảnh sau khi thu nhỏ, timeout gọi AI | Chốt ở mốc 07/10 cùng NFR-02 |
+| K4 | Giới hạn upload (≤ 2MB), kích thước ảnh sau thu nhỏ (≤ 1024px), timeout gọi AI (10.0s) | **Đã chốt** theo `02_ai_service_poc.md` |
 | K5 | W, Q, pool `analyze`, rate limit | Giữ giá trị khởi điểm ở mục 5, chỉnh sau load test C2 |
 | K6 | Hosting phải là VPS/cloud VM (mục 5) | Nhóm xác nhận phương án thuê dùng thử |
 | K7 | Môi trường huấn luyện (nơi có GPU) và ai phụ trách `ml/` | Bạn xác nhận; không ảnh hưởng thiết kế server |
 
-**Việc tiếp theo:** `02_database_design.md` (ERD theo mục 9), mô tả chi tiết API cho UC04 và UC07, `02_ai_service_poc.md`.
+**Việc tiếp theo:** Hoàn thành Pha Elaboration, sẵn sàng bước vào Pha Construction (dựng khung Architectural Skeleton: PHP Front Controller, Router, PDO Repository, Docker Compose và FastAPI skeleton).
