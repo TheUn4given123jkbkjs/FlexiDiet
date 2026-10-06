@@ -1,0 +1,478 @@
+[
+  {
+    "id": 0,
+    "name_vi": "Banh canh",
+    "name_full": "Banh canh (Vietnamese thick noodle soup)",
+    "dish_code": "banh_canh",
+    "is_food": true
+  },
+  {
+    "id": 1,
+    "name_vi": "Banh chung",
+    "name_full": "Banh chung (Square sticky rice cake)",
+    "dish_code": "banh_chung",
+    "is_food": true
+  },
+  {
+    "id": 2,
+    "name_vi": "Banh cuon",
+    "name_full": "Banh cuon (Rolled rice pancake)",
+    "dish_code": "banh_cuon",
+    "is_food": true
+  },
+  {
+    "id": 3,
+    "name_vi": "Banh khot",
+    "name_full": "Banh khot (Mini savory pancakes)",
+    "dish_code": "banh_khot",
+    "is_food": true
+  },
+  {
+    "id": 4,
+    "name_vi": "Banh mi",
+    "name_full": "Banh mi (Vietnamese baguette sandwich)",
+    "dish_code": "banh_mi",
+    "is_food": true
+  },
+  {
+    "id": 5,
+    "name_vi": "Banh trang",
+    "name_full": "Banh trang (Rice paper)",
+    "dish_code": "banh_trang",
+    "is_food": true
+  },
+  {
+    "id": 6,
+    "name_vi": "Banh trang tron",
+    "name_full": "Banh trang tron (Rice paper salad)",
+    "dish_code": "banh_trang_tron",
+    "is_food": true
+  },
+  {
+    "id": 7,
+    "name_vi": "Banh xeo",
+    "name_full": "Banh xeo (Vietnamese sizzling pancake)",
+    "dish_code": "banh_xeo",
+    "is_food": true
+  },
+  {
+    "id": 8,
+    "name_vi": "Bo kho",
+    "name_full": "Bo kho (Beef stew)",
+    "dish_code": "bo_kho",
+    "is_food": true
+  },
+  {
+    "id": 9,
+    "name_vi": "Bo la lot",
+    "name_full": "Bo la lot (Grilled beef wrapped in betel leaves)",
+    "dish_code": "bo_la_lot",
+    "is_food": true
+  },
+  {
+    "id": 10,
+    "name_vi": "Bong cai",
+    "name_full": "Bong cai (Cauliflower)",
+    "dish_code": "bong_cai",
+    "is_food": true
+  },
+  {
+    "id": 11,
+    "name_vi": "Bun",
+    "name_full": "Bun (Rice vermicelli)",
+    "dish_code": "bun",
+    "is_food": true
+  },
+  {
+    "id": 12,
+    "name_vi": "Bun bo Hue",
+    "name_full": "Bun bo Hue (Hue beef noodle soup)",
+    "dish_code": "bun_bo_hue",
+    "is_food": true
+  },
+  {
+    "id": 13,
+    "name_vi": "Bun cha",
+    "name_full": "Bun cha (Grilled pork with vermicelli)",
+    "dish_code": "bun_cha",
+    "is_food": true
+  },
+  {
+    "id": 14,
+    "name_vi": "Bun dau",
+    "name_full": "Bun dau (Vermicelli with tofu)",
+    "dish_code": "bun_dau",
+    "is_food": true
+  },
+  {
+    "id": 15,
+    "name_vi": "Bun mam",
+    "name_full": "Bun mam (Fermented fish noodle soup)",
+    "dish_code": "bun_mam",
+    "is_food": true
+  },
+  {
+    "id": 16,
+    "name_vi": "Bun rieu",
+    "name_full": "Bun rieu (Crab noodle soup)",
+    "dish_code": "bun_rieu",
+    "is_food": true
+  },
+  {
+    "id": 17,
+    "name_vi": "Ca",
+    "name_full": "Ca (Fish)",
+    "dish_code": "ca",
+    "is_food": true
+  },
+  {
+    "id": 18,
+    "name_vi": "Ca chua",
+    "name_full": "Ca chua (Tomato)",
+    "dish_code": "ca_chua",
+    "is_food": true
+  },
+  {
+    "id": 19,
+    "name_vi": "Ca phao",
+    "name_full": "Ca phao (Pickled eggplant)",
+    "dish_code": "ca_phao",
+    "is_food": true
+  },
+  {
+    "id": 20,
+    "name_vi": "Ca rot",
+    "name_full": "Ca rot (Carrot)",
+    "dish_code": "ca_rot",
+    "is_food": true
+  },
+  {
+    "id": 21,
+    "name_vi": "Canh",
+    "name_full": "Canh (Soup)",
+    "dish_code": "canh",
+    "is_food": true
+  },
+  {
+    "id": 22,
+    "name_vi": "Cha",
+    "name_full": "Cha (Vietnamese pork roll)",
+    "dish_code": "cha",
+    "is_food": true
+  },
+  {
+    "id": 23,
+    "name_vi": "Cha gio",
+    "name_full": "Cha gio (Spring rolls)",
+    "dish_code": "cha_gio",
+    "is_food": true
+  },
+  {
+    "id": 24,
+    "name_vi": "Chanh",
+    "name_full": "Chanh (Lime)",
+    "dish_code": "chanh",
+    "is_food": true
+  },
+  {
+    "id": 25,
+    "name_vi": "Com",
+    "name_full": "Com (Rice)",
+    "dish_code": "com",
+    "is_food": true
+  },
+  {
+    "id": 26,
+    "name_vi": "Com tam",
+    "name_full": "Com tam (Broken rice)",
+    "dish_code": "com_tam",
+    "is_food": true
+  },
+  {
+    "id": 27,
+    "name_vi": "Con nguoi",
+    "name_full": "Con nguoi (Human)",
+    "dish_code": "con_nguoi",
+    "is_food": false
+  },
+  {
+    "id": 28,
+    "name_vi": "Cu kieu",
+    "name_full": "Cu kieu (Pickled scallion head)",
+    "dish_code": "cu_kieu",
+    "is_food": true
+  },
+  {
+    "id": 29,
+    "name_vi": "Cua",
+    "name_full": "Cua (Crab)",
+    "dish_code": "cua",
+    "is_food": true
+  },
+  {
+    "id": 30,
+    "name_vi": "Dau hu",
+    "name_full": "Dau hu (Tofu)",
+    "dish_code": "dau_hu",
+    "is_food": true
+  },
+  {
+    "id": 31,
+    "name_vi": "Dua chua",
+    "name_full": "Dua chua (Pickled vegetables)",
+    "dish_code": "dua_chua",
+    "is_food": true
+  },
+  {
+    "id": 32,
+    "name_vi": "Dua leo",
+    "name_full": "Dua leo (Cucumber)",
+    "dish_code": "dua_leo",
+    "is_food": true
+  },
+  {
+    "id": 33,
+    "name_vi": "Goi cuon",
+    "name_full": "Goi cuon (Fresh spring rolls)",
+    "dish_code": "goi_cuon",
+    "is_food": true
+  },
+  {
+    "id": 34,
+    "name_vi": "Hamburger",
+    "name_full": "Hamburger",
+    "dish_code": "hamburger",
+    "is_food": true
+  },
+  {
+    "id": 35,
+    "name_vi": "Heo quay",
+    "name_full": "Heo quay (Roast pork)",
+    "dish_code": "heo_quay",
+    "is_food": true
+  },
+  {
+    "id": 36,
+    "name_vi": "Hu tieu",
+    "name_full": "Hu tieu (Clear rice noodle soup)",
+    "dish_code": "hu_tieu",
+    "is_food": true
+  },
+  {
+    "id": 37,
+    "name_vi": "Kho qua thit",
+    "name_full": "Kho qua thit (Stuffed bitter melon soup)",
+    "dish_code": "kho_qua_thit",
+    "is_food": true
+  },
+  {
+    "id": 38,
+    "name_vi": "Khoai tay chien",
+    "name_full": "Khoai tay chien (French fries)",
+    "dish_code": "khoai_tay_chien",
+    "is_food": true
+  },
+  {
+    "id": 39,
+    "name_vi": "Lau",
+    "name_full": "Lau (Hotpot)",
+    "dish_code": "lau",
+    "is_food": true
+  },
+  {
+    "id": 40,
+    "name_vi": "Long heo",
+    "name_full": "Long heo (Pork offal)",
+    "dish_code": "long_heo",
+    "is_food": true
+  },
+  {
+    "id": 41,
+    "name_vi": "Mi",
+    "name_full": "Mi (Egg noodles)",
+    "dish_code": "mi",
+    "is_food": true
+  },
+  {
+    "id": 42,
+    "name_vi": "Muc",
+    "name_full": "Muc (Squid)",
+    "dish_code": "muc",
+    "is_food": true
+  },
+  {
+    "id": 43,
+    "name_vi": "Nam",
+    "name_full": "Nam (Mushroom)",
+    "dish_code": "nam",
+    "is_food": true
+  },
+  {
+    "id": 44,
+    "name_vi": "Oc",
+    "name_full": "Oc (Snails)",
+    "dish_code": "oc",
+    "is_food": true
+  },
+  {
+    "id": 45,
+    "name_vi": "Ot chuong",
+    "name_full": "Ot chuong (Bell pepper)",
+    "dish_code": "ot_chuong",
+    "is_food": true
+  },
+  {
+    "id": 46,
+    "name_vi": "Pho",
+    "name_full": "Pho (Vietnamese noodle soup)",
+    "dish_code": "pho",
+    "is_food": true
+  },
+  {
+    "id": 47,
+    "name_vi": "Pho mai",
+    "name_full": "Pho mai (Cheese)",
+    "dish_code": "pho_mai",
+    "is_food": true
+  },
+  {
+    "id": 48,
+    "name_vi": "Rau",
+    "name_full": "Rau (Vegetables)",
+    "dish_code": "rau",
+    "is_food": true
+  },
+  {
+    "id": 49,
+    "name_vi": "Salad",
+    "name_full": "Salad (Salad)",
+    "dish_code": "salad",
+    "is_food": true
+  },
+  {
+    "id": 50,
+    "name_vi": "Thit bo",
+    "name_full": "Thit bo (Beef)",
+    "dish_code": "thit_bo",
+    "is_food": true
+  },
+  {
+    "id": 51,
+    "name_vi": "Thit ga",
+    "name_full": "Thit ga (Chicken)",
+    "dish_code": "thit_ga",
+    "is_food": true
+  },
+  {
+    "id": 52,
+    "name_vi": "Thit heo",
+    "name_full": "Thit heo (Pork)",
+    "dish_code": "thit_heo",
+    "is_food": true
+  },
+  {
+    "id": 53,
+    "name_vi": "Thit kho",
+    "name_full": "Thit kho (Braised pork)",
+    "dish_code": "thit_kho",
+    "is_food": true
+  },
+  {
+    "id": 54,
+    "name_vi": "Thit nuong",
+    "name_full": "Thit nuong (Grilled meat)",
+    "dish_code": "thit_nuong",
+    "is_food": true
+  },
+  {
+    "id": 55,
+    "name_vi": "Tom",
+    "name_full": "Tom (Shrimp)",
+    "dish_code": "tom",
+    "is_food": true
+  },
+  {
+    "id": 56,
+    "name_vi": "Trung",
+    "name_full": "Trung (Egg)",
+    "dish_code": "trung",
+    "is_food": true
+  },
+  {
+    "id": 57,
+    "name_vi": "Xoi",
+    "name_full": "Xoi (Sticky rice)",
+    "dish_code": "xoi",
+    "is_food": true
+  },
+  {
+    "id": 58,
+    "name_vi": "Banh beo",
+    "name_full": "Banh beo (Vietnamese savory steamed rice cake)",
+    "dish_code": "banh_beo",
+    "is_food": true
+  },
+  {
+    "id": 59,
+    "name_vi": "Cao lau",
+    "name_full": "Cao lau (Cao lau noodles)",
+    "dish_code": "cao_lau",
+    "is_food": true
+  },
+  {
+    "id": 60,
+    "name_vi": "Mi Quang",
+    "name_full": "Mi Quang (Quang-style noodles)",
+    "dish_code": "mi_quang",
+    "is_food": true
+  },
+  {
+    "id": 61,
+    "name_vi": "Com chien duong chau",
+    "name_full": "Com chien duong chau (Yangzhou fried rice)",
+    "dish_code": "com_chien_duong_chau",
+    "is_food": true
+  },
+  {
+    "id": 62,
+    "name_vi": "Bun cha ca",
+    "name_full": "Bun cha ca (Fish cake noodle soup)",
+    "dish_code": "bun_cha_ca",
+    "is_food": true
+  },
+  {
+    "id": 63,
+    "name_vi": "Com chien ga",
+    "name_full": "Com chien ga (Fried rice with chicken)",
+    "dish_code": "com_chien_ga",
+    "is_food": true
+  },
+  {
+    "id": 64,
+    "name_vi": "Chao long",
+    "name_full": "Chao long (Pork organ congee)",
+    "dish_code": "chao_long",
+    "is_food": true
+  },
+  {
+    "id": 65,
+    "name_vi": "Nom hoa chuoi",
+    "name_full": "Nom hoa chuoi (Banana blossom salad)",
+    "dish_code": "nom_hoa_chuoi",
+    "is_food": true
+  },
+  {
+    "id": 66,
+    "name_vi": "Nui xao bo",
+    "name_full": "Nui xao bo (Stir-fried macaroni with beef)",
+    "dish_code": "nui_xao_bo",
+    "is_food": true
+  },
+  {
+    "id": 67,
+    "name_vi": "Sup cua",
+    "name_full": "Sup cua (Crab soup)",
+    "dish_code": "sup_cua",
+    "is_food": true
+  }
+]
