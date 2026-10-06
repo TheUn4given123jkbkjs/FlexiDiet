@@ -1,32 +1,33 @@
-# FlexiDiet: Thiết Kế Cơ Sở Dữ Liệu (Database Design) – Bản Đặc Tả
+# FlexiDiet: Thiết Kế Cơ Sở Dữ Liệu (Database Design) – Bản Đặc Tả Tổng Thể
 
 > **Pha 2 – Elaboration (E1).**  
 > **Nguồn tham chiếu:** `01_business_modeling.md` (v1.1), `02_srs_requirements_v1.1.md`, `02_usecase_specifications_v1.1.md`, `02_architecture_design.md`.  
 > **Hệ quản trị CSDL mục tiêu:** MySQL >= 8.0.16 hoặc MariaDB >= 10.2.1 (đảm bảo mệnh đề `CHECK` có hiệu lực thực thi).  
 > **Bộ mã & Định dạng:** Engine `InnoDB`, Collation `utf8mb4_unicode_ci`. Múi giờ chuẩn: Việt Nam `UTC+07:00` (`SET time_zone = '+07:00'` trong PDO).  
 > **Kịch bản DDL nguồn:** [`../../database/schema.sql`](../../database/schema.sql)  
-> **Hồ sơ chi tiết phân hệ:** Đã được chia nhỏ tại thư mục `database_design/` gồm 5 file tương ứng với 5 phân hệ dữ liệu.
+> **Hồ sơ chi tiết phân hệ:** Đã module hóa thành 5 file chuyên biệt trong thư mục [`database_design/`](./database_design/) để tối ưu hiệu năng đọc, chống giật lag khi render.
 
 ---
 
-## 1. Mục Đích & Cấu Trúc Hồ Sơ Thiết Kế
+## Hướng Dẫn Cách Đọc Hồ Sơ Thiết Kế CSDL
 
-Tài liệu này đặc tả kiến trúc cơ sở dữ liệu quan hệ (RDBMS) gồm **18 bảng** của **FlexiDiet**, phục vụ cho việc cài đặt tầng Data Layer (Repository/PDO). Để đảm bảo trải nghiệm đọc mượt mà và tránh quá tải hiển thị, hồ sơ chi tiết được module hóa thành 5 phân hệ chuyên biệt:
+Hồ sơ CSDL FlexiDiet gồm **18 bảng** và được tổ chức theo mô hình **Tổng quan $\rightarrow$ Chi tiết**:
 
-```
-docs/02_elaboration/
-├── 02_database_design.md               <-- Tài liệu tổng quan kiến trúc & chuỗi liên kết bảng
-└── database_design/                     <-- Thư mục chi tiết từng phân hệ
-    ├── 01_user_management.md           <-- Phân hệ 1: Tài khoản, Hồ sơ BMR & Cân nặng (3 bảng)
-    ├── 02_budget_and_workouts.md       <-- Phân hệ 2: Ngân sách Calo Ngày & Tập luyện (4 bảng)
-    ├── 03_nutrition_and_dishes.md      <-- Phân hệ 3: Dinh dưỡng, Quy đổi & Món ăn AI (5 bảng)
-    ├── 04_meal_and_water_logs.md       <-- Phân hệ 4: Nhật ký Bữa ăn Snapshot & Nước (3 bảng)
-    └── 05_auxiliary_and_ai.md          <-- Phân hệ 5: Ảnh tạm, Rate Limit & AI Feedback (3 bảng)
-```
+1. **Đọc tài liệu này (`02_database_design.md`) trước:**
+   * Nắm **7 Quyết định thiết kế cốt lõi (DD1–DD7)** chi phối toàn bộ kiến trúc dữ liệu.
+   * Xem **Bản đồ liên kết chuỗi bảng tổng thể (Domain Clusters)** để thấy rõ các luồng khóa ngoại (`FOREIGN KEY`) và cách các bảng kết nối với nhau.
+   * Xem **Ma trận tra cứu 5 phân hệ** bên dưới để biết mỗi bảng nằm ở đâu.
+   * Nắm **Ranh giới giao dịch ACID** và **Chiến lược nạp dữ liệu Seed (Seeding Strategy)**.
+
+2. **Khi cần tra cứu chi tiết kỹ thuật từng bảng (Cột, Kiểu dữ liệu, Index, Ràng buộc `CHECK`):**
+   * Nhấp trực tiếp vào liên kết của phân hệ tương ứng trong bảng tra cứu ở **Mục 2**. Mỗi file phân hệ chỉ chứa 3–5 bảng kèm sơ đồ ERD riêng, giúp mở tức thì và đọc mượt mà.
+
+3. **Khi cần chạy kịch bản tạo bảng trên MySQL:**
+   * Sử dụng trực tiếp file DDL duy nhất tại [`database/schema.sql`](../../database/schema.sql).
 
 ---
 
-## 2. Các Quyết Định Thiết Kế Cốt Lõi (DD1 – DD7)
+## 1. Các Quyết Định Thiết Kế Cốt Lõi (DD1 – DD7)
 
 | # | Quyết định thiết kế | Cơ sở yêu cầu (SRS / SAD) | Hiện thực trong CSDL |
 |---|---|---|---|
@@ -40,94 +41,88 @@ docs/02_elaboration/
 
 ---
 
+## 2. Ma Trận Tra Cứu 5 Phân Hệ Dữ Liệu (18 Bảng)
+
+| STT | Phân hệ dữ liệu & Liên kết chi tiết | Số bảng | Danh sách bảng trực thuộc | Trách nhiệm & Nội dung trọng tâm |
+| :---: | :--- | :---: | :--- | :--- |
+| **01** | 👉 **[01_user_management.md](./database_design/01_user_management.md)** | **3** | `users`<br>`user_profiles`<br>`weight_logs` | Quản lý tài khoản đăng nhập, mật khẩu băm, quyền hạn, hồ sơ BMR, mục tiêu vóc dáng và nguyên tắc **cân nặng 1 nguồn chân lý**. |
+| **02** | 👉 **[02_budget_and_workouts.md](./database_design/02_budget_and_workouts.md)** | **4** | `daily_budgets`<br>`exercise_types`<br>`exercise_met_rules`<br>`workouts` | Quản lý ngân sách calo động từng ngày, danh mục môn tập, hệ số MET theo cường độ/tốc độ, calo tập thô vs calo được cộng thưởng. |
+| **03** | 👉 **[03_nutrition_and_dishes.md](./database_design/03_nutrition_and_dishes.md)** | **5** | `ingredients`<br>`ingredient_aliases`<br>`portion_units`<br>`dishes`<br>`dish_ingredients` | Thành phần dinh dưỡng 100g (Viện Dinh Dưỡng/USDA), tên đồng nghĩa, quy đổi đơn vị dân gian, công thức món & `dish_code` **khớp nhãn AI Microservice**. |
+| **04** | 👉 **[04_meal_and_water_logs.md](./database_design/04_meal_and_water_logs.md)** | **3** | `meal_entries`<br>`meal_entry_items`<br>`water_logs` | Cơ chế **Snapshot bất biến** cho bữa ăn theo bữa (Sáng/Trưa/Tối), lưu vết chi tiết từng gram nguyên liệu, theo dõi lượng nước uống. |
+| **05** | 👉 **[05_auxiliary_and_ai.md](./database_design/05_auxiliary_and_ai.md)** | **3** | `draft_images`<br>`rate_limit_hits`<br>`ai_feedback` | Vòng đời ảnh upload tạm thời (FR-03.18), bộ đếm giới hạn tốc độ Rate Limit chống spam AI (NFR-03), thu thập phản hồi sửa nhãn AI (FR-03.16). |
+
+---
+
 ## 3. Bản Đồ Liên Kết Chuỗi Bảng Tổng Thể (Domain Clusters)
+
+Sơ đồ thể hiện chuỗi liên kết logic và luồng dữ liệu giữa 18 bảng qua các khóa ngoại:
 
 ```mermaid
 flowchart TB
+    %% 5 Phân hệ
     subgraph U_GRP["1. Quản lý Người dùng & Chỉ số"]
-        users["users"] --- user_profiles["user_profiles"]
-        users --- weight_logs["weight_logs"]
+        users["users\n(Tài khoản gốc)"]
+        user_profiles["user_profiles\n(Hồ sơ thể chất)"]
+        weight_logs["weight_logs\n(Nguồn duy nhất cân nặng)"]
+        users --- user_profiles
+        users --- weight_logs
     end
 
     subgraph B_GRP["2. Ngân sách Ngày & Tập luyện"]
-        daily_budgets["daily_budgets"]
-        workouts["workouts"]
-        exercise_types["exercise_types"] --- exercise_met_rules["exercise_met_rules"]
+        daily_budgets["daily_budgets\n(Ngân sách calo ngày)"]
+        workouts["workouts\n(Nhật ký tập luyện)"]
+        exercise_types["exercise_types\n(Môn tập)"]
+        exercise_met_rules["exercise_met_rules\n(Hệ số MET)"]
+        exercise_types --- exercise_met_rules
         exercise_types --- workouts
     end
 
     subgraph C_GRP["3. Danh mục Dinh dưỡng & Công thức"]
-        ingredients["ingredients"] --- ingredient_aliases["ingredient_aliases"]
-        ingredients --- portion_units["portion_units"]
-        dishes["dishes"] --- dish_ingredients["dish_ingredients"]
+        ingredients["ingredients\n(Nguyên liệu 100g)"]
+        ingredient_aliases["ingredient_aliases\n(Tên đồng nghĩa)"]
+        portion_units["portion_units\n(Quy đổi chén/bát)"]
+        dishes["dishes\n(Món ăn + dish_code AI)"]
+        dish_ingredients["dish_ingredients\n(Công thức chuẩn)"]
+        ingredients --- ingredient_aliases
+        ingredients --- portion_units
+        dishes --- dish_ingredients
         ingredients --- dish_ingredients
     end
 
     subgraph M_GRP["4. Nhật ký Ăn uống & Nước"]
-        meal_entries["meal_entries"] --- meal_entry_items["meal_entry_items"]
-        water_logs["water_logs"]
+        meal_entries["meal_entries\n(Bữa ăn: Sáng/Trưa/Tối)"]
+        meal_entry_items["meal_entry_items\n(Snapshot nguyên liệu & calo)"]
+        water_logs["water_logs\n(Nhật ký uống nước)"]
+        meal_entries --- meal_entry_items
     end
 
     subgraph S_GRP["5. Phụ trợ & Dịch vụ AI"]
-        draft_images["draft_images"]
-        rate_limit_hits["rate_limit_hits"]
-        ai_feedback["ai_feedback"]
+        draft_images["draft_images\n(Ảnh tạm upload)"]
+        rate_limit_hits["rate_limit_hits\n(Chặn spam API AI)"]
+        ai_feedback["ai_feedback\n(Đánh giá kết quả AI)"]
     end
 
-    %% Các liên kết giữa các miền dữ liệu
-    users --> daily_budgets
-    users --> workouts
-    users --> water_logs
-    users --> meal_entries
-    users -.-> ingredients
-    users -.-> dishes
-    users --> draft_images
-    users --> rate_limit_hits
-    users --> ai_feedback
+    %% Chuỗi liên kết ngoại (Foreign Keys & Soft Links)
+    users -->|1-N| daily_budgets
+    users -->|1-N| workouts
+    users -->|1-N| water_logs
+    users -->|1-N| meal_entries
+    users -.->|Sở hữu món/nguyên liệu cá nhân| ingredients
+    users -.->|Sở hữu món/nguyên liệu cá nhân| dishes
+    users -->|1-N| draft_images
+    users -->|1-N| rate_limit_hits
+    users -->|1-N| ai_feedback
 
-    dishes -. "SET NULL" .-> meal_entries
-    ingredients -. "SET NULL" .-> meal_entry_items
+    workouts -->|Đồng bộ calo tập| daily_budgets
+    dishes -.->|SET NULL khi xóa món gốc| meal_entries
+    ingredients -.->|SET NULL khi xóa nguyên liệu| meal_entry_items
 ```
 
 ---
 
-## 4. Chi Tiết Các Phân Hệ Dữ Liệu
+## 4. Ranh Giới Giao Dịch & Toàn Vẹn ACID
 
-Nhấn vào từng liên kết bên dưới để xem chi tiết lược đồ ERD và Từ điển dữ liệu (Data Dictionary):
-
-1. 👉 **[01. Quản lý Tài khoản, Hồ sơ BMR & Cân nặng (3 bảng)](./database_design/01_user_management.md):**
-   * `users`: Tài khoản, mật khẩu băm, phân quyền (`member`/`admin`).
-   * `user_profiles`: Thông tin nhân trắc học, mục tiêu vóc dáng, công thức BMR, chính sách calo.
-   * `weight_logs`: Nhật ký cân nặng theo ngày (nguồn chân lý duy nhất).
-
-2. 👉 **[02. Ngân sách Calo Động & Tập luyện Thể chất (4 bảng)](./database_design/02_budget_and_workouts.md):**
-   * `daily_budgets`: Quản lý ngân sách nạp động theo từng ngày (BMR, baseline, thưởng calo tập).
-   * `exercise_types`: Danh mục môn vận động (chạy bộ, đạp xe, gym, bơi lội...).
-   * `exercise_met_rules`: Quy tắc hệ số MET theo dải tốc độ hoặc cường độ.
-   * `workouts`: Nhật ký buổi tập luyện thực tế của hội viên.
-
-3. 👉 **[03. Danh mục Dinh dưỡng, Đơn vị Đo & Món ăn AI (5 bảng)](./database_design/03_nutrition_and_dishes.md):**
-   * `ingredients`: Danh mục nguyên liệu chuẩn (macro/100g, nguồn VDD/USDA, phân tách hệ thống vs cá nhân).
-   * `ingredient_aliases`: Tên đồng nghĩa, tên gọi địa phương của nguyên liệu.
-   * `portion_units`: Quy đổi ước lượng đơn vị dân gian (bát, chén, quả, miếng $\rightarrow$ gram).
-   * `dishes`: Danh mục món ăn (`dish_code` dùng để khớp trực tiếp với nhãn AI).
-   * `dish_ingredients`: Công thức cấu thành món ăn (danh sách nguyên liệu và gram chuẩn).
-
-4. 👉 **[04. Nhật ký Ăn uống Snapshot & Theo dõi Nước (3 bảng)](./database_design/04_meal_and_water_logs.md):**
-   * `meal_entries`: Nhật ký bữa ăn (Sáng/Trưa/Tối/Phụ, lưu snapshot tổng calo/macro).
-   * `meal_entry_items`: Chi tiết nguyên liệu bất biến tại thời điểm ăn (bảo toàn lịch sử khi sửa danh mục).
-   * `water_logs`: Nhật ký uống nước trong ngày.
-
-5. 👉 **[05. Hạ tầng Phụ trợ, Rate Limit & AI Feedback (3 bảng)](./database_design/05_auxiliary_and_ai.md):**
-   * `draft_images`: Quản lý ảnh upload tạm thời (tự động dọn sau khi lưu hoặc hết hạn).
-   * `rate_limit_hits`: Giới hạn tốc độ gọi API AI (chống spam/DDoS).
-   * `ai_feedback`: Thu thập dữ liệu phản hồi đúng/sai từ người dùng để tái đào tạo AI.
-
----
-
-## 5. Ranh Giới Giao Dịch & Toàn Vẹn ACID
-
-Theo tiêu chuẩn **NFR-10**, 4 luồng nghiệp vụ cốt lõi sau bắt buộc thực thi trong một Database Transaction duy nhất (`PDO::beginTransaction()` → `commit()` / `rollBack()`):
+Theo tiêu chuẩn **NFR-10**, 4 luồng nghiệp vụ sau bắt buộc thực thi trong một Database Transaction duy nhất (`PDO::beginTransaction()` → `commit()` / `rollBack()`):
 
 ```mermaid
 flowchart TD
@@ -152,6 +147,24 @@ flowchart TD
         T4B --> T4C["Tính lại BMR & UPDATE daily_budgets hôm nay"]
     end
 ```
+
+---
+
+## 5. Chiến Lược Dữ Liệu Khởi Tạo (Database Seeding Strategy)
+
+Dữ liệu khởi tạo được chuẩn bị qua các file CSV và nạp theo thứ tự ràng buộc khóa ngoại:
+
+1. **Bảng phân loại bài tập & MET (`exercise_types`, `exercise_met_rules`):**
+   * Nguồn: *2011 Compendium of Physical Activities*.
+   * Khởi tạo sẵn: Đi bộ (dải tốc độ 3 – 6.5 km/h), Chạy bộ (dải 6.5 – 12 km/h), Đạp xe (15 – 25 km/h), Bơi lội, Tập tạ/Gym, Yoga/Giãn cơ.
+2. **Nguyên liệu thực phẩm hệ thống (`ingredients` với `owner_user_id = NULL`):**
+   * Nguồn: *Bảng thành phần thực phẩm Việt Nam (Viện Dinh Dưỡng Quốc Gia)* kết hợp USDA.
+   * Ưu tiên nạp trước các nguyên liệu cần thiết cho 15–20 món ăn mục tiêu của mô hình AI (cơm trắng, bún tươi, bánh phở, thịt bò, thịt heo nạc, ức gà, trứng, rau mùi, dầu ăn, nước mắm...).
+3. **Quy đổi khẩu phần dân gian (`portion_units`):**
+   * Seed các đơn vị thân thuộc: bát con cơm (150g), thìa canh dầu ăn (10g), quả trứng vừa (50g), lát cá, đùi gà...
+4. **Món ăn hệ thống & Công thức (`dishes`, `dish_ingredients`):**
+   * Seed 15–20 món chuẩn khớp danh mục nhãn của AI Vision Service (`dish_code` như `com_tam_suon`, `pho_bo`, `bun_bo_hue`, `banh_mi_thit`, `goi_cuon`...).
+   * Mỗi món liên kết với danh sách nguyên liệu và gram tương ứng để hệ thống tự động bung công thức và tính calo/macro chuẩn.
 
 ---
 
