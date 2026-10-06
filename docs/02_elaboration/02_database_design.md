@@ -39,72 +39,81 @@ Tài liệu này đặc tả chi tiết toàn bộ thiết kế cơ sở dữ li
 ```mermaid
 flowchart TB
     subgraph U_GRP["1. Quản lý Người dùng & Chỉ số"]
-        U["users"] --- UP["user_profiles"]
-        U --- WL["weight_logs"]
+        users["users"] --- user_profiles["user_profiles"]
+        users --- weight_logs["weight_logs"]
     end
 
     subgraph B_GRP["2. Ngân sách Ngày & Tập luyện"]
-        U --- DB["daily_budgets"]
-        U --- W["workouts"]
-        ET["exercise_types"] --- EMR["exercise_met_rules"]
-        ET --- W
+        daily_budgets["daily_budgets"]
+        workouts["workouts"]
+        exercise_types["exercise_types"] --- exercise_met_rules["exercise_met_rules"]
+        exercise_types --- workouts
     end
 
     subgraph C_GRP["3. Danh mục Dinh dưỡng & Công thức"]
-        U -.- ING["ingredients"]
-        ING --- IA["ingredient_aliases"]
-        ING --- PU["portion_units"]
-        U -.- D["dishes"]
-        D --- DI["dish_ingredients"]
-        ING --- DI
+        ingredients["ingredients"] --- ingredient_aliases["ingredient_aliases"]
+        ingredients --- portion_units["portion_units"]
+        dishes["dishes"] --- dish_ingredients["dish_ingredients"]
+        ingredients --- dish_ingredients
     end
 
-    subgraph M_GRP["4. Nhật ký Ăn uống (Snapshot) & Nước"]
-        U --- ME["meal_entries"]
-        ME --- MEI["meal_entry_items"]
-        D -. "SET NULL" .-> ME
-        ING -. "SET NULL" .-> MEI
-        U --- WAT["water_logs"]
+    subgraph M_GRP["4. Nhật ký Ăn uống & Nước"]
+        meal_entries["meal_entries"] --- meal_entry_items["meal_entry_items"]
+        water_logs["water_logs"]
     end
 
     subgraph S_GRP["5. Phụ trợ & Dịch vụ AI"]
-        U --- DI_IMG["draft_images"]
-        U --- RL["rate_limit_hits"]
-        U --- AIF["ai_feedback"]
+        draft_images["draft_images"]
+        rate_limit_hits["rate_limit_hits"]
+        ai_feedback["ai_feedback"]
     end
+
+    %% Các liên kết giữa các miền dữ liệu
+    users --> daily_budgets
+    users --> workouts
+    users --> water_logs
+    users --> meal_entries
+    users -.-> ingredients
+    users -.-> dishes
+    users --> draft_images
+    users --> rate_limit_hits
+    users --> ai_feedback
+
+    dishes -. "SET NULL" .-> meal_entries
+    ingredients -. "SET NULL" .-> meal_entry_items
 ```
 
 ### 3.2. Lược đồ Thực thể Chi tiết (Mermaid erDiagram)
 
 ```mermaid
 erDiagram
-    users ||--|| user_profiles : "1 - 1"
-    users ||--o{ weight_logs : "1 - N"
-    users ||--o{ daily_budgets : "1 - N"
-    users ||--o{ workouts : "1 - N"
-    users ||--o{ water_logs : "1 - N"
-    users ||--o{ meal_entries : "1 - N"
-    users ||--o{ draft_images : "1 - N"
-    users ||--o{ rate_limit_hits : "1 - N"
-    users ||--o{ ai_feedback : "1 - N"
-    users ||--o{ ingredients : "owns (nullable)"
-    users ||--o{ dishes : "owns (nullable)"
+    users ||--|| user_profiles : "1-1"
+    users ||--o{ weight_logs : "1-N"
+    users ||--o{ daily_budgets : "1-N"
+    users ||--o{ workouts : "1-N"
+    users ||--o{ water_logs : "1-N"
+    users ||--o{ meal_entries : "1-N"
+    users ||--o{ draft_images : "1-N"
+    users ||--o{ rate_limit_hits : "1-N"
+    users ||--o{ ai_feedback : "1-N"
+    users ||--o{ ingredients : "owns"
+    users ||--o{ dishes : "owns"
 
-    exercise_types ||--o{ exercise_met_rules : "1 - N"
-    exercise_types ||--o{ workouts : "1 - N"
+    exercise_types ||--o{ exercise_met_rules : "1-N"
+    exercise_types ||--o{ workouts : "1-N"
 
-    ingredients ||--o{ ingredient_aliases : "1 - N"
-    ingredients ||--o{ portion_units : "1 - N"
-    ingredients ||--o{ dish_ingredients : "1 - N (RESTRICT)"
-    dishes ||--o{ dish_ingredients : "1 - N"
+    ingredients ||--o{ ingredient_aliases : "1-N"
+    ingredients ||--o{ portion_units : "1-N"
+    ingredients ||--o{ dish_ingredients : "1-N"
+    dishes ||--o{ dish_ingredients : "1-N"
 
-    dishes ||--o{ meal_entries : "source (SET NULL)"
-    ingredients ||--o{ meal_entry_items : "source (SET NULL)"
-    meal_entries ||--|{ meal_entry_items : "1 - N (CASCADE)"
+    dishes ||--o{ meal_entries : "source"
+    ingredients ||--o{ meal_entry_items : "source"
+    meal_entries ||--|{ meal_entry_items : "1-N"
 
     users {
         BIGINT id PK
-        VARCHAR email UK
+        VARCHAR email "UK"
         VARCHAR password_hash
         VARCHAR display_name
         ENUM role
@@ -112,7 +121,7 @@ erDiagram
     }
 
     user_profiles {
-        BIGINT user_id PK, FK
+        BIGINT user_id PK "FK"
         ENUM sex
         DATE birth_date
         DECIMAL height_cm
@@ -128,14 +137,14 @@ erDiagram
     weight_logs {
         BIGINT id PK
         BIGINT user_id FK
-        DATE log_date UK
+        DATE log_date "UK"
         DECIMAL weight_kg
     }
 
     daily_budgets {
         BIGINT id PK
         BIGINT user_id FK
-        DATE budget_date UK
+        DATE budget_date "UK"
         DECIMAL weight_kg_used
         DECIMAL bmr_kcal
         DECIMAL baseline_kcal
@@ -179,7 +188,7 @@ erDiagram
     dishes {
         BIGINT id PK
         BIGINT owner_user_id FK
-        VARCHAR dish_code UK
+        VARCHAR dish_code "UK"
         VARCHAR name
         VARCHAR name_norm
         ENUM origin
@@ -659,7 +668,7 @@ Thu thập phản hồi đính chính kết quả AI khi người dùng đồng 
 
 ## 5. Ranh giới Giao dịch & Toàn vẹn Dữ liệu (ACID)
 
-Theo tiêu chuẩn **NFR-10**, các luồng nghiệp vụ sau đây **bắt buộc** phải được thực thi trong một Database Transaction duy nhất (`PDO::beginTransaction()` $\rightarrow$ `commit()` / `rollBack()`):
+Theo tiêu chuẩn **NFR-10**, các luồng nghiệp vụ sau đây **bắt buộc** phải được thực thi trong một Database Transaction duy nhất (`PDO::beginTransaction()` → `commit()` / `rollBack()`):
 
 ```mermaid
 flowchart TD
