@@ -1,68 +1,68 @@
 dish_code,name,origin,serving_label,is_active
-banh_canh,Banh canh,system,1 serving,1
-banh_chung,Banh chung,system,1 serving,1
-banh_cuon,Banh cuon,system,1 serving,1
-banh_khot,Banh khot,system,1 serving,1
-banh_mi,Banh mi,system,1 serving,1
-banh_trang,Banh trang,system,per 100g,1
-banh_trang_tron,Banh trang tron,system,1 serving,1
-banh_xeo,Banh xeo,system,1 serving,1
-bo_kho,Bo kho,system,1 serving,1
-bo_la_lot,Bo la lot,system,1 serving,1
-bong_cai,Bong cai,system,per 100g,1
-bun,Bun,system,per 100g,1
-bun_bo_hue,Bun bo Hue,system,1 serving,1
-bun_cha,Bun cha,system,1 serving,1
-bun_dau,Bun dau,system,1 serving,1
-bun_mam,Bun mam,system,1 serving,1
-bun_rieu,Bun rieu,system,1 serving,1
-ca,Ca,system,per 100g,1
-ca_chua,Ca chua,system,per 100g,1
-ca_phao,Ca phao,system,per 100g,1
-ca_rot,Ca rot,system,per 100g,1
-canh,Canh,system,1 serving,1
-cha,Cha,system,per 100g,1
-cha_gio,Cha gio,system,1 serving,1
-chanh,Chanh,system,per 100g,1
-com,Com,system,per 100g,1
-com_tam,Com tam,system,per 100g,1
-cu_kieu,Cu kieu,system,per 100g,1
-cua,Cua,system,per 100g,1
-dau_hu,Dau hu,system,per 100g,1
-dua_chua,Dua chua,system,per 100g,1
-dua_leo,Dua leo,system,per 100g,1
-goi_cuon,Goi cuon,system,1 serving,1
-hamburger,Hamburger,system,1 serving,1
-heo_quay,Heo quay,system,per 100g,1
-hu_tieu,Hu tieu,system,1 serving,1
-kho_qua_thit,Kho qua thit,system,1 serving,1
-khoai_tay_chien,Khoai tay chien,system,per 100g,1
-lau,Lau,system,1 serving,1
-long_heo,Long heo,system,per 100g,1
-mi,Mi,system,per 100g,1
-muc,Muc,system,per 100g,1
-nam,Nam,system,per 100g,1
-oc,Oc,system,per 100g,1
-ot_chuong,Ot chuong,system,per 100g,1
-pho,Pho,system,1 serving,1
-pho_mai,Pho mai,system,per 100g,1
-rau,Rau,system,per 100g,1
-salad,Salad,system,1 serving,1
-thit_bo,Thit bo,system,per 100g,1
-thit_ga,Thit ga,system,per 100g,1
-thit_heo,Thit heo,system,per 100g,1
-thit_kho,Thit kho,system,per 100g,1
-thit_nuong,Thit nuong,system,per 100g,1
-tom,Tom,system,per 100g,1
-trung,Trung,system,per 100g,1
-xoi,Xoi,system,1 serving,1
-banh_beo,Banh beo,system,1 serving,1
-cao_lau,Cao lau,system,1 serving,1
-mi_quang,Mi Quang,system,1 serving,1
-com_chien_duong_chau,Com chien duong chau,system,1 serving,1
-bun_cha_ca,Bun cha ca,system,1 serving,1
-com_chien_ga,Com chien ga,system,1 serving,1
-chao_long,Chao long,system,1 serving,1
-nom_hoa_chuoi,Nom hoa chuoi,system,1 serving,1
-nui_xao_bo,Nui xao bo,system,1 serving,1
-sup_cua,Sup cua,system,1 serving,1
+banh_canh,Bánh canh,system,1 tô,1
+banh_chung,Bánh chưng,system,1 cái,1
+banh_cuon,Bánh cuốn,system,1 đĩa,1
+banh_khot,Bánh khọt,system,1 đĩa,1
+banh_mi,Bánh mì,system,1 ổ,1
+banh_trang,Bánh tráng,system,100g,1
+banh_trang_tron,Bánh tráng trộn,system,1 phần,1
+banh_xeo,Bánh xèo,system,1 cái,1
+bo_kho,Bò kho,system,1 tô,1
+bo_la_lot,Bò lá lốt,system,1 phần,1
+bong_cai,Bông cải,system,100g,1
+bun,Bún tươi,system,100g,1
+bun_bo_hue,Bún bò Huế,system,1 tô,1
+bun_cha,Bún chả,system,1 suất,1
+bun_dau,Bún đậu mắm tôm,system,1 suất,1
+bun_mam,Bún mắm,system,1 tô,1
+bun_rieu,Bún riêu,system,1 tô,1
+ca,Cá,system,100g,1
+ca_chua,Cà chua,system,100g,1
+ca_phao,Cà pháo,system,100g,1
+ca_rot,Cà rốt,system,100g,1
+canh,Canh,system,1 bát,1
+cha,Chả lụa,system,100g,1
+cha_gio,Chả giò (Nem rán),system,1 đĩa,1
+chanh,Chanh,system,1 quả,1
+com,Cơm trắng,system,1 bát,1
+com_tam,Cơm tấm,system,1 đĩa,1
+cu_kieu,Củ kiệu,system,100g,1
+cua,Cua,system,100g,1
+dau_hu,Đậu hũ,system,100g,1
+dua_chua,Dưa chua,system,100g,1
+dua_leo,Dưa leo,system,100g,1
+goi_cuon,Gỏi cuốn,system,1 phần (3 cuốn),1
+hamburger,Hamburger,system,1 cái,1
+heo_quay,Heo quay,system,100g,1
+hu_tieu,Hủ tiếu,system,1 tô,1
+kho_qua_thit,Khổ qua dồi thịt,system,1 bát,1
+khoai_tay_chien,Khoai tây chiên,system,1 phần (100g),1
+lau,Lẩu,system,1 nồi,1
+long_heo,Lòng heo,system,100g,1
+mi,Mì,system,100g,1
+muc,Mực,system,100g,1
+nam,Nấm,system,100g,1
+oc,Ốc,system,100g,1
+ot_chuong,Ớt chuông,system,100g,1
+pho,Phở,system,1 tô,1
+pho_mai,Phô mai,system,100g,1
+rau,Rau xanh,system,100g,1
+salad,Salad,system,1 đĩa,1
+thit_bo,Thịt bò,system,100g,1
+thit_ga,Thịt gà,system,100g,1
+thit_heo,Thịt heo,system,100g,1
+thit_kho,Thịt kho,system,1 phần,1
+thit_nuong,Thịt nướng,system,1 phần,1
+tom,Tôm,system,100g,1
+trung,Trứng,system,1 quả,1
+xoi,Xôi,system,1 bát,1
+banh_beo,Bánh bèo,system,1 đĩa,1
+cao_lau,Cao lầu,system,1 tô,1
+mi_quang,Mì Quảng,system,1 tô,1
+com_chien_duong_chau,Cơm chiên Dương Châu,system,1 đĩa,1
+bun_cha_ca,Bún chả cá,system,1 tô,1
+com_chien_ga,Cơm chiên gà,system,1 đĩa,1
+chao_long,Cháo lòng,system,1 tô,1
+nom_hoa_chuoi,Nộm hoa chuối,system,1 đĩa,1
+nui_xao_bo,Nui xào bò,system,1 đĩa,1
+sup_cua,Súp cua,system,1 bát,1
