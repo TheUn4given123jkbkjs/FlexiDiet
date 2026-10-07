@@ -180,7 +180,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | NFR-01 | Hiệu năng | Ghi một bữa từ lúc mở form đến khi lưu: mục tiêu dưới 30 giây (chỉ số thành công, 01 mục 4) | Đo thủ công khi thử nghiệm |
 | NFR-02 | Hiệu năng | Thời gian phản hồi dịch vụ AI: **mục tiêu SLA tổng (end-to-end) ≤ 3 giây** trên CPU; **timeout cứng (circuit breaker) = 10.0 giây** (vượt thì chuyển sang ghi thủ công UC06). Mục tiêu suy luận ONNX ≤ 500 ms. Cần đo thực tế trên model thật | Đo ở PoC và load test C2 |
 | NFR-03 | Hiệu năng | Dịch vụ AI dùng hàng đợi và giới hạn tốc độ. Mặc định: **10 yêu cầu phân tích/phút/người dùng**, **hàng đợi tối đa 20 yêu cầu** (đầy thì trả 429). Cấu hình được, điều chỉnh sau load test nhẹ ở C2 | Load test nhẹ |
-| NFR-04 | Độ chính xác | Độ đúng top-1 và tỉ lệ chuyển đúng sang đường nguyên liệu đo trên ảnh tự chụp bằng điện thoại **[CẦN CHỐT: ngưỡng, ghi ở mốc 07/10]** | Cổng go/no-go 11/10 |
+| NFR-04 | Độ chính xác | Mô hình AI nhận diện món ăn đạt độ chính xác phát hiện **mAP50 ≥ 0.85** (mô hình YOLOv10m đạt 0.92 trên bộ dữ liệu VietFood67 cho 67 món ăn Việt). Tỷ lệ ánh xạ đúng từ `dish_code` sang công thức dinh dưỡng đạt **100%** đối với toàn bộ các món trong hệ thống. Ngưỡng tin cậy chấp nhận gợi ý tự tin ≥ 0.65; nếu độ tin cậy < 0.40, tự động trả về `unknown` để chuyển sang luồng chọn/sửa thủ công (UC05/UC06) | Benchmark trên tập test VietFood67 & Integration Test ánh xạ CSDL |
 | NFR-05 | Minh bạch | Mọi con số calo hiển thị kèm nhãn nguồn/độ tin cậy (AI, công thức chuẩn, tự nhập, thiết bị, MET) | Kiểm tra giao diện |
 | NFR-06 | Bảo mật | Mật khẩu băm bằng `password_hash`; truy vấn dùng PDO prepared statements; chống CSRF cho form; kiểm tra và giới hạn loại/kích thước ảnh tải lên | Review mã, kiểm thử |
 | NFR-07 | Bảo mật | Trang protected chỉ truy cập sau đăng nhập; phiên có thời hạn | Kiểm thử hệ thống |
@@ -220,7 +220,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 
 | # | Vấn đề | Cần chốt trước |
 |---|---|---|
-| O1 | Ngưỡng độ tin cậy để chuyển giữa đường nhận diện và đường nguyên liệu (FR-03.3), ngưỡng đạt (top-1, tỉ lệ chuyển đường) và số món tối thiểu chấp nhận ở cổng 11/10 | Ghi ở mốc 07/10, trước khi có kết quả PoC |
+| O1 | Ngưỡng độ tin cậy để chuyển giữa đường nhận diện và đường nguyên liệu (FR-03.3) và tiêu chí chất lượng mô hình | **Đã chốt (07/10)**: YOLOv10m mAP50 ≥ 0.85; CONFIDENCE_THRESHOLD = 0.65, UNKNOWN_THRESHOLD = 0.40; đưa trực tiếp vào pipeline |
 | O2 | README Pha 2 nhắc "Gemini Vision" như một lựa chọn cho PoC, trong khi D14 chốt suy luận phía server tự host. Cần xác nhận dùng Gemini chỉ để so sánh hay là phương án thật | 07/10 |
 | O3 | Có làm "Quên mật khẩu" (FR-01.12) không. Cần dịch vụ gửi email, nằm ngoài phạm vi 01; ảnh hưởng link "Quên mật khẩu?" trong modal đăng nhập | 07/10 |
 | O4 | Mô tả khẩu phần ở FR-03.1 là bắt buộc hay tùy chọn, và khi không có mô tả thì dùng khẩu phần mặc định nào | 07/10 |

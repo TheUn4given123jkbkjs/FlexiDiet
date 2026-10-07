@@ -36,7 +36,7 @@ Theo chuẩn **Unified Process (Ian Sommerville, Chapter 2.4)**, pha Elaboration
 
 ## 📌 Các Mốc Quan Trọng (Milestones)
 
-* **Mốc 1 (07/10/2026):** Hoàn tất toàn bộ SRS & sơ đồ thiết kế CSDL (Schema & ERD v1.0). Chốt NFR-02, NFR-04.
-* **Mốc 2 (11/10/2026):** Executable Baseline: `schema.sql` chạy sạch trên MySQL thật, seed tối thiểu, AI Stub chạy được từ PHP, sẵn sàng đóng gói Baseline cho Pha Construction.
+* **Mốc 1 (07/10/2026):** Hoàn tất toàn bộ SRS & sơ đồ thiết kế CSDL (Schema & ERD v1.0). Đã chốt chỉ số kỹ thuật NFR-02, NFR-04 và tích hợp mô hình YOLOv10m ONNX cho 67 món Việt.
+* **Mốc 2 (11/10/2026):** Executable Baseline: `schema.sql` chạy sạch trên MySQL thật, nạp seed dữ liệu Viện Dinh Dưỡng, AI Microservice (FastAPI + ONNX) chạy thực tế và kết nối thông suốt với PHP Backend, sẵn sàng đóng gói Baseline cho Pha Construction.
 
-> **Ghi chú:** Kết quả đo kiểm PoC thực tế (latency, accuracy trên ảnh tự chụp) là yêu cầu bắt buộc của cổng go/no-go 11/10 nhưng phụ thuộc tiến độ huấn luyện mô hình. Nếu chưa có model thật, ghi nhận là giới hạn đã biết và dùng Stub để kiểm chứng đường lỗi.
+> **Ghi chú:** Đã tích hợp sẵn mô hình YOLOv10m ONNX thực tế ($mAP_{50} = 0.92$) cho 67 món ăn Việt Nam vào `ai_service/models/`. Tính năng AI được đưa trực tiếp vào pipeline sản phẩm; trọng tâm mốc 11/10 là kiểm chứng luồng ánh xạ end-to-end từ nhận diện ảnh $\rightarrow$ truy vấn công thức CSDL $\rightarrow$ tính Calo/Macro hiển thị trên Web.

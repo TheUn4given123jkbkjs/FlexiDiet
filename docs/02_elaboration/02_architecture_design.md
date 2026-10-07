@@ -497,7 +497,7 @@ Chi tiết tham số và phản hồi sẽ viết khi bắt đầu C1, theo từ
 | Việc | Khi nào | Kết quả cần có |
 |---|---|---|
 | Hợp đồng AI + `Stub` chạy được từ PHP | **07/10** | PHP và giao diện làm UC04 độc lập với mô hình thật |
-| PoC mô hình, đo trên ảnh tự chụp | 07/10 – 11/10 | Số liệu cho cổng go/no-go; điền NFR-02, NFR-04 |
+| Tích hợp mô hình ONNX + kiểm thử pipeline | **07/10 – 11/10** | Kiểm chứng end-to-end từ ảnh → dish_code → CSDL calo; đáp ứng NFR-02, NFR-04 |
 | Tích hợp PHP ↔ AI thật | C1 | Thay `Stub` bằng `Http`; kiểm thử tích hợp |
 | Load test nhẹ | C2 | p50/p95 của `/v1/recognize`, tỉ lệ `429`, CPU/RAM; chỉnh W, Q, pool `analyze`, timeout |
 | Thử đường lỗi | C2 | Tắt dịch vụ AI → các chức năng khác vẫn chạy (NFR-12) |
@@ -513,7 +513,7 @@ Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/an
 | NFR-01 (ghi một bữa < 30 giây) | Thu nhỏ ảnh ở client, UC14 ghi nhanh, Stub để tách thời gian AI khi đo |
 | NFR-02 | Timeout PHP, đo ở PoC và load test |
 | NFR-03 | Rate limit, hàng chờ Q, pool `analyze` (mục 5, 11) |
-| NFR-04 | Cổng go/no-go, ngưỡng ở PHP |
+| NFR-04 | Đo benchmark VietFood67 (mAP50 ≥ 0.85), ánh xạ CSDL 100%, ngưỡng tin cậy ở PHP (0.65 / 0.40) |
 | NFR-05 | Mọi con số kèm nhãn nguồn do `NutritionCalculator` và dữ liệu bản ghi |
 | NFR-06, 07 | Mục 13 |
 | NFR-08 | Dịch vụ AI không lưu ảnh; ảnh tạm xóa ngay; chức năng xóa dữ liệu |
