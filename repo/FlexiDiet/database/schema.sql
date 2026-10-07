@@ -4,8 +4,34 @@
 -- Tài liệu thiết kế: docs/02_elaboration/02_database_design.md
 -- =====================================================================
 
+CREATE DATABASE IF NOT EXISTS flexidiet CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE flexidiet;
+
 SET NAMES utf8mb4;
 SET time_zone = '+07:00';
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Dọn dẹp bảng cũ nếu đã tồn tại để script có thể chạy lại an toàn nhiều lần
+DROP TABLE IF EXISTS ai_feedback;
+DROP TABLE IF EXISTS rate_limit_hits;
+DROP TABLE IF EXISTS draft_images;
+DROP TABLE IF EXISTS water_logs;
+DROP TABLE IF EXISTS meal_entry_items;
+DROP TABLE IF EXISTS meal_entries;
+DROP TABLE IF EXISTS dish_ingredients;
+DROP TABLE IF EXISTS dishes;
+DROP TABLE IF EXISTS portion_units;
+DROP TABLE IF EXISTS ingredient_aliases;
+DROP TABLE IF EXISTS ingredients;
+DROP TABLE IF EXISTS workouts;
+DROP TABLE IF EXISTS exercise_met_rules;
+DROP TABLE IF EXISTS exercise_types;
+DROP TABLE IF EXISTS daily_budgets;
+DROP TABLE IF EXISTS weight_logs;
+DROP TABLE IF EXISTS user_profiles;
+DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ---------------------------------------------------------------------
 -- 1. Người dùng & Chỉ số
