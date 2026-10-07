@@ -10,7 +10,7 @@
 | `com gao lut` | `VDD_1005_convert` | 1005: (359.0 / 7.5 / 2.6 / 76.1) | Gốc $\div K (2.40)$ | **149.58 / 3.13 / 1.08 / 31.71** | `cooked` |
 | `xoi nep cai hoa vang` | `VDD_1001_convert` | 1001: (348.0 / 8.6 / 1.5 / 75.1) | Gốc $\div K (2.00)$ | **174.00 / 4.30 / 0.75 / 37.55** | `cooked` |
 | `xoi nep thuong` | `VDD_1002_convert` | 1002: (350.0 / 8.4 / 1.6 / 75.4) | Gốc $\div K (2.00)$ | **175.00 / 4.20 / 0.80 / 37.70** | `cooked` |
-| `banh trang (kho)` | `VDD_1017_13046_convert` | 1017: (360.0 / 6.6 / 0.4 / 82.6)<br>13046: (343.0 / 0.7 / 0.0 / 85.1) | $85\% \times 1017 + 15\% \times 13046$ | **357.45 / 5.72 / 0.34 / 82.98** | `cooked` |
+| `banh trang (kho)` | `VDD_1017_13046_convert` | 1017: (360.0 / 6.6 / 0.4 / 82.6)<br>13046: (343.0 / 0.7 / 0.0 / 85.1) | $(85\% \times 1017 + 15\% \times 13046) \times K_{\text{moisture}} (0.82)$ (độ ẩm thương phẩm $\sim 26\%$) | **293.11 / 4.69 / 0.28 / 68.04** | `cooked` |
 | `thit heo quay` | `VDD_7018_convert` | 7018: (260.0 / 16.5 / 21.5 / 0.0) | Gốc $\times 1.38$ + $1.5\text{g}$ Carb gia vị | **358.80 / 22.77 / 29.67 / 1.50** | `cooked` |
 | `ca qua (luoc / hap)` | `VDD_8022_luoc_convert` | 8022: (97.0 / 18.2 / 2.7 / 0.0) | Gốc $\times 1.20$ (co cơ luộc/hấp) | **116.40 / 21.84 / 3.24 / 0.00** | `cooked` |
 | `ca qua (chien gion)` | `VDD_8022_chien_convert` | 8022: (97.0 / 18.2 / 2.7 / 0.0) | Gốc $\times 1.25$ + $3.0\text{g}$ dầu rán | **148.42 / 22.75 / 6.38 / 0.00** | `cooked` |
@@ -52,6 +52,8 @@
 | `hanh phi (hanh cu chien gion)` | `VDD_4037_phi_convert` | 4037: (29.0 / 1.3 / 0.2 / 5.2) | Chiên ngập dầu giòn: bốc hơi nước + ngấm $35\text{g}$ dầu | **440.00 / 3.50 / 35.00 / 28.00** | `cooked` |
 | `bot gao chien gion` | `VDD_1017_chien_convert` | 1017: (360.0 / 6.6 / 0.4 / 82.6) | Pha nước đổ khuôn/chảo: tinh bột chín + ngấm $9\text{g}$ dầu | **205.00 / 3.20 / 9.20 / 27.50** | `cooked` |
 | `sot bo trung (bo banh mi)` | `MANUAL_SOT_BO_TRUNG` | Lòng đỏ trứng + dầu thực vật | Đánh nhũ tương bơ trứng kiểu Việt: 68% lipid, 25% lòng đỏ | **635.00 / 2.60 / 68.00 / 2.50** | `cooked` |
+
+
 
 
 
