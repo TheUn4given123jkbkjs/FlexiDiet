@@ -190,16 +190,7 @@ INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
   ((SELECT id FROM dishes WHERE dish_code = 'bun_bo_hue'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 14),             -- Hành lá, ngò gai rắc mặt (5g)
   ((SELECT id FROM dishes WHERE dish_code = 'bun_bo_hue'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 2.0, 15),            -- Đường cát nêm dịu vị (2g)
   ((SELECT id FROM dishes WHERE dish_code = 'bun_bo_hue'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 3.0, 16);            -- Nước mắm cá nêm cốt (3g)
-
-
-
-
-
-
-
-
-
-
+  
 -- ---------------------------------------------------------------------
 -- 15. Cơm trắng (dish_code: com - 1 bát ~150g ~ 211.8 Kcal)
 -- ---------------------------------------------------------------------
@@ -367,3 +358,410 @@ INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
 -- ---------------------------------------------------------------------
 INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
   ((SELECT id FROM dishes WHERE dish_code = 'khoai_tay_chien'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_170721'), 100.0, 1);
+
+-- ---------------------------------------------------------------------
+-- 43. Bún chả (dish_code: bun_cha - 1 suất đầy đủ thịt nướng, bún, nước chấm, đồ chua ~540g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 80.0, 1),              -- Thịt nạc vai heo băm nướng chả viên (80g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7018'), 80.0, 2),              -- Thịt ba chỉ thái mỏng nướng chả miếng (80g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 180.0, 3),             -- Bún tươi sợi nhỏ (180g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'LONGCHAU_SA_TUOI'), 4.0, 4),        -- Sả tươi băm nhuyễn ướp thịt (4g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 4.0, 5),               -- Hành củ (hành tím) băm ướp thịt (4g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 7.0, 6),               -- Tỏi ta băm (4g ướp thịt + 3g pha nước chấm) (7g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 35.0, 7),             -- Nước mắm cá (5g ướp thịt + 30g pha nước chấm) (35g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 30.0, 8),             -- Đường cát (5g thắng nước hàng + 25g pha nước chấm) (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 9),              -- Hạt tiêu đen xay (0.5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12015'), 2.5, 10),             -- Mật ong ướp chả nướng thơm vàng (2.5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13034'), 25.0, 11),            -- Giấm ăn pha nước chấm chua ngọt (25g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4096'), 20.0, 12),             -- Củ su hào tươi thái mỏng làm đồ chua (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 20.0, 13),             -- Củ cà rốt tươi thái mỏng làm đồ chua (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 2.0, 14),             -- Ớt tươi băm nhuyễn pha nước chấm (2g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 50.0, 15);            -- Rau sống: xà lách, tía tô, kinh giới, húng quế (50g)
+
+-- ---------------------------------------------------------------------
+-- 44. Bún đậu mắm tôm (dish_code: bun_dau - 1 suất mẹt bún đậu thịt chả mắm tôm ~572.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_3026'), 150.0, 1),             -- Đậu phụ rán chiên giòn rụm (150g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7032002'), 80.0, 2),           -- Thịt chân giò lợn luộc thái lát (80g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'LONGCHAU_CHA_COM_CHIEN'), 50.0, 3), -- Chả cốm chiên vàng giòn (50g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 180.0, 4),            -- Bún tươi sợi cắt miếng/bún lá (180g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13011'), 30.0, 5),            -- Mắm tôm đặc nguyên chất (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 7.5, 6),             -- Đường cát pha dịu mắm tôm (7.5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 10.0, 7),             -- Nước cốt tắc/quất vắt tạo bọt (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 10.0, 8),            -- Dầu thực vật sôi đánh sủi bọt mắm tôm (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 3.0, 9),              -- Tỏi ta băm nhuyễn (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 2.0, 10),            -- Ớt tươi băm nhuyễn (2g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4027'), 30.0, 11),            -- Dưa chuột tươi thái lát ăn kèm (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_dau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 20.0, 12);           -- Rau thơm: tía tô, kinh giới, húng quế (20g)
+
+-- ---------------------------------------------------------------------
+-- 45. Bún mắm (dish_code: bun_mam - 1 tô chuẩn vị miền Tây ~597g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'LONGCHAU_MAM_CA'), 40.0, 1),       -- Mắm cá linh/sặc cốt nấu nước dùng (40g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_14006'), 150.0, 2),             -- Nước dừa non tươi nấu nước dùng ngọt thanh (150g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'LONGCHAU_SA_TUOI'), 15.0, 3),        -- Sả cây băm và đập dập (15g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4009002'), 40.0, 4),            -- Cà tím luộc/nấu nước lèo (40g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 150.0, 5),              -- Bún tươi sợi lớn (150g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051002'), 40.0, 6),            -- Tôm biển luộc chín bóc vỏ (40g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8040_luoc_convert'), 30.0, 7),   -- Mực tươi luộc cắt khoanh (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7018_convert'), 40.0, 8),        -- Thịt heo quay giòn bì (40g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8064008'), 30.0, 9),            -- Chả cá rán miếng (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4083'), 30.0, 10),              -- Rau muống chẻ (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4043'), 30.0, 11),              -- Hoa chuối/bắp chuối bào (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 20.0, 12),              -- Giá đỗ tươi (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 10.0, 13),              -- Chanh tươi gia giảm vị (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_mam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 2.0, 14);              -- Ớt tươi (2g)
+
+-- ---------------------------------------------------------------------
+-- 46. Bún riêu (dish_code: bun_rieu - 1 tô bún riêu cua đầy đủ topping ~562g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8034'), 50.0, 1),            -- Cua đồng tươi lọc gạch/thịt riêu (50g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 30.0, 2),            -- Thịt lợn nạc vai băm trộn riêu (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 20.0, 3),            -- Trứng gà ta đánh tạo mảng riêu (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 60.0, 4),            -- Quả cà chua tươi bổ múi cau xào nước dùng (60g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 5.0, 5),            -- Dầu thực vật phi xào cà chua (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13034'), 10.0, 6),           -- Giấm ăn / giấm bỗng tạo vị chua thanh (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 180.0, 7),           -- Bún tươi (180g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_3026'), 50.0, 8),            -- Đậu phụ rán vàng giòn (50g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7059'), 40.0, 9),            -- Tiết lợn luộc chín (40g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7069'), 30.0, 10),           -- Giò lụa chín thái miếng (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13011'), 5.0, 11),           -- Mắm tôm đặc nêm nước dùng dậy mùi (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 12),           -- Nước mắm cá (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 10.0, 13),           -- Hành lá / hành hoa thái nhỏ (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 60.0, 14),           -- Rau sống: rau muống chẻ, hoa chuối, kinh giới, giá (60g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 5.0, 15),            -- Chanh tươi (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_rieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 2.0, 16);           -- Ớt tươi (2g)
+
+-- ---------------------------------------------------------------------
+-- 47. Canh (dish_code: canh - 1 bát canh rau ngót nấu thịt băm chuẩn gia đình Việt ~141g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'canh'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4086'), 100.0, 1),           -- Rau ngót tươi (100g)
+  ((SELECT id FROM dishes WHERE dish_code = 'canh'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 30.0, 2),             -- Thịt lợn nạc vai băm (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'canh'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 3.0, 3),             -- Dầu thực vật phi xào thịt (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'canh'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 4),             -- Nước mắm cá (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'canh'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 3.0, 5);              -- Hành củ (hành tím) phi thơm (3g)
+
+-- ---------------------------------------------------------------------
+-- 48. Chả giò / Nem rán (dish_code: cha_gio - 1 đĩa nem rán gồm 5-6 chiếc giòn rụm ~265.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 80.0, 1),            -- Thịt lợn nạc vai băm nhuyễn (80g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051'), 30.0, 2),            -- Tôm biển tươi bóc vỏ băm nhỏ (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4125'), 10.0, 3),            -- Mộc nhĩ khô ngâm nở thái sợi (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4126'), 5.0, 4),             -- Nấm hương khô ngâm nở băm nhỏ (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_2015'), 10.0, 5),            -- Miến dong khô ngâm mềm cắt khúc (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 20.0, 6),            -- Củ cà rốt tươi bào sợi (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4096'), 20.0, 7),            -- Củ su hào tươi bào sợi (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 20.0, 8),            -- Giá đậu xanh tươi (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 25.0, 9),            -- Trứng gà ta kết dính nhân (25g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 5.0, 10),            -- Hành tím băm (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017_13046_convert'), 30.0, 11), -- Bánh tráng / bánh đa nem cuốn vỏ giòn (30g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 12.0, 12),           -- Dầu thực vật rán vàng giòn (độ ngấm dầu ~12g) (12g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 13),           -- Hạt tiêu đen xay (0.5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cha_gio'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 3.0, 14);           -- Nước mắm cá nêm nhân (3g)
+
+-- ---------------------------------------------------------------------
+-- 49. Cơm tấm (dish_code: com_tam - 1 đĩa cơm tấm sườn bì chả mỡ hành đồ chua ~391g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_convert'), 150.0, 1),    -- Cơm tấm dẻo thơm (150g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7053'), 80.0, 2),             -- Sườn heo cốt lết ướp nướng (80g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 20.0, 3),             -- Thịt heo nạc vai băm làm chả trứng (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7031'), 15.0, 4),             -- Bì heo (da heo luộc thái sợi) (15g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7084002'), 10.0, 5),          -- Thịt nạc mông luộc xé sợi trộn bì (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 15.0, 6),             -- Trứng gà ta làm chả trứng hấp (15g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4125'), 3.0, 7),              -- Mộc nhĩ khô thái sợi làm chả trứng (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_2015'), 2.0, 8),              -- Miến dong khô cắt nhỏ làm chả trứng (2g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 9),              -- Hành lá tươi làm mỡ hành (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 7.0, 10),            -- Dầu thực vật (3g ướp sườn + 4g mỡ hành) (7g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4027'), 20.0, 11),            -- Dưa chuột tươi thái lát ăn kèm (20g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 15.0, 12),            -- Cà chua tươi thái lát ăn kèm (15g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 15.0, 13),            -- Cà rốt tươi làm đồ chua chua ngọt (15g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 10.0, 14),           -- Nước mắm cá (5g ướp sườn + 5g pha nước mắm chấm) (10g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 8.0, 15),            -- Đường cát (4g ướp sườn + 4g pha nước mắm chấm) (8g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12015'), 3.0, 16),            -- Mật ong ướp sườn thơm vàng (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 5.0, 17),             -- Tỏi ta băm (3g ướp sườn + 2g pha nước mắm) (5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 3.0, 18),             -- Hành tím băm ướp sườn (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 19),            -- Hạt tiêu đen xay (0.5g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 3.0, 20),             -- Chanh tươi vắt nước mắm chấm (3g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_tam'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.5, 21);            -- Ớt tươi băm pha nước mắm (1.5g)
+
+-- ---------------------------------------------------------------------
+-- 50. Gỏi cuốn (dish_code: goi_cuon - 1 phần 3 cuốn ~241.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017_13046_convert'), 20.0, 1), -- Bánh tráng khô (cuốn gỏi) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 50.0, 2), -- Bún tươi sợi nhỏ (50.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051002'), 45.0, 3), -- Tôm biển luộc bóc vỏ (45.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7032002'), 40.0, 4), -- Thịt chân giò / ba chỉ luộc (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4042'), 10.0, 5), -- Hẹ lá tươi (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 30.0, 6), -- Rau thơm, xà lách (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 20.0, 7), -- Giá đậu xanh tươi (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_HOISIN'), 20.0, 8), -- Tương đen chấm gỏi cuốn (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_174261'), 5.0, 9), -- Đậu phộng rang rắc lên tương (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'goi_cuon'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 10); -- Ớt tươi băm (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 51. Hamburger bò (dish_code: hamburger - 1 cái ~225.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1012'), 70.0, 1), -- Bánh mì burger bun (70.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7005018'), 90.0, 2), -- Thịt bò nạc xay làm patty áp chảo (90.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_10009'), 20.0, 3), -- Phô mát (cheddar) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 20.0, 4), -- Quả cà chua tươi (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4069'), 15.0, 5), -- Xà lách tươi (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13023'), 5.0, 6), -- Sốt mayonnaise (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hamburger'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_2709733'), 5.0, 7); -- Tương cà (ketchup) (5.0g)
+
+-- ---------------------------------------------------------------------
+-- 52. Hủ tiếu Nam Vang (dish_code: hu_tieu - 1 tô ~550.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 140.0, 1), -- Sợi hủ tiếu (bún gạo chần) (140.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051002'), 30.0, 2), -- Tôm biển luộc bóc vỏ (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 30.0, 3), -- Thịt heo nạc vai băm xào tỏi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7085002'), 30.0, 4), -- Thịt nạc thăn heo luộc thái mỏng (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7041002'), 20.0, 5), -- Gan heo luộc thái lát (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9007_luoc_convert'), 20.0, 6), -- Trứng chim cút luộc (2 quả) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 30.0, 7), -- Giá đậu xanh tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4042'), 15.0, 8), -- Hẹ lá tươi (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4018'), 15.0, 9), -- Cần tây tươi (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037_phi_convert'), 5.0, 10), -- Hành phi giòn (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 4.0, 11), -- Tỏi ta băm (4.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'MANUAL_BROTH_HEO'), 200.0, 12), -- Nước dùng xương hầm (200.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 13), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 5.0, 14), -- Chanh tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'hu_tieu'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 15); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 53. Khổ qua dồi thịt (dish_code: kho_qua_thit - 1 bát ~205.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4055'), 120.0, 1), -- Mướp đắng (khổ qua) tươi (120.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 60.0, 2), -- Thịt heo nạc vai băm nhồi (60.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4125'), 5.0, 3), -- Mộc nhĩ khô thái sợi nhuyễn (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_2015'), 5.0, 4), -- Miến dong khô cắt vụn (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 3.0, 5), -- Hành tím băm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 6), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 7), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 2.0, 8), -- Dầu thực vật (2.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'kho_qua_thit'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 9); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 54. Lẩu thập cẩm (dish_code: lau - 1 phần ăn cá nhân ~647.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'MANUAL_BROTH_HEO'), 250.0, 1), -- Nước dùng xương hầm thanh ngọt (250.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7005018'), 60.0, 2), -- Thịt bò bắp thái mỏng nhúng (60.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051'), 40.0, 3), -- Tôm biển tươi (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8040'), 40.0, 4), -- Mực tươi cắt miếng khía hoa (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_3025'), 50.0, 5), -- Đậu phụ trắng tươi (50.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4129'), 30.0, 6), -- Nấm rơm tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4133'), 30.0, 7), -- Nấm kim châm tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4083'), 50.0, 8), -- Rau muống cọng (50.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4013'), 40.0, 9), -- Cải cúc (tần ô) tươi (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 50.0, 10), -- Bún tươi sợi nhúng lẩu (50.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 11), -- Nước mắm cá gia giảm (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 2.0, 12); -- Ớt tươi cắt lát (2.0g)
+
+-- ---------------------------------------------------------------------
+-- 55. Salad rau củ quả (dish_code: salad - 1 đĩa ~211.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4069'), 70.0, 1), -- Xà lách tươi (70.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 40.0, 2), -- Quả cà chua tươi (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4027'), 40.0, 3), -- Dưa chuột tươi thái lát (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1007'), 20.0, 4), -- Ngô tươi (hạt bắp ngọt) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001_luoc_convert'), 25.0, 5), -- Trứng gà ta luộc thái lát (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 8.0, 6), -- Dầu thực vật trộn giấm (8.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13034'), 5.0, 7), -- Giấm ăn (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'salad'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 3.0, 8); -- Đường cát (3.0g)
+
+-- ---------------------------------------------------------------------
+-- 56. Thịt kho tàu trứng (dish_code: thit_kho - 1 phần ~217.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7018'), 100.0, 1), -- Thịt heo ba chỉ thái khối vuông (100.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9004_luoc_convert'), 55.0, 2), -- Trứng vịt luộc bóc vỏ (1 quả) (55.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_14006'), 40.0, 3), -- Nước dừa non tươi nấu kho (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 10.0, 4), -- Nước mắm cá kho đậm đà (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 6.0, 5), -- Đường cát thắng nước màu (6.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 3.0, 6), -- Hành củ tím băm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 2.0, 7), -- Tỏi ta băm (2.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 8), -- Ớt tươi (1.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_kho'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 9); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 57. Thịt nướng sả mè (dish_code: thit_nuong - 1 đĩa ~150.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 120.0, 1), -- Thịt heo nạc vai thái lát (120.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'LONGCHAU_SA_TUOI'), 10.0, 2), -- Sả tươi băm nhuyễn (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 5.0, 3), -- Dầu thực vật ướp bóng mềm (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 4), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12015'), 4.0, 5), -- Mật ong ướp vàng thơm (4.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 3.0, 6), -- Tỏi ta băm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4037'), 3.0, 7), -- Hành củ tím băm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'thit_nuong'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 8); -- Hạt tiêu đen xay (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 58. Bánh bèo tôm cháy (dish_code: banh_beo - 1 đĩa 6 chén ~161.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017'), 70.0, 1), -- Bột gạo tẻ pha hấp bánh (70.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051'), 35.0, 2), -- Tôm biển tươi giã làm tôm cháy (35.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7083'), 20.0, 3), -- Thịt heo nạc vai băm xào nhân (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1012'), 10.0, 4), -- Bánh mì vụn sấy giòn (thay tóp mỡ) (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 6.0, 5), -- Dầu thực vật làm mỡ hành (6.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 6), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 8.0, 7), -- Nước mắm cá pha chan bánh (8.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 6.0, 8), -- Đường cát pha nước mắm (6.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'banh_beo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 9); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 59. Cao lầu Hội An (dish_code: cao_lau - 1 tô ~330.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 140.0, 1), -- Sợi cao lầu (bún gạo sợi dày) (140.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7085'), 80.0, 2), -- Thịt nạc thăn heo làm xá xíu (80.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7031'), 15.0, 3), -- Bì lợn chiên giòn (ram cao lầu) (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036002'), 40.0, 4), -- Giá đậu xanh luộc sơ (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 35.0, 5), -- Rau sống, rau thơm Trà Quế (35.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13019'), 8.0, 6), -- Xì dầu (nước tương) ướp xíu (8.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 5.0, 7), -- Dầu thực vật (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 3.0, 8), -- Tỏi ta băm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 3.0, 9), -- Đường cát (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'cao_lau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 10); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 60. Mì Quảng tôm thịt (dish_code: mi_quang - 1 tô ~347.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1013'), 150.0, 1), -- Bánh phở / Mì Quảng tươi (150.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051'), 40.0, 2), -- Tôm biển tươi rim (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7018'), 40.0, 3), -- Thịt heo ba chỉ rim (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9007_luoc_convert'), 20.0, 4), -- Trứng chim cút luộc rim (2 quả) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017_13046_convert'), 15.0, 5), -- Bánh tráng nướng mè bẻ vụn (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_174261'), 10.0, 6), -- Đậu phộng rang rắc mặt (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4043'), 30.0, 7), -- Hoa chuối tươi bào mỏng (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 25.0, 8), -- Rau thơm, xà lách (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 6.0, 9), -- Dầu thực vật rim nhưn (6.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 10), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 11), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'mi_quang'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 12); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 61. Cơm chiên Dương Châu (dish_code: com_chien_duong_chau - 1 đĩa ~323.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_convert'), 180.0, 1), -- Cơm trắng tẻ chiên (180.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 30.0, 2), -- Trứng gà ta chiên cơm (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7066'), 25.0, 3), -- Dăm bông lợn thái hạt lựu (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8051002'), 30.0, 4), -- Tôm biển luộc chín thái hạt lựu (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 20.0, 5), -- Củ cà rốt tươi thái hạt lựu (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4031'), 20.0, 6), -- Hạt đậu Hà Lan (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 10.0, 7), -- Dầu thực vật chiên cơm (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 8), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 3.0, 9), -- Nước mắm cá nêm cơm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_duong_chau'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 10); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 62. Bún chả cá (dish_code: bun_cha_ca - 1 tô ~401.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 150.0, 1), -- Bún tươi (150.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8064008'), 60.0, 2), -- Chả cá rán lát (60.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 40.0, 3), -- Quả cà chua tươi (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5014'), 30.0, 4), -- Dứa ta tươi nấu nước dùng chua ngọt (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4003'), 30.0, 5), -- Quả bí ngô (bí đỏ) tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 40.0, 6), -- Rau sống, xà lách, rau thơm (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 30.0, 7), -- Giá đậu xanh tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 5.0, 8), -- Dầu thực vật xào cà chua (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 9), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 10), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 5.0, 11), -- Chanh tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'bun_cha_ca'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 12); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 63. Cơm chiên gà (dish_code: com_chien_ga - 1 đĩa ~353.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_convert'), 180.0, 1), -- Cơm trắng tẻ chiên (180.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7108002'), 80.0, 2), -- Thịt chân đùi gà luộc xé sợi (80.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 25.0, 3), -- Trứng gà ta chiên cùng cơm (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 10.0, 4), -- Dầu thực vật chiên cơm (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 15.0, 5), -- Củ cà rốt tươi thái hạt lựu (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 6), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4027'), 20.0, 7), -- Dưa chuột tươi ăn kèm (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 15.0, 8), -- Cà chua tươi ăn kèm (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 3.0, 9), -- Nước mắm cá (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'com_chien_ga'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 10); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 64. Cháo lòng (dish_code: chao_long - 1 tô ~366.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_convert'), 160.0, 1), -- Cháo trắng nấu nhừ (160.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7059'), 40.0, 2), -- Tiết lợn luộc (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7046'), 35.0, 3), -- Lòng non lợn luộc (35.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7034002'), 25.0, 4), -- Dạ dày lợn luộc (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7041002'), 25.0, 5), -- Gan lợn luộc (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7067'), 25.0, 6), -- Dồi lợn chín (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7057002'), 20.0, 7), -- Tim lợn luộc (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 20.0, 8), -- Giá đậu xanh tươi (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 10.0, 9), -- Hành lá tươi (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 10), -- Nước mắm cá (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 11), -- Ớt tươi (1.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 12); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 65. Nộm hoa chuối tai heo (dish_code: nom_hoa_chuoi - 1 đĩa ~271.0g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4043'), 120.0, 1), -- Hoa chuối tươi bào mỏng (120.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7054002'), 45.0, 2), -- Tai lợn luộc giòn sần sật (45.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4007'), 25.0, 3), -- Củ cà rốt tươi bào sợi (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4036'), 25.0, 4), -- Giá đậu xanh tươi (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'USDA_174261'), 15.0, 5), -- Đậu phộng rang giã dập (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4094'), 15.0, 6), -- Rau thơm, kinh giới, ngò rí (15.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 10.0, 7), -- Nước mắm cá trộn gỏi (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_12013'), 8.0, 8), -- Đường cát trộn chua ngọt (8.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_5003'), 5.0, 9), -- Chanh tươi vắt lấy nước cốt (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 2.0, 10), -- Tỏi ta băm (2.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nom_hoa_chuoi'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13039'), 1.0, 11); -- Ớt tươi (1.0g)
+
+-- ---------------------------------------------------------------------
+-- 66. Nui xào bò (dish_code: nui_xao_bo - 1 đĩa ~307.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 130.0, 1), -- Nui / bún gạo luộc chín (130.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7005018'), 70.0, 2), -- Thịt bò nạc xào mềm (70.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4108'), 40.0, 3), -- Rau cải ngọt tươi xào kèm (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 30.0, 4), -- Quả cà chua tươi (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4039'), 20.0, 5), -- Hành tây tươi xào (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 8.0, 6), -- Dầu thực vật xào (8.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13019'), 6.0, 7), -- Xì dầu (nước tương) (6.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4103'), 3.0, 8), -- Tỏi ta băm phi thơm (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 9); -- Hạt tiêu đen (0.5g)
+
+-- ---------------------------------------------------------------------
+-- 67. Súp cua gà xé (dish_code: sup_cua - 1 bát ~163.5g)
+-- ---------------------------------------------------------------------
+INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_8033_luoc_convert'), 40.0, 1), -- Thịt cua bể hấp gỡ thịt (40.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7106002'), 30.0, 2), -- Thịt gà ta (thịt nạc lườn luộc xé) (30.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 25.0, 3), -- Trứng gà ta đánh vân trứng (25.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9007_luoc_convert'), 20.0, 4), -- Trứng chim cút luộc (2 quả) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1007'), 20.0, 5), -- Ngô tươi (hạt bắp ngọt) (20.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017'), 10.0, 6), -- Bột gạo tẻ / bột năng tạo sánh (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4126'), 5.0, 7), -- Nấm hương khô thái sợi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 8), -- Hành lá tươi (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 9), -- Nước mắm cá nêm súp (5.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_11001'), 3.0, 10), -- Dầu thực vật phi (3.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13004'), 0.5, 11); -- Hạt tiêu đen (0.5g)
+

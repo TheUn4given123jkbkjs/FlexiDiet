@@ -4,6 +4,7 @@ Xôi nếp thường,xoi nep thuong,175.00,4.20,0.80,37.70,cooked,100.00,vdd,VDD
 Cơm trắng (tẻ giã tay),com trang (te gia tay),141.63,3.31,0.53,30.90,cooked,100.00,vdd,VDD_1003_convert,1
 Cơm trắng (tẻ máy),com trang (te may),141.22,3.22,0.41,31.14,cooked,100.00,vdd,VDD_1004_convert,1
 Cơm gạo lứt,com gao lut,149.58,3.13,1.08,31.71,cooked,100.00,vdd,VDD_1005_convert,1
+Ngô (cả bắp - tươi),ngo (ca bap - tuoi),200.00,4.10,2.30,40.80,raw,100.00,vdd,VDD_1007,1
 Bánh mỳ,banh my,250.00,7.90,0.80,52.80,cooked,100.00,vdd,VDD_1012,1
 Bánh phở,banh pho,146.00,3.20,0.90,31.20,raw,100.00,vdd,VDD_1013,1
 Bột gạo nếp,bot gao nep,365.00,8.20,1.60,79.40,raw,100.00,vdd,VDD_1016,1
@@ -14,55 +15,185 @@ Bún tươi,bun tuoi,116.00,1.70,0.90,25.30,cooked,100.00,vdd,VDD_1020,1
 Sợi bánh canh (tươi),soi banh canh (tuoi),110.00,1.80,0.40,24.80,cooked,100.00,manual,MANUAL_1021_BANH_CANH,1
 Mỳ ăn liền (lúa mì - sống),my an lien (lua mi - song),364.00,6.70,5.90,70.90,raw,100.00,vdd,VDD_1043,1
 Mỳ ăn liền (lúa mì - luộc),my an lien (lua mi - luoc),102.00,1.80,1.60,19.80,cooked,100.00,vdd,VDD_1043002,1
+Miến dong (khô),mien dong (kho),338.00,0.60,0.10,83.70,raw,100.00,vdd,VDD_2015,1
 Đậu xanh (khô),dau xanh (kho),346.00,23.40,2.40,57.80,raw,100.00,vdd,VDD_3010,1
 Đậu xanh (hấp / luộc),dau xanh (hap / luoc),147.23,9.96,1.02,24.60,cooked,100.00,vdd,VDD_3010_hap_convert,1
 Đậu phụ (sống),dau phu (song),97.00,10.90,5.40,1.10,raw,100.00,vdd,VDD_3025,1
 Đậu phụ (luộc),dau phu (luoc),98.00,11.00,5.40,1.10,cooked,100.00,vdd,VDD_3025002,1
 Đậu phụ (rán),dau phu (ran),153.00,13.00,10.50,1.60,cooked,100.00,vdd,VDD_3026,1
 Đậu phụ (nướng),dau phu (nuong),116.00,13.40,6.40,1.30,cooked,100.00,vdd,VDD_3027,1
+"Quả bầu, tươi","qua bau, tuoi",18.00,0.60,0.02,3.88,raw,100.00,vdd,VDD_4001,1
+"Bầu, luộc","bau, luoc",19.00,0.65,0.00,4.19,cooked,100.00,vdd,VDD_4001002,1
+"Quả bí đao (bí xanh), tươi","qua bi dao (bi xanh), tuoi",16.00,0.60,0.00,3.40,raw,100.00,vdd,VDD_4002,1
+"Bí đao (bí xanh), luộc","bi dao (bi xanh), luoc",17.00,0.63,0.00,3.58,cooked,100.00,vdd,VDD_4002002,1
+"Quả bí ngô, tươi","qua bi ngo, tuoi",29.00,0.30,0.07,6.83,raw,100.00,vdd,VDD_4003,1
+"Bí ngô, luộc","bi ngo, luoc",35.00,0.34,0.34,7.75,cooked,100.00,vdd,VDD_4003002,1
+"Quả cà bát, tươi","qua ca bat, tuoi",28.00,1.20,0.13,5.57,raw,100.00,vdd,VDD_4004,1
+"Cà bát, luộc","ca bat, luoc",36.00,1.52,0.13,7.22,cooked,100.00,vdd,VDD_4004002,1
 Quả cà chua (tươi),qua ca chua (tuoi),24.00,0.60,0.20,4.70,raw,100.00,vdd,VDD_4005,1
 Quả cà pháo (tươi),qua ca phao (tuoi),27.00,1.50,0.00,5.20,raw,100.00,vdd,VDD_4006,1
 Củ cà rốt (tươi),cu ca rot (tuoi),44.00,1.50,0.10,9.00,raw,100.00,vdd,VDD_4007,1
 Cà rốt (luộc),ca rot (luoc),47.00,1.60,0.20,9.70,cooked,100.00,vdd,VDD_4007002,1
 Củ cà rốt (khô),cu ca rot (kho),330.00,9.20,1.50,70.00,raw,100.00,vdd,VDD_4008,1
+"Quả cà tím, tươi","qua ca tim, tuoi",28.00,1.00,0.00,6.00,raw,100.00,vdd,VDD_4009,1
+Cà tím (luộc),ca tim (luoc),37.00,1.20,0.10,7.50,cooked,100.00,vdd,VDD_4009002,1
+"Cải bắp trắng, tươi","cai bap trang, tuoi",36.00,1.80,0.09,6.91,raw,100.00,vdd,VDD_4010,1
+"Cải bắp, luộc","cai bap, luoc",41.00,1.96,0.33,7.61,cooked,100.00,vdd,VDD_4010002,1
+"Cải bắp đỏ, tươi","cai bap do, tuoi",61.00,1.90,0.20,13.00,raw,100.00,vdd,VDD_4011,1
+"Cải bắp đỏ, luộc","cai bap do, luoc",67.00,2.07,0.22,14.13,cooked,100.00,vdd,VDD_4011002,1
+"Cải bắp trắng, khô","cai bap trang, kho",301.00,18.00,1.60,53.70,raw,100.00,vdd,VDD_4012,1
+"Cải cúc, tươi","cai cuc, tuoi",22.00,1.60,0.00,3.90,raw,100.00,vdd,VDD_4013,1
+"Cải soong, tươi","cai soong, tuoi",22.00,2.10,0.07,3.33,raw,100.00,vdd,VDD_4014,1
+"Cải thìa (cải trắng), tươi","cai thia (cai trang), tuoi",24.00,1.40,0.14,4.26,raw,100.00,vdd,VDD_4015,1
+"Cải thìa (cải trắng), luộc","cai thia (cai trang), luoc",28.00,1.57,0.22,4.94,cooked,100.00,vdd,VDD_4015002,1
+"Cải xanh, tươi","cai xanh, tuoi",23.00,1.70,0.14,3.76,raw,100.00,vdd,VDD_4016,1
+"Cải xanh, luộc","cai xanh, luoc",26.00,1.81,0.21,4.15,cooked,100.00,vdd,VDD_4016002,1
+"Cần ta, tươi","can ta, tuoi",16.00,1.00,0.00,3.00,raw,100.00,vdd,VDD_4017,1
+"Cần tây, tươi","can tay, tuoi",54.00,3.70,0.16,9.44,raw,100.00,vdd,VDD_4018,1
+"Chuối xanh, tươi","chuoi xanh, tuoi",78.00,1.20,0.32,17.48,raw,100.00,vdd,VDD_4019,1
+"Chuối xanh, luộc","chuoi xanh, luoc",64.00,1.00,0.08,14.83,cooked,100.00,vdd,VDD_4019002,1
+"Củ cải đỏ, tươi","cu cai do, tuoi",52.00,1.30,0.00,11.70,raw,100.00,vdd,VDD_4020,1
+"Củ cải đỏ, luộc","cu cai do, luoc",63.00,1.51,0.23,13.60,cooked,100.00,vdd,VDD_4020002,1
 Củ cải trắng (tươi),cu cai trang (tuoi),27.00,1.50,0.00,5.10,raw,100.00,vdd,VDD_4021,1
 Củ cải trắng (luộc),cu cai trang (luoc),33.00,1.70,0.20,6.00,cooked,100.00,vdd,VDD_4021002,1
+"Củ cải trắng, khô","cu cai trang, kho",290.00,17.60,1.50,51.60,raw,100.00,vdd,VDD_4022,1
+"Củ đậu, tươi","cu dau, tuoi",31.00,1.00,0.00,6.70,raw,100.00,vdd,VDD_4023,1
+"Củ niễng, tươi","cu nieng, tuoi",37.00,2.00,0.00,7.20,raw,100.00,vdd,VDD_4024,1
+"Dọc củ cải, non, tươi","doc cu cai, non, tuoi",21.00,1.90,0.00,3.40,raw,100.00,vdd,VDD_4025,1
+"Dọc mùng, tươi","doc mung, tuoi",13.00,0.40,0.00,2.80,raw,100.00,vdd,VDD_4026,1
 Dưa chuột (tươi),dua chuot (tuoi),16.00,0.80,0.10,3.00,raw,100.00,vdd,VDD_4027,1
+"Dưa gang, tươi","dua gang, tuoi",14.00,0.80,0.00,2.70,raw,100.00,vdd,VDD_4028,1
+"Đậu cô ve, quả, tươi","dau co ve, qua, tuoi",77.00,5.00,0.00,14.30,raw,100.00,vdd,VDD_4029,1
+"Đậu cô ve, luộc","dau co ve, luoc",85.00,5.38,0.22,15.38,cooked,100.00,vdd,VDD_4029002,1
+"Đậu đũa, quả, tươi","dau dua, qua, tuoi",67.00,6.00,0.31,9.99,raw,100.00,vdd,VDD_4030,1
+"Đậu đũa, luộc","dau dua, luoc",68.00,6.12,0.20,10.51,cooked,100.00,vdd,VDD_4030002,1
+"Đậu Hà Lan, quả, tươi","dau ha lan, qua, tuoi",75.00,6.50,0.29,11.71,raw,100.00,vdd,VDD_4031,1
+"Đậu rồng, quả non, tươi","dau rong, qua non, tuoi",40.00,1.90,0.10,7.90,raw,100.00,vdd,VDD_4032,1
+"Đu đủ xanh, tươi","du du xanh, tuoi",30.00,0.80,0.00,6.60,raw,100.00,vdd,VDD_4033,1
+"Quả gấc, tươi","qua gac, tuoi",129.00,2.10,7.90,12.30,raw,100.00,vdd,VDD_4034,1
+"Giá đậu tương, tươi","gia dau tuong, tuoi",82.00,7.70,1.80,8.70,raw,100.00,vdd,VDD_4035,1
 Giá đậu xanh (tươi),gia dau xanh (tuoi),52.00,5.50,0.10,7.10,raw,100.00,vdd,VDD_4036,1
 Giá đậu xanh (luộc),gia dau xanh (luoc),58.00,6.00,0.20,8.00,cooked,100.00,vdd,VDD_4036002,1
 Hành củ (tươi),hanh cu (tuoi),29.00,1.30,0.20,5.20,raw,100.00,vdd,VDD_4037,1
 Hành phi (hành củ chiên giòn),hanh phi (hanh cu chien gion),440.00,3.50,35.00,28.00,cooked,100.00,vdd,VDD_4037_phi_convert,1
 Hành lá (tươi),hanh la (tuoi),26.00,1.30,0.00,5.20,raw,100.00,vdd,VDD_4038,1
 Hành tây (tươi),hanh tay (tuoi),45.00,1.80,0.10,9.20,raw,100.00,vdd,VDD_4039,1
+"Hạt sen, tươi","hat sen, tuoi",164.00,9.50,0.50,30.30,raw,100.00,vdd,VDD_4040,1
+"Hạt sen, khô","hat sen, kho",342.00,20.00,2.40,60.20,raw,100.00,vdd,VDD_4041,1
+"Hẹ lá, tươi","he la, tuoi",21.00,2.20,0.21,2.49,raw,100.00,vdd,VDD_4042,1
 Hoa chuối (tươi),hoa chuoi (tuoi),28.00,1.50,0.00,5.50,raw,100.00,vdd,VDD_4043,1
+"Hoa lý, tươi","hoa ly, tuoi",35.00,2.90,0.00,5.80,raw,100.00,vdd,VDD_4044,1
+"Quả khế, tươi","qua khe, tuoi",26.00,0.60,0.23,5.47,raw,100.00,vdd,VDD_4045,1
 Lá lốt (tươi),la lot (tuoi),49.00,4.30,0.00,7.90,raw,100.00,vdd,VDD_4046,1
+"Lá me, tươi","la me, tuoi",46.00,7.50,0.00,4.00,raw,100.00,vdd,VDD_4047,1
+"Lá mơ lông, tươi","la mo long, tuoi",48.00,3.90,0.00,8.00,raw,100.00,vdd,VDD_4048,1
+"Lá sắn, tươi","la san, tuoi",96.00,7.00,0.00,16.90,raw,100.00,vdd,VDD_4049,1
+"Măng chua, măng tre","mang chua, mang tre",28.00,1.40,0.00,5.50,raw,100.00,vdd,VDD_4050,1
+"Măng tre, khô","mang tre, kho",301.00,13.00,2.10,57.50,raw,100.00,vdd,VDD_4051,1
+"Măng tây, tươi","mang tay, tuoi",24.00,2.20,0.14,3.36,raw,100.00,vdd,VDD_4052,1
+"Măng tre, tươi","mang tre, tuoi",31.00,1.70,0.21,5.59,raw,100.00,vdd,VDD_4053,1
+"Mướp, tươi","muop, tuoi",18.00,0.90,0.14,3.36,raw,100.00,vdd,VDD_4054,1
+"Mướp, luộc","muop, luoc",26.00,1.25,0.14,4.86,cooked,100.00,vdd,VDD_4054002,1
+"Mướp đắng, tươi","muop dang, tuoi",20.00,0.90,0.00,4.10,raw,100.00,vdd,VDD_4055,1
+"Mướp đắng, luộc","muop dang, luoc",21.00,0.91,0.10,4.14,cooked,100.00,vdd,VDD_4055002,1
+"Mướp Nhật bản, tươi","muop nhat ban, tuoi",16.00,0.80,0.00,3.20,raw,100.00,vdd,VDD_4056,1
+"Ngải cứu, tươi","ngai cuu, tuoi",33.00,3.80,0.00,4.40,raw,100.00,vdd,VDD_4057,1
+"Ngô bao tử, tươi","ngo bao tu, tuoi",42.00,2.20,0.20,7.80,raw,100.00,vdd,VDD_4058,1
+"Ngó sen, tươi","ngo sen, tuoi",65.00,1.00,0.07,15.13,raw,100.00,vdd,VDD_4059,1
+"Nụ mướp, tươi","nu muop, tuoi",36.00,4.90,0.00,4.00,raw,100.00,vdd,VDD_4060,1
 Ớt đỏ to (tươi),ot do to (tuoi),31.00,0.90,0.30,6.00,raw,100.00,vdd,VDD_4061,1
 Ớt vàng to (tươi),ot vang to (tuoi),34.00,1.30,0.00,7.10,raw,100.00,vdd,VDD_4062,1
 Ớt xanh to (tươi),ot xanh to (tuoi),31.00,1.30,0.10,6.00,raw,100.00,vdd,VDD_4063,1
+"Quả dọc, tươi","qua doc, tuoi",19.00,0.80,0.00,3.90,raw,100.00,vdd,VDD_4064,1
+"Quả me chua, tươi","qua me chua, tuoi",35.00,1.90,0.00,6.80,raw,100.00,vdd,VDD_4065,1
+"Rau bí, tươi","rau bi, tuoi",26.00,2.70,0.28,3.12,raw,100.00,vdd,VDD_4066,1
+"Rau bí, luộc","rau bi, luoc",27.00,2.84,0.11,3.58,cooked,100.00,vdd,VDD_4066002,1
+"Rau câu, khô","rau cau, kho",281.00,11.20,1.10,56.60,raw,100.00,vdd,VDD_4067,1
+"Rau câu, tươi","rau cau, tuoi",45.00,1.90,0.10,9.10,raw,100.00,vdd,VDD_4068,1
+"Rau diếp, tươi","rau diep, tuoi",15.00,1.20,0.11,2.39,raw,100.00,vdd,VDD_4069,1
+"Rau đay, tươi","rau day, tuoi",31.00,2.80,0.18,4.52,raw,100.00,vdd,VDD_4070,1
+"Rau giấp cá, diếp cá, tươi","rau giap ca, diep ca, tuoi",30.00,2.90,0.00,4.50,raw,100.00,vdd,VDD_4071,1
+"Rau giền cơm, tươi","rau gien com, tuoi",27.00,3.40,0.31,2.69,raw,100.00,vdd,VDD_4072,1
+"Rau giền cơm, luộc","rau gien com, luoc",29.00,3.47,0.31,3.06,cooked,100.00,vdd,VDD_4072002,1
+"Rau giền đỏ, tươi","rau gien do, tuoi",47.00,3.30,0.31,7.79,raw,100.00,vdd,VDD_4073,1
+"Rau giền đỏ, luộc","rau gien do, luoc",48.00,3.37,0.31,7.96,cooked,100.00,vdd,VDD_4073002,1
+"Rau giền trắng, tươi","rau gien trang, tuoi",48.00,3.20,0.40,7.80,raw,100.00,vdd,VDD_4074,1
+"Rau giền trắng, luộc","rau gien trang, luoc",49.00,3.27,0.41,7.96,cooked,100.00,vdd,VDD_4074002,1
+"Rau húng, tươi","rau hung, tuoi",34.00,2.20,0.52,5.08,raw,100.00,vdd,VDD_4075,1
+"Rau khoai lang, tươi","rau khoai lang, tuoi",28.00,2.60,0.21,3.99,raw,100.00,vdd,VDD_4076,1
+"Rau khoai lang, luộc","rau khoai lang, luoc",28.00,2.65,0.00,4.29,cooked,100.00,vdd,VDD_4076002,1
+"Rau kinh giới, tươi","rau kinh gioi, tuoi",36.00,2.70,0.00,6.40,raw,100.00,vdd,VDD_4077,1
+"Rau má rừng, tươi","rau ma rung, tuoi",31.00,3.10,0.00,4.60,raw,100.00,vdd,VDD_4078,1
+"Rau má, má mơ, tươi","rau ma, ma mo, tuoi",38.00,3.20,0.00,6.30,raw,100.00,vdd,VDD_4079,1
+"Rau mồng tơi, tươi","rau mong toi, tuoi",24.00,2.00,0.00,3.90,raw,100.00,vdd,VDD_4080,1
+"Rau mồng tơi, luộc","rau mong toi, luoc",24.00,2.04,0.00,3.98,cooked,100.00,vdd,VDD_4080002,1
+"Rau mùi, tươi","rau mui, tuoi",22.00,2.60,0.33,2.17,raw,100.00,vdd,VDD_4081,1
+"Rau mùi tàu, tươi","rau mui tau, tuoi",30.00,2.10,0.55,4.25,raw,100.00,vdd,VDD_4082,1
 Rau muống (tươi),rau muong (tuoi),28.00,3.20,0.20,3.20,raw,100.00,vdd,VDD_4083,1
 Rau muống (luộc),rau muong (luoc),27.00,3.20,0.00,3.50,cooked,100.00,vdd,VDD_4083002,1
 Rau muống (khô),rau muong (kho),293.00,34.20,1.80,35.00,raw,100.00,vdd,VDD_4084,1
+"Rau ngổ, tươi","rau ngo, tuoi",24.00,1.50,0.00,4.40,raw,100.00,vdd,VDD_4085,1
+"Rau ngót, tươi","rau ngot, tuoi",45.00,5.30,0.00,5.90,raw,100.00,vdd,VDD_4086,1
+"Rau ngót, khô","rau ngot, kho",299.00,32.20,2.60,36.80,raw,100.00,vdd,VDD_4087,1
 Rau răm (tươi),rau ram (tuoi),45.00,4.70,0.00,6.60,raw,100.00,vdd,VDD_4088,1
+"Rau rút, tươi","rau rut, tuoi",35.00,5.10,0.00,3.70,raw,100.00,vdd,VDD_4089,1
+"Rau sà lách, tươi","rau sa lach, tuoi",18.00,1.50,0.27,2.43,raw,100.00,vdd,VDD_4090,1
+"Rau sam, tươi","rau sam, tuoi",20.00,1.40,0.00,3.70,raw,100.00,vdd,VDD_4091,1
+"Rau sắng chùa hương, tươi","rau sang chua huong, tuoi",62.00,6.50,0.00,8.90,raw,100.00,vdd,VDD_4092,1
+"Rau tàu bay, tươi","rau tau bay, tuoi",24.00,2.50,0.00,3.50,raw,100.00,vdd,VDD_4093,1
 Rau thơm (tươi),rau thom (tuoi),30.00,2.00,0.00,5.40,raw,100.00,vdd,VDD_4094,1
+"Quả sấu xanh, tươi","qua sau xanh, tuoi",19.00,1.80,0.00,3.00,raw,100.00,vdd,VDD_4095,1
+Củ su hào (tươi),cu su hao (tuoi),44.00,2.80,0.00,7.90,raw,100.00,vdd,VDD_4096,1
+Su hào (luộc),su hao (luoc),48.00,3.10,0.00,8.80,cooked,100.00,vdd,VDD_4096002,1
+Củ su hào (khô),cu su hao (kho),311.00,20.00,1.40,54.60,raw,100.00,vdd,VDD_4097,1
+"Quả su su, tươi","qua su su, tuoi",23.00,0.80,0.10,4.60,raw,100.00,vdd,VDD_4098,1
+"Su su, luộc","su su, luoc",24.00,0.88,0.00,5.16,cooked,100.00,vdd,VDD_4098002,1
 Súp lơ trắng (tươi),sup lo trang (tuoi),34.00,2.50,0.10,5.60,raw,100.00,vdd,VDD_4099,1
 Súp lơ trắng (luộc),sup lo trang (luoc),29.00,2.10,0.00,5.00,cooked,100.00,vdd,VDD_4099002,1
 Súp lơ xanh (tươi),sup lo xanh (tuoi),39.00,2.90,0.30,6.00,raw,100.00,vdd,VDD_4100,1
 Súp lơ xanh (luộc),sup lo xanh (luoc),34.00,2.50,0.20,5.20,cooked,100.00,vdd,VDD_4100002,1
-Tỏi ta (tươi),toi ta (tuoi),126.00,6.00,0.35,24.65,raw,100.00,vdd,VDD_4103,1
+"Thìa là, tươi","thia la, tuoi",47.00,2.60,0.96,6.94,raw,100.00,vdd,VDD_4101,1
+"Tía tô, tươi","tia to, tuoi",40.00,2.90,0.00,7.00,raw,100.00,vdd,VDD_4102,1
+Tỏi ta (tươi),toi ta (tuoi),126.00,6.00,0.30,24.60,raw,100.00,vdd,VDD_4103,1
+"Tỏi tây, cả lá, tươi","toi tay, ca la, tuoi",35.00,1.40,0.00,7.40,raw,100.00,vdd,VDD_4104,1
+"Trám đen, quả chín, tươi","tram den, qua chin, tuoi",134.00,2.50,10.00,8.50,cooked,100.00,vdd,VDD_4105,1
+"Trám xanh, trám trắng, tươi","tram xanh, tram trang, tuoi",56.00,1.20,1.60,9.30,raw,100.00,vdd,VDD_4106,1
+"Lá xương sông, tươi","la xuong song, tuoi",28.00,2.20,0.00,4.70,raw,100.00,vdd,VDD_4107,1
+"Rau cải ngọt, tươi","rau cai ngot, tuoi",17.00,1.40,0.10,2.62,raw,100.00,vdd,VDD_4108,1
+"Cải ngọt, luộc","cai ngot, luoc",19.00,1.57,0.11,2.94,cooked,100.00,vdd,VDD_4108002,1
+"Rau cải thảo, tươi","rau cai thao, tuoi",14.00,0.90,0.00,2.57,raw,100.00,vdd,VDD_4109,1
+"Cải thảo, luộc","cai thao, luoc",15.00,0.98,0.00,2.79,cooked,100.00,vdd,VDD_4109002,1
+"Ngọn su su, tươi","ngon su su, tuoi",24.00,3.30,0.10,2.50,raw,100.00,vdd,VDD_4110,1
+"Ngọn su su, luộc","ngon su su, luoc",14.00,3.37,0.10,0.00,cooked,100.00,vdd,VDD_4110002,1
+"Quả đậu ván, tươi","qua dau van, tuoi",39.00,2.80,0.00,7.00,raw,100.00,vdd,VDD_4111,1
 Cà chua (muối),ca chua (muoi),10.00,0.60,0.00,1.80,cooked,100.00,vdd,VDD_4112,1
 Cà pháo (muối nén),ca phao (muoi nen),20.00,1.30,0.00,3.70,cooked,100.00,vdd,VDD_4113,1
 Cà pháo (muối sổi),ca phao (muoi soi),23.00,1.50,0.00,4.20,cooked,100.00,vdd,VDD_4114,1
+Dưa cải bắp,dua cai bap,24.00,1.20,0.00,4.90,raw,100.00,vdd,VDD_4115,1
 Dưa cải bẹ (Cải chua),dua cai be (cai chua),25.00,1.80,0.00,4.50,raw,100.00,vdd,VDD_4116,1
+Dưa cải sen,dua cai sen,17.00,1.10,0.00,3.10,raw,100.00,vdd,VDD_4117,1
 Dưa chuột (muối),dua chuot (muoi),17.00,0.80,0.10,3.00,cooked,100.00,vdd,VDD_4118,1
+Dưa giá đậu xanh,dua gia dau xanh,47.00,5.00,0.00,6.80,raw,100.00,vdd,VDD_4119,1
 Hành củ (muối),hanh cu (muoi),24.00,1.40,0.00,4.70,cooked,100.00,vdd,VDD_4120,1
 Kiệu (muối),kieu (muoi),29.00,1.30,0.00,5.90,cooked,100.00,vdd,VDD_4121,1
+"Nhút (dưa muối từ mít non, lá đậu xanh non...)","nhut (dua muoi tu mit non, la dau xanh non...)",25.00,2.50,0.00,3.80,cooked,100.00,vdd,VDD_4122,1
+"Men bia, khô","men bia, kho",367.00,52.50,3.20,32.00,raw,100.00,vdd,VDD_4123,1
+"Men bia, tươi","men bia, tuoi",103.00,16.20,1.30,6.50,raw,100.00,vdd,VDD_4124,1
+"Mộc nhĩ, khô","moc nhi, kho",332.00,10.60,0.20,72.00,raw,100.00,vdd,VDD_4125,1
 Nấm hương (khô),nam huong (kho),342.00,36.00,4.00,40.50,raw,100.00,vdd,VDD_4126,1
 Nấm hương (tươi),nam huong (tuoi),51.00,5.50,0.50,6.10,raw,100.00,vdd,VDD_4127,1
 Nấm mỡ (tươi),nam mo (tuoi),37.00,4.00,0.30,4.50,raw,100.00,vdd,VDD_4128,1
 Nấm rơm (tươi),nam rom (tuoi),61.00,3.60,3.20,4.50,raw,100.00,vdd,VDD_4129,1
 Nấm thường (tươi),nam thuong (tuoi),48.00,4.60,0.80,5.70,raw,100.00,vdd,VDD_4130,1
+Hành khô,hanh kho,326.00,15.60,0.00,66.00,raw,100.00,vdd,VDD_4132,1
 Nấm kim châm,nam kim cham,44.00,2.60,0.20,7.80,raw,100.00,vdd,VDD_4133,1
+Cải ngồng,cai ngong,17.00,1.50,0.20,2.18,raw,100.00,vdd,VDD_4134,1
+"Cải ngồng, luộc","cai ngong, luoc",18.00,1.60,0.21,2.32,cooked,100.00,vdd,VDD_4134002,1
+Rau cải chíp,rau cai chip,17.00,1.50,0.20,2.18,raw,100.00,vdd,VDD_4135,1
+Rau cải chíp luộc,rau cai chip luoc,17.00,1.50,0.20,2.18,cooked,100.00,vdd,VDD_4135002,1
+Rong biển,rong bien,700.00,20.00,60.00,20.00,raw,100.00,vdd,VDD_4139,1
 Chanh (tươi),chanh (tuoi),29.00,0.90,0.10,5.90,raw,100.00,vdd,VDD_5003,1
+Dứa ta (tươi),dua ta (tuoi),32.00,0.80,0.00,7.30,raw,100.00,vdd,VDD_5014,1
 Thịt bò (loại I - tươi),thit bo (loai I - tuoi),118.00,21.00,3.80,0.00,raw,100.00,vdd,VDD_7003,1
 Thịt bò (loại II - tươi),thit bo (loai II - tuoi),167.00,18.00,10.50,0.00,raw,100.00,vdd,VDD_7004,1
 Thịt bò (lưng nạc - tươi),thit bo (lung nac - tuoi),121.00,23.00,3.10,0.10,raw,100.00,vdd,VDD_7005,1
@@ -276,6 +407,7 @@ Thịt lợn hộp,thit lon hop,344.00,17.30,29.30,2.70,cooked,100.00,vdd,VDD_11
 Cá ngừ hộp,ca ngu hop,85.00,19.00,0.90,0.00,cooked,100.00,vdd,VDD_11022,1
 Cá nục hộp,ca nuc hop,233.00,22.30,14.40,3.50,cooked,100.00,vdd,VDD_11023,1
 Đường cát,duong cat,383.00,0.00,0.00,95.70,raw,100.00,vdd,VDD_12013,1
+Mật ong,mat ong,327.00,0.40,0.00,81.30,raw,100.00,vdd,VDD_12015,1
 Hạt tiêu,hat tieu,365.00,7.00,7.40,67.60,raw,100.00,vdd,VDD_13004,1
 Muối,muoi,1.00,0.00,0.00,0.00,raw,100.00,vdd,VDD_13005,1
 Mắm tôm đặc,mam tom dac,73.00,14.80,1.50,0.00,raw,100.00,vdd,VDD_13011,1
@@ -307,4 +439,7 @@ Nước dùng gà (nước hầm xương),nuoc dung ga (nuoc ham xuong),15.00,1.
 Nước dùng heo (nước hầm xương),nuoc dung heo (nuoc ham xuong),18.00,1.20,1.40,0.15,cooked,100.00,manual,MANUAL_BROTH_HEO,1
 Sốt bơ trứng (bơ bánh mì),sot bo trung (bo banh mi),635.00,2.60,68.00,2.50,cooked,100.00,manual,MANUAL_SOT_BO_TRUNG,1
 Ngũ vị hương,ngu vi huong,340.00,8.00,8.00,58.00,raw,100.00,foodcaloriecalculator,FOODCALORIECALCULATOR_CHINESE_FIVE_SPICE,1
+Chả cốm (chiên),cha com (chien),140.00,6.10,0.00,0.60,cooked,100.00,longchau,LONGCHAU_CHA_COM_CHIEN,1
+Chả cốm (hấp),cha com (hap),90.00,6.10,0.00,0.60,cooked,100.00,longchau,LONGCHAU_CHA_COM_HAP,1
+Mắm cá,mam ca,115.00,17.50,7.50,3.50,raw,100.00,longchau,LONGCHAU_MAM_CA,1
 Sả (tươi),sa (tuoi),99.00,1.82,0.49,25.30,raw,100.00,longchau,LONGCHAU_SA_TUOI,1
