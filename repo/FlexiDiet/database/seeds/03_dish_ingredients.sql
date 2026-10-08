@@ -739,7 +739,7 @@ INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
 -- 66. Nui xào bò (dish_code: nui_xao_bo - 1 đĩa ~307.5g)
 -- ---------------------------------------------------------------------
 INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
-  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1020'), 130.0, 1), -- Nui / bún gạo luộc chín (130.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1046002'), 130.0, 1), -- Nui luộc chín (130.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7005018'), 70.0, 2), -- Thịt bò nạc xào mềm (70.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4108'), 40.0, 3), -- Rau cải ngọt tươi xào kèm (40.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'nui_xao_bo'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4005'), 30.0, 4), -- Quả cà chua tươi (30.0g)
@@ -758,7 +758,7 @@ INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9001'), 25.0, 3), -- Trứng gà ta đánh vân trứng (25.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_9007_luoc_convert'), 20.0, 4), -- Trứng chim cút luộc (2 quả) (20.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1007'), 20.0, 5), -- Ngô tươi (hạt bắp ngọt) (20.0g)
-  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1017'), 10.0, 6), -- Bột gạo tẻ / bột năng tạo sánh (10.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13046'), 10.0, 6), -- Bột năng tạo độ sánh sệt (10.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4126'), 5.0, 7), -- Nấm hương khô thái sợi (5.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_4038'), 5.0, 8), -- Hành lá tươi (5.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'sup_cua'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_13017'), 5.0, 9), -- Nước mắm cá nêm súp (5.0g)

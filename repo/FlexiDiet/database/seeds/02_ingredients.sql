@@ -1,5 +1,5 @@
 -- =====================================================================
--- FlexiDiet Seed: Danh mục 445 nguyên liệu hệ thống (Pha Elaboration)
+-- FlexiDiet Seed: Danh mục 446 nguyên liệu hệ thống (Pha Elaboration)
 -- Nguồn: Viện Dinh Dưỡng Quốc Gia (VDD), USDA & Quy đổi khoa học / Manual
 -- Sắp xếp theo thứ tự mã số danh mục Quốc gia (1xxx Lương thực -> 15xxx)
 -- =====================================================================
@@ -27,6 +27,7 @@ INSERT INTO ingredients (
   (NULL, 'Sợi bánh canh (tươi)', 'soi banh canh (tuoi)', 110.00, 1.80, 0.40, 24.80, 'cooked', 100.00, 'manual', 'MANUAL_1021_BANH_CANH', 1),
   (NULL, 'Mỳ ăn liền (lúa mì - sống)', 'my an lien (lua mi - song)', 364.00, 6.70, 5.90, 70.90, 'raw', 100.00, 'vdd', 'VDD_1043', 1),
   (NULL, 'Mỳ ăn liền (lúa mì - luộc)', 'my an lien (lua mi - luoc)', 102.00, 1.80, 1.60, 19.80, 'cooked', 100.00, 'vdd', 'VDD_1043002', 1),
+  (NULL, 'Nui (luộc)', 'nui (luoc)', 371.00, 13.00, 1.50, 74.70, 'cooked', 100.00, 'vdd', 'VDD_1046002', 1),
   (NULL, 'Miến dong (khô)', 'mien dong (kho)', 338.00, 0.60, 0.10, 83.70, 'raw', 100.00, 'vdd', 'VDD_2015', 1),
   (NULL, 'Đậu xanh (khô)', 'dau xanh (kho)', 346.00, 23.40, 2.40, 57.80, 'raw', 100.00, 'vdd', 'VDD_3010', 1),
   (NULL, 'Đậu xanh (hấp / luộc)', 'dau xanh (hap / luoc)', 147.23, 9.96, 1.02, 24.60, 'cooked', 100.00, 'vdd', 'VDD_3010_hap_convert', 1),

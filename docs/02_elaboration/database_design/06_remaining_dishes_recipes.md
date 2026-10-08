@@ -26,8 +26,8 @@
 | 14 | `com_chien_ga` | Cơm chiên gà | 1 đĩa | 353.5g | **570.17** | 25.75g | 24.82g | 59.87g |
 | 15 | `chao_long` | Cháo lòng | 1 tô | 366.5g | **278.04** | 27.90g | 10.34g | 18.12g |
 | 16 | `nom_hoa_chuoi` | Nộm hoa chuối tai heo | 1 đĩa | 271.0g | **246.94** | 18.18g | 9.78g | 23.14g |
-| 17 | `nui_xao_bo` | Nui xào bò | 1 đĩa | 307.5g | **364.18** | 27.94g | 9.31g | 42.07g |
-| 18 | `sup_cua` | Súp cua gà xé | 1 bát | 163.5g | **299.81** | 27.37g | 10.67g | 23.46g |
+| 17 | `nui_xao_bo` | Nui xào bò | 1 đĩa | 307.5g | **695.69** | 42.63g | 10.09g | 106.29g |
+| 18 | `sup_cua` | Súp cua gà xé | 1 bát | 163.5g | **298.11** | 26.78g | 10.63g | 23.71g |
 
 ---
 
@@ -230,7 +230,7 @@
 * **Ớt tươi:** 1.0g (`VDD_13039`)
 
 ### 17. Nui xào bò (`nui_xao_bo` - 1 đĩa ~307.5g)
-* **Nui / bún gạo luộc chín:** 130.0g (`VDD_1020`)
+* **Nui luộc chín:** 130.0g (`VDD_1046002`)
 * **Thịt bò nạc xào mềm:** 70.0g (`VDD_7005018`)
 * **Rau cải ngọt tươi xào kèm:** 40.0g (`VDD_4108`)
 * **Quả cà chua tươi:** 30.0g (`VDD_4005`)
@@ -246,7 +246,7 @@
 * **Trứng gà ta đánh vân trứng:** 25.0g (`VDD_9001`)
 * **Trứng chim cút luộc (2 quả):** 20.0g (`VDD_9007_luoc_convert`)
 * **Ngô tươi (hạt bắp ngọt):** 20.0g (`VDD_1007`)
-* **Bột gạo tẻ / bột năng tạo sánh:** 10.0g (`VDD_1017`)
+* **Bột năng tạo độ sánh sệt:** 10.0g (`VDD_13046`)
 * **Nấm hương khô thái sợi:** 5.0g (`VDD_4126`)
 * **Hành lá tươi:** 5.0g (`VDD_4038`)
 * **Nước mắm cá nêm súp:** 5.0g (`VDD_13017`)
