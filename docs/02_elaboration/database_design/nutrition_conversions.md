@@ -6,6 +6,7 @@
 | Tên nguyên liệu (`name_norm`) | Mã tham chiếu (`source_ref`) | Chỉ số gốc VDD (Kcal / P / F / C) | Công thức quy đổi | Chỉ số sau quy đổi (Kcal / P / F / C) | Trạng thái |
 |---|---|---|---|---|:---:|
 | `com trang (te may)` | `VDD_1004_convert` | 1004: (346.0 / 7.9 / 1.0 / 76.3) | Gốc $\div K (2.45)$ | **141.22 / 3.22 / 0.41 / 31.14** | `cooked` |
+| `chao trang (te may)` | `VDD_1004_chao_convert` | 1004: (346.0 / 7.9 / 1.0 / 76.3) | Gốc $\div K (8.50)$ (nấu cháo nhừ nở nước, độ ẩm $\approx 88.2\%$) | **40.71 / 0.93 / 0.12 / 8.98** | `cooked` |
 | `com trang (te gia tay)` | `VDD_1003_convert` | 1003: (347.0 / 8.1 / 1.3 / 75.7) | Gốc $\div K (2.45)$ | **141.63 / 3.31 / 0.53 / 30.90** | `cooked` |
 | `com gao lut` | `VDD_1005_convert` | 1005: (359.0 / 7.5 / 2.6 / 76.1) | Gốc $\div K (2.40)$ | **149.58 / 3.13 / 1.08 / 31.71** | `cooked` |
 | `xoi nep cai hoa vang` | `VDD_1001_convert` | 1001: (348.0 / 8.6 / 1.5 / 75.1) | Gốc $\div K (2.00)$ | **174.00 / 4.30 / 0.75 / 37.55** | `cooked` |

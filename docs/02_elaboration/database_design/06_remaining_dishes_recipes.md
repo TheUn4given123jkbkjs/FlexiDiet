@@ -24,7 +24,7 @@
 | 12 | `com_chien_duong_chau` | Cơm chiên Dương Châu | 1 đĩa | 323.5g | **520.97** | 22.55g | 20.43g | 61.60g |
 | 13 | `bun_cha_ca` | Bún chả cá | 1 tô | 401.0g | **390.63** | 12.60g | 14.27g | 52.78g |
 | 14 | `com_chien_ga` | Cơm chiên gà | 1 đĩa | 353.5g | **570.17** | 25.75g | 24.82g | 59.87g |
-| 15 | `chao_long` | Cháo lòng | 1 tô | 366.5g | **438.86** | 31.57g | 10.80g | 53.58g |
+| 15 | `chao_long` | Cháo lòng | 1 tô | 366.5g | **278.04** | 27.90g | 10.34g | 18.12g |
 | 16 | `nom_hoa_chuoi` | Nộm hoa chuối tai heo | 1 đĩa | 271.0g | **246.94** | 18.18g | 9.78g | 23.14g |
 | 17 | `nui_xao_bo` | Nui xào bò | 1 đĩa | 307.5g | **364.18** | 27.94g | 9.31g | 42.07g |
 | 18 | `sup_cua` | Súp cua gà xé | 1 bát | 163.5g | **299.81** | 27.37g | 10.67g | 23.46g |
@@ -203,7 +203,7 @@
 * **Hạt tiêu đen:** 0.5g (`VDD_13004`)
 
 ### 15. Cháo lòng (`chao_long` - 1 tô ~366.5g)
-* **Cháo trắng nấu nhừ:** 160.0g (`VDD_1004_convert`)
+* **Cháo trắng nấu nhừ:** 160.0g (`VDD_1004_chao_convert`)
 * **Tiết lợn luộc:** 40.0g (`VDD_7059`)
 * **Lòng non lợn luộc:** 35.0g (`VDD_7046`)
 * **Dạ dày lợn luộc:** 25.0g (`VDD_7034002`)

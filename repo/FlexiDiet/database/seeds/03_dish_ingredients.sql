@@ -706,7 +706,7 @@ INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
 -- 64. Cháo lòng (dish_code: chao_long - 1 tô ~366.5g)
 -- ---------------------------------------------------------------------
 INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES
-  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_convert'), 160.0, 1), -- Cháo trắng nấu nhừ (160.0g)
+  ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_1004_chao_convert'), 160.0, 1), -- Cháo trắng nấu nhừ (160.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7059'), 40.0, 2), -- Tiết lợn luộc (40.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7046'), 35.0, 3), -- Lòng non lợn luộc (35.0g)
   ((SELECT id FROM dishes WHERE dish_code = 'chao_long'), (SELECT id FROM ingredients WHERE source_ref = 'VDD_7034002'), 25.0, 4), -- Dạ dày lợn luộc (25.0g)

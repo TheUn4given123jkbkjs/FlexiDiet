@@ -1,5 +1,5 @@
 -- =====================================================================
--- FlexiDiet Seed: Danh mục 444 nguyên liệu hệ thống (Pha Elaboration)
+-- FlexiDiet Seed: Danh mục 445 nguyên liệu hệ thống (Pha Elaboration)
 -- Nguồn: Viện Dinh Dưỡng Quốc Gia (VDD), USDA & Quy đổi khoa học / Manual
 -- Sắp xếp theo thứ tự mã số danh mục Quốc gia (1xxx Lương thực -> 15xxx)
 -- =====================================================================
@@ -13,6 +13,7 @@ INSERT INTO ingredients (
   (NULL, 'Xôi nếp cái hoa vàng', 'xoi nep cai hoa vang', 174.00, 4.30, 0.75, 37.55, 'cooked', 100.00, 'vdd', 'VDD_1001_convert', 1),
   (NULL, 'Xôi nếp thường', 'xoi nep thuong', 175.00, 4.20, 0.80, 37.70, 'cooked', 100.00, 'vdd', 'VDD_1002_convert', 1),
   (NULL, 'Cơm trắng (tẻ giã tay)', 'com trang (te gia tay)', 141.63, 3.31, 0.53, 30.90, 'cooked', 100.00, 'vdd', 'VDD_1003_convert', 1),
+  (NULL, 'Cháo trắng (nấu nhừ)', 'chao trang (nau nhu)', 40.71, 0.93, 0.12, 8.98, 'cooked', 100.00, 'vdd', 'VDD_1004_chao_convert', 1),
   (NULL, 'Cơm trắng (tẻ máy)', 'com trang (te may)', 141.22, 3.22, 0.41, 31.14, 'cooked', 100.00, 'vdd', 'VDD_1004_convert', 1),
   (NULL, 'Cơm gạo lứt', 'com gao lut', 149.58, 3.13, 1.08, 31.71, 'cooked', 100.00, 'vdd', 'VDD_1005_convert', 1),
   (NULL, 'Ngô (cả bắp - tươi)', 'ngo (ca bap - tuoi)', 200.00, 4.10, 2.30, 40.80, 'raw', 100.00, 'vdd', 'VDD_1007', 1),
