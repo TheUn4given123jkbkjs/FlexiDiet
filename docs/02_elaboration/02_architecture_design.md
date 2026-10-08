@@ -202,11 +202,11 @@ flowchart TB
 | `ProfileService`, `EnergyEngine` | Hồ sơ; BMR → Baseline → ngân sách mục tiêu (áp sàn calo) | UC01, UC03 |
 | `BudgetService` | Ngân sách của ngày: tạo khi cần, tính calo tập được cộng ở cấp ngày, tính "còn lại" | UC03, UC07, UC08 |
 | `RecognitionOrchestrator` | Điều phối đường nhận diện hoặc đường nguyên liệu; gọi `RecognitionClient`; áp ngưỡng tin cậy; ghép công thức với mô tả (FR-03.17) | UC04 |
-| `DescriptionParser` | Tách mô tả thành (số lượng, đơn vị, tên) bằng quy tắc và từ điển đồng nghĩa | UC04 |
+| `DescriptionParser` | Tách chuỗi mô tả thành (số lượng, đơn vị, tên) bằng quy tắc regex hỗ trợ nhập nhanh | UC04 |
 | `PortionConverter` | Quy đổi đơn vị Việt sang gram, xét sống/chín | UC04, UC06, UC12 |
 | `NutritionCalculator` | **Nơi duy nhất** tính kcal/macro từ nguyên liệu + gram (FR-03.20) | UC04, 05, 06, 12, 14 |
 | `FoodLogService` | Ghi, sửa, xóa mục nhật ký dạng snapshot; áp quy tắc FR-03.19 | UC05, UC06, UC14 |
-| `CatalogService` | Tìm kiếm, tạo, sửa danh mục hệ thống (chỉ đọc với Member) và danh mục cá nhân; "Món đã lưu" | UC06, UC12, UC13 |
+| `CatalogService` | Tìm kiếm nguyên liệu/món (hỗ trợ tên địa phương 3 miền qua chỉ mục `ingredient_aliases` khi custom món gốc hoặc tự tạo món cá nhân); quản lý danh mục hệ thống và "Món đã lưu" | UC06, UC12, UC13 |
 | `WorkoutService` | Ghi buổi tập, chọn MET, tính calo thô | UC07 |
 | `DashboardService` | Tổng hợp thanh năng lượng, macro, nước, cân nặng, tuân thủ ngân sách | UC09 |
 | `RecognitionClient` | Giao tiếp HTTP với dịch vụ AI; chuẩn hóa lỗi; có bản `Stub` | UC04 |
@@ -270,7 +270,7 @@ RecognitionOrchestrator.analyze(ảnh?, mô tả?):
             → đường nhận diện: công thức chuẩn + ghép mô tả (FR-03.17)
         ngược lại → đường nguyên liệu
     nếu không có ảnh → đường nguyên liệu
-    đường nguyên liệu: DescriptionParser → PortionConverter → tra nguyên liệu (hệ thống + cá nhân)
+    đường nguyên liệu: thanh tìm kiếm nguyên liệu (hỗ trợ từ địa phương qua ingredient_aliases) / DescriptionParser → PortionConverter → tra nguyên liệu (hệ thống + cá nhân)
     trả bản nháp (chưa ghi gì)
 ```
 

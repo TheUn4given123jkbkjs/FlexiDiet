@@ -109,7 +109,9 @@ Danh mục nguyên liệu thực phẩm (hệ thống và cá nhân dùng chung)
 ---
 
 ### 2.2. Bảng `ingredient_aliases`
-Các từ đồng nghĩa / tên gọi địa phương của nguyên liệu (hỗ trợ bộ phân tích mô tả NLP).
+Lưu trữ các từ đồng nghĩa, tên gọi địa phương 3 miền (Bắc – Trung – Nam) và tên gọi thông tục của nguyên liệu (ví dụ: "hột vịt" $\rightarrow$ "trứng vịt", "đậu phộng" $\rightarrow$ "lạc", "nấm mèo" $\rightarrow$ "mộc nhĩ"). Bảng này đóng vai trò làm chỉ mục tra cứu (Search Autocomplete / Synonym Lookup) hỗ trợ người dùng khi tìm kiếm nguyên liệu để:
+1. Tùy chỉnh (custom) thành phần món ăn gốc từ 67 món của hệ thống.
+2. Tự lập công thức món ăn cá nhân hóa (personalized dishes) từ danh mục `ingredients`.
 
 | Cột | Kiểu dữ liệu | Null | Mặc định | Ý nghĩa & Quy tắc |
 |---|---|:---:|---|---|

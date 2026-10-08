@@ -194,6 +194,7 @@ CREATE TABLE ingredients (
   CONSTRAINT ck_ingredients_edible CHECK (edible_pct > 0 AND edible_pct <= 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Từ đồng nghĩa / tên gọi địa phương 3 miền hỗ trợ tìm kiếm nguyên liệu (custom món / tạo món cá nhân)
 CREATE TABLE ingredient_aliases (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   ingredient_id BIGINT UNSIGNED NOT NULL,

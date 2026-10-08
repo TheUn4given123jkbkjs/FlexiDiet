@@ -178,7 +178,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 10. Chuyển sang UC05.
 
 **Luồng thay thế**
-- A1 (bước 6): độ tin cậy < ngưỡng, hoặc mô tả liệt kê nguyên liệu → **đường nguyên liệu**: tách mô tả thành nguyên liệu + gram bằng quy tắc và từ điển đồng nghĩa (D20), tra CSDL nguyên liệu, tổng hợp bản nháp.
+- A1 (bước 6): độ tin cậy < ngưỡng, hoặc mô tả liệt kê nguyên liệu → **đường nguyên liệu**: Member tìm kiếm và chọn nguyên liệu trực tiếp trên thanh tìm kiếm (hỗ trợ tên địa phương 3 miền qua bảng `ingredient_aliases`) hoặc bóc tách nhanh bằng quy tắc regex (D20), tra CSDL nguyên liệu, tổng hợp bản nháp.
 - A2 (bước 2): Member chỉ có mô tả, không có ảnh → bỏ bước 4 – 6, đi thẳng đường nguyên liệu.
 - A3 (bước 5): dịch vụ AI trả "không nhận ra" → gợi ý Member mô tả bằng nguyên liệu hoặc chuyển UC06.
 - A4 (sau bước 9): ảnh tạm bị xóa ngay, trừ khi Member đã chọn giữ ảnh ở bước 2. Ảnh được giữ gắn với bản nháp và bị dọn khi quá hạn nếu Member không xác nhận.
@@ -236,7 +236,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 **Luồng chính**
 1. Member mở trang Nhật ký ăn uống, chọn ngày (mặc định hôm nay) và buổi (sáng / trưa / tối / phụ).
 2. Member chọn "Tìm món" và nhập từ khóa.
-3. Hệ thống tìm trong danh mục hệ thống và danh mục cá nhân (chỉ các mục đang hoạt động), hiển thị kết quả kèm nhãn nguồn.
+3. Hệ thống tìm trong danh mục hệ thống và danh mục cá nhân (kết hợp tra cứu từ đồng nghĩa / tên gọi địa phương 3 miền qua bảng `ingredient_aliases`), hiển thị kết quả kèm nhãn nguồn.
 4. Member chọn một món hoặc nguyên liệu.
 5. Hệ thống hiển thị khẩu phần mặc định; Member nhập số lượng và đơn vị (bát, chén, dĩa, miếng, gram...).
 6. Hệ thống quy đổi sang gram (có xét sống/chín) và tính calo, protein/carb/fat.
@@ -420,7 +420,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 1. Member chọn "Tạo nguyên liệu" hoặc "Tạo món" (từ trang Nhật ký, hoặc từ UC05, UC06).
 2. **Tạo nguyên liệu:** Member nhập tên, calo, protein, carb, fat trên 100 g và trạng thái sống/chín.
 3. Hệ thống gắn nhãn nguồn "tự nhập" (độ tin cậy thấp) cho nguyên liệu này.
-4. **Tạo món:** Member nhập tên, thêm các nguyên liệu (từ danh mục hệ thống hoặc cá nhân) với gram cho một khẩu phần chuẩn.
+4. **Tạo món:** Member nhập tên, thêm các nguyên liệu (tìm kiếm từ danh mục hệ thống hoặc cá nhân, hỗ trợ tra cứu tên địa phương qua bảng `ingredient_aliases`) với gram cho một khẩu phần chuẩn.
 5. Hệ thống tính và hiển thị tổng calo, protein/carb/fat của món.
 6. Member bấm Lưu; hệ thống ghi vào danh mục cá nhân trong một transaction.
 7. Món hoặc nguyên liệu mới dùng được ở UC06, UC14 và UC10.

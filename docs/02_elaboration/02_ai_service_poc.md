@@ -229,7 +229,7 @@ flowchart TD
   3. Điểm tin cậy cao nhất đạt chuẩn: `top1.confidence >= CONFIDENCE_THRESHOLD` và cờ `is_unknown = false`.
 * **Luồng xử lý tại hệ thống:**
   * Backend PHP lấy mã món ăn `dish_code` từ kết quả AI, tra cứu công thức chuẩn trong bảng `dishes` và `dish_ingredients` (MySQL).
-  * Nếu Member có nhập mô tả (ví dụ *"thêm 1 quả trứng ốp la, ít cơm"*): Bộ phân tích cú pháp mô tả (`DescriptionParser`) sẽ ghép nguyên liệu vào công thức chuẩn (thay gram nếu trùng, thêm dòng mới nếu là nguyên liệu phụ).
+  * Nếu Member có nhập mô tả hoặc tìm kiếm thêm nguyên liệu: Hệ thống hỗ trợ ghép/điều chỉnh nguyên liệu vào công thức chuẩn (thay gram nếu trùng, thêm dòng mới nếu là nguyên liệu phụ; hỗ trợ tra cứu tên địa phương qua `ingredient_aliases`).
   * Trả về **bản nháp bữa ăn** đầy đủ tên món, danh sách nguyên liệu, gram, kcal và từng macro để Member duyệt và lưu snapshot ở **UC05**.
 
 ---
@@ -243,9 +243,9 @@ flowchart TD
   2. **Ảnh món lạ / Không nhận diện được (UC04 - Luồng A3):**
      * Mô hình trả về cờ `is_unknown = true` (ảnh không phải thức ăn, góc chụp quá tối/mờ, hoặc món ăn chưa có trong tập dữ liệu huấn luyện).
      * *Xử lý:* Hệ thống hiển thị thông báo nhẹ nhàng: *"Chưa nhận diện được món ăn này. Bạn có thể mô tả các nguyên liệu trong đĩa hoặc tìm kiếm thủ công nhé!"* và chuyển sang luồng bóc tách nguyên liệu hoặc gợi ý mở UC06.
-  3. **Người dùng không gửi ảnh, chỉ nhập mô tả (UC04 - Luồng A2):**
-     * Member chỉ nhập chữ vào ô mô tả mà không tải ảnh.
-     * *Xử lý:* Bỏ qua bước gọi Dịch vụ AI, đi thẳng vào đường bóc tách nguyên liệu văn bản (`DescriptionParser` + `PortionConverter`).
+  3. **Người dùng không gửi ảnh, chỉ nhập mô tả hoặc tìm kiếm nguyên liệu (UC04 - Luồng A2):**
+     * Member không tải ảnh món ăn.
+     * *Xử lý:* Bỏ qua bước gọi Dịch vụ AI, chuyển sang giao diện tra cứu/tìm kiếm nguyên liệu (UC06) hoặc bóc tách nhanh bằng `DescriptionParser` + `PortionConverter`.
 
 ---
 

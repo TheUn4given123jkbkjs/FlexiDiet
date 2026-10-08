@@ -110,7 +110,7 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-03.5 | Hệ thống có lớp "không nhận ra"; khi đó chuyển sang tìm/nhập thủ công thay vì đoán | M |
 | FR-03.6 | Quy đổi khẩu phần Việt (bát, chén, dĩa, miếng...) sang gram; phân biệt khối lượng sống/chín | M |
 | FR-03.7 | Hiển thị kết quả gồm món, nguyên liệu, gram, kcal, protein/carb/fat; Member xác nhận hoặc chỉnh sửa trước khi lưu (**không được bỏ**). Gram mỗi nguyên liệu hợp lệ trong khoảng **0,1 – 2.000 g** | M |
-| FR-03.8 | Mô tả lời được tách bằng quy tắc + từ điển đồng nghĩa ở v1; LLM chỉ là tùy chọn (D20) | M |
+| FR-03.8 | Hỗ trợ tra cứu nguyên liệu theo từ đồng nghĩa / tên gọi địa phương 3 miền (`ingredient_aliases`) khi tìm kiếm tùy chỉnh món; tách mô tả lời (nếu có) bằng quy tắc regex ở v1, không dùng NLP/LLM phức tạp (D20) | M |
 | FR-03.9 | Tìm món thủ công trong danh mục hệ thống và danh mục cá nhân, chọn khẩu phần và ghi vào nhật ký | M |
 | FR-03.10 | Ghi bữa ăn vào nhật ký theo buổi (sáng / trưa / tối / phụ) dưới dạng **snapshot**; sửa dữ liệu nguồn không làm đổi lịch sử | M |
 | FR-03.11 | Member sửa hoặc xóa mục trong nhật ký | M |
