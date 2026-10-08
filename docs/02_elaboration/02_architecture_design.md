@@ -141,9 +141,10 @@ FlexiDiet/
 ├── public/                     # Thư mục Web gốc (Document Root) phục vụ giao diện người dùng
 │   ├── index.html              # Landing Page: Giới thiệu giải pháp, tính thử TDEE/BMR, modal đăng nhập/đăng ký
 │   ├── app.html                # Web App SPA-like: Dashboard, Nhật ký ăn (camera/AI), Bài tập, Gợi ý, Hồ sơ
+│   ├── admin.html              # (Should) Admin Panel SPA-like: CRUD nguyên liệu, món, khẩu phần, MET (UC11)
 │   ├── assets/                 # Tài nguyên tĩnh phục vụ giao diện
-│   │   ├── css/                # app.css (giao diện web app), home.css (landing), theme.css
-│   │   └── js/                 # app.js, home.js, theme.js (ES Modules, tương tác API qua fetch)
+│   │   ├── css/                # app.css, home.css, admin.css (Should), theme.css
+│   │   └── js/                 # app.js, home.js, admin.js (Should), theme.js (ES Modules, fetch API)
 │   └── uploads/                # Thư mục lưu trữ tạm thời ảnh upload / ảnh chụp món ăn
 └── storage/                    # Thư mục lưu trữ nội bộ (logs/, tmp/) ngoài Document Root
 ```
@@ -158,7 +159,7 @@ FlexiDiet/
 ### 6.3. Vòng đời một request
 
 ```
-Trình duyệt Web (public/index.html hoặc app.html)
+Trình duyệt Web (public/index.html hoặc app.html hoặc admin.html)
    │
    ▼ Gọi Fetch API (kèm X-CSRF-Token, Cookie Session)
 Nginx / Web Server
@@ -167,6 +168,7 @@ Nginx / Web Server
 backend/index.php (Front Controller)
    │
    ▼ Pipeline Middleware: SessionManager → Authenticator → CsrfProtector → RateLimiter
+   │                      (nếu /api/admin/*: thêm → AdminGuard kiểm tra role = 'admin')
 Controllers (API Endpoints)
    │
    ▼ Gọi nghiệp vụ
@@ -501,11 +503,12 @@ cleanup_tmp.php (cron): xóa ảnh tạm hết hạn không được xác nhận
 | Phiên | Cookie `HttpOnly`, `SameSite`, thêm `Secure` khi chạy HTTPS; có thời hạn | NFR-07 |
 | CSRF | Mã chống CSRF cho mọi thao tác thay đổi dữ liệu | NFR-06 |
 | Phân quyền dữ liệu | Mọi truy vấn cá nhân gắn `user_id` từ phiên | NFR-07 |
+| **Phân quyền Admin** | Middleware `AdminGuard` kiểm tra `$_SESSION['role'] === 'admin'` trước khi cho truy cập nhóm `/api/admin/*`. Request từ tài khoản không phải Admin → trả `403 Forbidden` ngay. Không dùng cơ chế phân quyền dựa trên URL client-side (FR-07.4) | FR-07.4 |
 | Upload | Kiểm tra loại tệp thật, giới hạn kích thước, đặt tên ngẫu nhiên, lưu ngoài docroot | NFR-06 |
 | Dịch vụ AI | Chỉ nghe nội bộ, khóa dịch vụ trong header, không nhận request từ Internet | AS1 |
 | Bí mật cấu hình | Khóa dịch vụ, mật khẩu CSDL đọc từ biến môi trường, **không** commit vào Git | NFR-06 |
 | HTTPS | Nginx, chứng chỉ Let's Encrypt khi có domain | NFR-06 |
-| Quyền Admin (v1) | Chỉ qua script chạy trên server; giao diện quản trị (Should) cần vai trò Admin | FR-07 |
+| Quyền Admin (v1) | Script seed chạy trên server (Must); giao diện quản trị web bảo vệ bằng `AdminGuard` middleware (Should) | FR-07 |
 | Xóa dữ liệu | Xóa toàn bộ dữ liệu của người dùng gồm cả ảnh đã lưu (NFR-08) | NFR-08 |
 
 ---
@@ -525,7 +528,124 @@ Chi tiết tham số và phản hồi sẽ viết khi bắt đầu C1, theo từ
 | Tập luyện | `POST /api/workouts/estimate`; `GET/POST/PUT/DELETE /api/workouts` | UC07 |
 | Dashboard | `GET /api/dashboard/summary?date=`, `/series?type=&range=`; `POST /api/water` | UC09 |
 | Gợi ý (Could) | `GET /api/suggestions` | UC10 |
-| Quản trị (Should) | `/admin/*` | UC11 |
+| Quản trị (Should) | Xem bảng chi tiết bên dưới | UC11 |
+
+**Nhóm API Quản trị Admin (`/api/admin/*`) – Should (FR-07.3, FR-07.4, MLOps & User Lifecycle):**
+
+Tất cả endpoint dưới đây yêu cầu phiên đăng nhập với `role = 'admin'`; middleware `AdminGuard` chặn trước khi vào Controller. Response chuẩn JSON, phân trang mặc định 50 bản ghi/trang.
+
+```mermaid
+flowchart TB
+    subgraph Client ["Client Layer - Admin Panel (public/admin.html)"]
+        direction TB
+        subgraph SubDash ["Nhóm 1: Giám sát & Vận hành AI"]
+            UI1["1. Executive Dashboard (KPIs, DAU, Calo Tracker)"]
+            UI2["2. AI Observability Hub (Google AI Studio Telemetry)"]
+            UI3["3. AI Active Learning Hub (Confusion Matrix & Retrain Export)"]
+            UI4["4. AI Audit & Feedback Logs (Ảnh chụp & Đối soát nhãn)"]
+        end
+        subgraph SubCatalog ["Nhóm 2: Quản trị Dữ liệu & Dinh dưỡng"]
+            UI5["5. Quản lý Món ăn (Dishes Catalog & AI Mapping)"]
+            UI6["6. Quản lý Công thức món (Dish Recipes & Tỷ lệ gram)"]
+            UI7["7. Quản lý Nguyên liệu (Ingredients & Macro Nutrition)"]
+            UI8["8. Bí danh & Khẩu phần (Aliases 3 miền & Portions S/M/L)"]
+            UI9["9. Quản lý Bài tập & MET (Exercise & Physical Intensity)"]
+        end
+        subgraph SubUser ["Nhóm 3: Người dùng & Tương tác"]
+            UI10["10. Vòng đời User & Retention (Dormant Filter & Re-engage)"]
+        end
+    end
+
+    subgraph Security ["Security & Routing Layer"]
+        Guard["AdminGuard Middleware (Kiểm tra Session role = 'admin')"]
+        Router["Backend Front Controller / Router"]
+    end
+
+    subgraph Endpoints ["Nhóm Endpoint REST API (/api/admin/*)"]
+        direction TB
+        EP1["GET /api/admin/stats"]
+        EP2["GET /api/admin/ai/metrics, /health"]
+        EP3["GET /api/admin/ai/recognition-stats, POST /export-retrain-dataset"]
+        EP4["GET /api/admin/ai/feedback-logs"]
+        EP5["GET, POST, PUT, PATCH /api/admin/dishes"]
+        EP6["GET, POST, PUT, DELETE /api/admin/dishes/{id}/ingredients"]
+        EP7["GET, POST, PUT, PATCH /api/admin/ingredients"]
+        EP8["GET, POST, DELETE /aliases, /portions"]
+        EP9["GET, POST, PUT, PATCH /api/admin/exercise-types"]
+        EP10["GET /users, PATCH /status, POST /re-engage"]
+    end
+
+    subgraph Services ["Service & Persistence Layer"]
+        MySQL[("MySQL 18 Tables (Data Warehouse & Transactions)")]
+        FastAPI["FastAPI Microservice (YOLOv10m ONNX Runtime)"]
+        Dispatcher["Worker & Notification Service (Email Dispatcher / Export Engine)"]
+    end
+
+    Client -->|"Gọi Fetch API kèm X-CSRF-Token"| Guard
+    Guard -->|"Xác thực Admin hợp lệ"| Router
+
+    UI1 -.-> EP1
+    UI2 -.-> EP2
+    UI3 -.-> EP3
+    UI4 -.-> EP4
+    UI5 -.-> EP5
+    UI6 -.-> EP6
+    UI7 -.-> EP7
+    UI8 -.-> EP8
+    UI9 -.-> EP9
+    UI10 -.-> EP10
+
+    Router --> Endpoints
+
+    EP1 --> MySQL
+    EP2 --> FastAPI
+    EP3 --> MySQL
+    EP3 --> Dispatcher
+    EP4 --> MySQL
+    EP5 --> MySQL
+    EP6 --> MySQL
+    EP7 --> MySQL
+    EP8 --> MySQL
+    EP9 --> MySQL
+    EP10 --> MySQL
+    EP10 --> Dispatcher
+```
+
+| Phân hệ | Endpoint | Phương thức | Mô tả ngắn & Tham số |
+|---|---|---|---|
+| **Executive Stats** | `/api/admin/stats` | `GET` | Thống kê tổng quan: DAU/WAU, tổng món, nguyên liệu, nhật ký bữa ăn, tỷ lệ đạt mục tiêu calo |
+| **AI Observability** | `/api/admin/ai/metrics` | `GET` | Chỉ số luồng AI (phong cách Google AI Studio): volume hôm nay/tuần/tháng, số request in-flight đang chờ/xử lý, error rate, p50/p95 latency (ms) |
+| | `/api/admin/ai/health` | `GET` | Live telemetry container AI: FastAPI ping, uptime, tải CPU/RAM, trạng thái model ONNX |
+| **AI Active Learning** | `/api/admin/ai/recognition-stats` | `GET` | Phân tích nhận diện: top món được phát hiện, phân bổ 67 nhãn, tỷ lệ chấp thuận (acceptance rate), danh sách món hay bị sửa đổi (confusion pairs), cảnh báo món confidence < 0.45 |
+| | `/api/admin/ai/feedback-logs` | `GET` | Danh sách lịch sử ảnh chụp: ảnh thumbnail, nhãn AI dự đoán, nhãn người dùng chốt thực tế, độ tin cậy `?page=&dish_code=` |
+| | `/api/admin/ai/export-retrain-dataset` | `POST` | Kết xuất gói dữ liệu mẫu đã xác thực (ZIP file gồm ảnh nén và nhãn chuẩn YOLO format) để phục vụ tái huấn luyện mô hình ở phiên bản sau |
+| **Nguyên liệu** | `/api/admin/ingredients` | `GET` | Danh sách nguyên liệu hệ thống, hỗ trợ `?q=`, `?page=`, `?status=active\|inactive` |
+| | `/api/admin/ingredients` | `POST` | Thêm nguyên liệu mới (tên, dinh dưỡng/100g, nguồn, trạng thái sống/chín) |
+| | `/api/admin/ingredients/{id}` | `PUT` | Sửa thông tin nguyên liệu (giá trị mới áp dụng cho lần dùng sau, snapshot cũ không đổi – FR-07.2) |
+| | `/api/admin/ingredients/{id}` | `PATCH` | Ngưng dùng / kích hoạt lại (`is_active`); không xóa cứng (UC11 A2) |
+| **Bí danh NL** | `/api/admin/ingredients/{id}/aliases` | `GET` | Danh sách bí danh 3 miền của một nguyên liệu |
+| | `/api/admin/ingredients/{id}/aliases` | `POST` | Thêm bí danh mới cho nguyên liệu (alias_name, region) |
+| | `/api/admin/aliases/{alias_id}` | `DELETE` | Xóa một bí danh |
+| **Quy đổi khẩu phần** | `/api/admin/ingredients/{id}/portions` | `GET` | Danh sách quy đổi 3 nấc (S/M/L) của nguyên liệu |
+| | `/api/admin/ingredients/{id}/portions` | `POST` | Thêm đơn vị quy đổi mới (unit_name, size_label, grams_per_unit, note) |
+| | `/api/admin/portions/{portion_id}` | `PUT` | Sửa quy đổi khẩu phần |
+| | `/api/admin/portions/{portion_id}` | `DELETE` | Xóa quy đổi khẩu phần |
+| **Món ăn hệ thống** | `/api/admin/dishes` | `GET` | Danh sách món hệ thống, hỗ trợ `?q=`, `?page=` |
+| | `/api/admin/dishes` | `POST` | Thêm món hệ thống mới (tên, dish_code khớp nhãn AI, serving_label) |
+| | `/api/admin/dishes/{id}` | `PUT` | Sửa thông tin món |
+| | `/api/admin/dishes/{id}` | `PATCH` | Ngưng dùng / kích hoạt lại |
+| **Công thức món** | `/api/admin/dishes/{id}/ingredients` | `GET` | Danh sách nguyên liệu cấu thành món |
+| | `/api/admin/dishes/{id}/ingredients` | `POST` | Thêm nguyên liệu vào công thức (ingredient_id, grams, sort_order) |
+| | `/api/admin/dishes/{id}/ingredients/{di_id}` | `PUT` | Sửa gram / thứ tự thành phần trong món |
+| | `/api/admin/dishes/{id}/ingredients/{di_id}` | `DELETE` | Xóa nguyên liệu khỏi công thức |
+| **Bảng MET** | `/api/admin/exercise-types` | `GET` | Danh sách loại bài tập và MET rules |
+| | `/api/admin/exercise-types` | `POST` | Thêm loại bài tập mới |
+| | `/api/admin/exercise-types/{id}` | `PUT` | Sửa thông tin loại bài tập |
+| | `/api/admin/exercise-types/{id}` | `PATCH` | Ngưng dùng / kích hoạt lại |
+| **User & Retention** | `/api/admin/users` | `GET` | Danh sách người dùng, lọc `?status=active\|banned\|dormant`, lọc theo số ngày offline `?inactive_days=7\|14\|30` |
+| | `/api/admin/users/{id}/status` | `PATCH` | Khóa / mở khóa tài khoản (`status`), điều chỉnh quyền (`role = 'admin'\|'member'`) |
+| | `/api/admin/users/retention-stats` | `GET` | Phân tích phễu người dùng: tỷ lệ người dùng duy trì thói quen vs người dùng có nguy cơ rời bỏ (churn risk) |
+| | `/api/admin/users/re-engage` | `POST` | Kích hoạt chiến dịch gửi email/thông báo nhắc nhở quay lại cho phân nhóm người dùng offline nhiều ngày |
 
 ---
 
@@ -547,6 +667,31 @@ Giao diện FlexiDiet được thiết kế theo mô hình **Client-Side SPA-lik
    * **`app.js`:** Điều phối trạng thái ứng dụng (State Management), định tuyến tab view, gọi API `fetch()` kèm mã chống CSRF và xử lý phản hồi JSON, đồng bộ thanh trượt khẩu phần 3 màu với ô nhập gram.
    * **`theme.js`:** Hỗ trợ chuyển đổi giao diện Sáng / Tối (Light / Dark Mode).
    * **Xử lý ảnh client-side:** Sử dụng HTML5 `<input type="file" accept="image/*" capture>` để mở trực tiếp camera trên điện thoại; tự động thu nhỏ ảnh bằng HTML5 Canvas (cạnh dài tối đa $\le 1024$ px, nén JPEG 85%) trước khi gửi lên server, giúp tiết kiệm băng thông và giảm tối đa độ trễ truyền tải (NFR-11).
+
+3. **Giao diện quản trị Admin (`public/admin.html`) – Should (UC11, FR-07.3, FR-07.4, MLOps & Retention):**
+
+   Trang quản trị là một ứng dụng SPA riêng biệt (`admin.html`) phục vụ **chỉ cho người dùng có vai trò Admin**, thiết kế giao diện dạng **Dashboard Sidebar cố định bên trái + Main Content động bên phải**, chuyển đổi mượt mà giữa **6 cụm giao diện chuyên biệt**:
+
+   * **Kiểm tra quyền truy cập:** Khi nạp trang, `admin.js` lập tức gửi `GET /api/profile`. Nếu người dùng chưa đăng nhập hoặc `role !== 'admin'`, hệ thống hiển thị thông báo lỗi và tự động điều hướng về `app.html` hoặc `index.html`. Toàn bộ hành vi thao tác dữ liệu đều được bảo vệ 2 lớp nhờ middleware `AdminGuard` phía PHP Backend.
+   * **Cấu trúc 6 phân hệ giao diện chính:**
+
+     | STT | Phân hệ (Tab) | Mô tả chi tiết giao diện & Trải nghiệm người dùng (UX) | API kết nối |
+     |:---:|---|---|---|
+     | **1** | **Executive Dashboard** | **Tổng quan vận hành:** Hiển thị Metric Cards (DAU/WAU, tổng số bữa ăn ghi nhận, tổng năng lượng kcal tiêu thụ toàn hệ thống). Biểu đồ xu hướng tăng trưởng người dùng mới, biểu đồ tròn phân bổ mục tiêu thể chất (Tăng/Giảm/Duy trì cân nặng). | `GET /api/admin/stats` |
+     | **2** | **AI Observability Hub** | **Giám sát luồng AI (phong cách Google AI Studio):**<br>• Metric Cards: Thống kê số lượng request hôm nay, tuần này, tháng này.<br>• Live Counter: Số request đang xử lý / đang xếp hàng (In-flight Queue).<br>• Tỷ lệ lỗi (Error / Failure Rate %) và phân bổ mã lỗi HTTP (422, 500, 504).<br>• Biểu đồ độ trễ: Latency p50 / p95 theo thời gian thực.<br>• System Health: Trạng thái container FastAPI, dung lượng RAM/VRAM và thời gian uptime. | `GET /api/admin/ai/metrics`<br>`GET /api/admin/ai/health` |
+     | **3** | **AI Insights & Retraining Hub** | **Phân tích mô hình & Vòng lặp tái huấn luyện (Active Learning):**<br>• Top món ăn xuất hiện nhiều nhất và biểu đồ phân bổ 67 nhãn lớp.<br>• Tỷ lệ người dùng chấp nhận nhãn gợi ý (Acceptance Rate) vs tỷ lệ sửa món.<br>• Ma trận nhầm lẫn (Confusion Pairs): Thống kê cặp món AI hay đoán sai nhất.<br>• Cảnh báo món ăn có độ tin cậy thấp (`confidence < 0.45`).<br>• Audit Logs: Xem danh sách ảnh chụp của người dùng, nhãn AI dự đoán vs nhãn người dùng chốt thực tế.<br>• Nút thao tác một chạm: **"Export Retrain Dataset"** kết xuất gói ZIP (ảnh + nhãn chuẩn YOLO) để chuẩn bị train model version tiếp theo. | `GET /api/admin/ai/recognition-stats`<br>`GET /api/admin/ai/feedback-logs`<br>`POST /api/admin/ai/export-retrain-dataset` |
+     | **4** | **Data Management Studio** | **Quản lý dữ liệu dinh dưỡng CSDL (CRUD trực quan):**<br>• *Quản lý Món ăn (`dishes`):* Thêm món mới, sửa tên, gán ảnh đại diện, kiểm tra mã `dish_code` khớp với `labels.json` của AI model.<br>• *Công thức món (`dish_ingredients`):* Click vào món sẽ mở drawer/modal chi tiết công thức, cho phép thêm/bớt nguyên liệu và cấu hình gram chuẩn.<br>• *Nguyên liệu nền (`ingredients`):* Bảng quản lý 446 nguyên liệu, tìm kiếm debounce 300ms, chỉnh sửa macro (Carb/Pro/Fat/Fiber) trên 100g.<br>• *Bí danh (`ingredient_aliases`):* Quản lý từ đồng nghĩa 3 miền cho nguyên liệu.<br>• *Khẩu phần (`portion_units`):* Cấu hình quy đổi 3 nấc (Small/Medium/Large) ra gram thực tế. | `GET/POST/PUT/PATCH /api/admin/dishes/*`<br>`GET/POST/PUT/DELETE /api/admin/dishes/{id}/ingredients`<br>`GET/POST/PUT/PATCH /api/admin/ingredients/*`<br>`GET/POST/DELETE /api/admin/ingredients/{id}/aliases`<br>`GET/POST/PUT/DELETE /api/admin/portions/*` |
+     | **5** | **Exercise & MET Catalog** | **Từ điển bài tập thể lực:** Danh sách bài tập, bảng hệ số MET chuẩn y khoa theo các cấp độ vận động (Nhẹ, Vừa, Nặng). Cho phép thêm bài tập mới hoặc tinh chỉnh hệ số tiêu hao năng lượng. | `GET/POST/PUT/PATCH /api/admin/exercise-types/*` |
+     | **6** | **User Lifecycle & Retention** | **Quản lý & Chăm sóc giữ chân người dùng:**<br>• Bảng danh sách người dùng kèm bộ lọc trạng thái: `Active`, `Banned`, `Dormant (Offline > 7 ngày, > 30 ngày)`.<br>• Thao tác quản trị: Khóa / mở khóa tài khoản vi phạm, cấp quyền Admin.<br>• Sub-system Re-engagement: Xem danh sách người dùng bỏ quên nhật ký và kích hoạt chiến dịch gửi email nhắc nhở động viên quay lại với hệ thống. | `GET /api/admin/users`<br>`PATCH /api/admin/users/{id}/status`<br>`GET /api/admin/users/retention-stats`<br>`POST /api/admin/users/re-engage` |
+
+   * **Quy chuẩn mã nguồn Admin Frontend:**
+     * **`admin.js`:** Module JS điều phối giao diện quản trị, xây dựng theo hướng Event-Driven, quản lý state cho từng tab, phân trang AJAX, debounce tìm kiếm, xử lý modal confirm trước các thao tác ngưng dùng (soft-delete), vẽ biểu đồ giám sát bằng Canvas/SVG nhẹ.
+     * **`admin.css`:** Hệ thống CSS chuyên dụng cho Admin Panel, hỗ trợ Dark/Light Theme đồng bộ với FlexiDiet, tối ưu hóa hiển thị bảng dữ liệu (Data Table), Badge màu trạng thái, chỉ báo Real-time Telemetry (xanh/vàng/đỏ) và Drawer side-panel.
+
+   * **Nguyên tắc nghiệp vụ & An toàn dữ liệu trong Admin Panel:**
+     * **Ngăn chặn xóa cứng (Soft Delete Only):** Admin không thể xóa cứng (Hard Delete) nguyên liệu hoặc món ăn đã phát sinh dữ liệu trong các bảng nhật ký bữa ăn (`meal_entry_items`) hoặc công thức (`dish_ingredients`). Hệ thống chỉ cho phép ngưng dùng (`is_active = 0`) để bảo toàn tính toàn vẹn lịch sử (UC11 A2).
+     * **Snapshot nguyên vẹn (Snapshot Immutability):** Mọi điều chỉnh về chỉ số dinh dưỡng (kcal, macro) của nguyên liệu chỉ có hiệu lực cho các lần ghi nhận nhật ký sau thời điểm cập nhật; dữ liệu dinh dưỡng trong nhật ký quá khứ của người dùng được giữ nguyên trạng nhờ cơ chế snapshot (FR-07.2).
+     * **Kiểm tra tương thích mã nhãn AI:** Khi tạo mới hoặc cập nhật món ăn có `dish_code`, hệ thống sẽ đối chiếu với danh mục 67 nhãn trong `labels.json`. Nếu mã không tồn tại, giao diện sẽ hiển thị cảnh báo để tránh xung đột với module AI nhận diện.
 
 ---
 
