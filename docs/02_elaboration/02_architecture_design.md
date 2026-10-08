@@ -45,26 +45,26 @@ Không chọn microservices cho toàn hệ thống: nhóm 3 người, 23 ngày, 
 
 ```mermaid
 flowchart LR
-    B([Trình duyệt Mobile / Desktop<br/>HTML + CSS + Vanilla JS])
-    subgraph SERVER[Server / VPS]
-        NG[Web Server / Nginx<br/>Phục vụ public/ & Reverse Proxy]
-        subgraph PHP[PHP Backend Monolith]
-            API[backend/index.php<br/>REST API Controllers & Services]
-            POOL_A[Pool analyze<br/>chuyên /api/food/analyze]
+    B["Trình duyệt Mobile / Desktop<br/>HTML + CSS + Vanilla JS"]
+    subgraph SERVER["Server / VPS"]
+        NG["Web Server / Nginx<br/>Phục vụ public/ & Reverse Proxy"]
+        subgraph PHP["PHP Backend Monolith"]
+            API["backend/index.php<br/>REST API Controllers & Services"]
+            POOL_A["Pool analyze<br/>chuyên /api/food/analyze"]
         end
-        DB[(MySQL 8.0<br/>flexidiet: 18 bảng)]
-        ST[[storage/<br/>tmp, uploads, logs]]
-        AI[Python AI Microservice (:8001)<br/>FastAPI + ONNX Runtime<br/>yolov10m_vietfood67.onnx]
+        DB[("MySQL 8.0<br/>flexidiet: 18 bảng")]
+        ST[["storage/<br/>tmp, uploads, logs"]]
+        AI["Python AI Microservice (:8001)<br/>FastAPI + ONNX Runtime<br/>yolov10m_vietfood67.onnx"]
     end
-    B -- "HTTPS (Static Files)" --> NG
-    B -- "AJAX / Fetch API (JSON)" --> NG
-    NG -- "Tệp tĩnh (index.html, app.html, assets/)" --> B
-    NG -- FastCGI --> API
-    NG -- FastCGI --> POOL_A
+    B -->|"HTTPS (Tải trang tĩnh)"| NG
+    B -->|"AJAX / Fetch API (JSON)"| NG
+    NG -->|"Tệp tĩnh (index, app, assets)"| B
+    NG -->|FastCGI| API
+    NG -->|FastCGI| POOL_A
     API --> DB
     POOL_A --> DB
     API --> ST
-    POOL_A -- "cURL HTTP nội bộ + X-Service-Key" --> AI
+    POOL_A -->|"cURL HTTP nội bộ + X-Service-Key"| AI
 ```
 
 ---
