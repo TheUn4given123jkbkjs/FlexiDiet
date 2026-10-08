@@ -1,0 +1,361 @@
+source_ref,alias,alias_norm
+VDD_1003_convert,Cơm,com
+VDD_1003_convert,Cơm tẻ,com te
+VDD_1004_chao_convert,Cháo hoa,chao hoa
+VDD_1004_chao_convert,Cháo,chao
+VDD_1004_convert,Cơm,com
+VDD_1004_convert,Cơm tẻ,com te
+VDD_1007,Bắp,bap
+VDD_1007,Bắp ngọt,bap ngot
+VDD_1007,Trái bắp,trai bap
+VDD_1017_13046_convert,Bánh đa nem,banh da nem
+VDD_1017_13046_convert,Vỏ ram,vo ram
+VDD_1017_13046_convert,Bánh tráng cuốn,banh trang cuon
+VDD_1020,Bún,bun
+VDD_1020,Bún gạo,bun gao
+VDD_1046002,Nui,nui
+VDD_1046002,Mì ống,mi ong
+VDD_1046002,Macaroni,macaroni
+VDD_3010,Đỗ xanh,do xanh
+VDD_3010_hap_convert,Đỗ xanh,do xanh
+VDD_3025,Đậu hũ,dau hu
+VDD_3025,Tàu hũ,tau hu
+VDD_3025,Đậu hũ trắng,dau hu trang
+VDD_3025,Tàu hũ trắng,tau hu trang
+VDD_3025,Đậu hũ non,dau hu non
+VDD_3025002,Đậu hũ,dau hu
+VDD_3025002,Tàu hũ,tau hu
+VDD_3026,Đậu hũ,dau hu
+VDD_3026,Tàu hũ,tau hu
+VDD_3026,Đậu hũ chiên,dau hu chien
+VDD_3026,Đậu hũ rán,dau hu ran
+VDD_3027,Đậu hũ,dau hu
+VDD_3027,Tàu hũ,tau hu
+VDD_4002,Bí xanh,bi xanh
+VDD_4002,Bí đao,bi dao
+VDD_4002,Trái bí đao,trai bi dao
+VDD_4002002,Bí xanh,bi xanh
+VDD_4002002,Bí đao,bi dao
+VDD_4002002,Trái bí đao,trai bi dao
+VDD_4003,Bí đỏ,bi do
+VDD_4003,Trái bí đỏ,trai bi do
+VDD_4003002,Bí đỏ,bi do
+VDD_4003002,Trái bí đỏ,trai bi do
+VDD_4005,Trái cà chua,trai ca chua
+VDD_4005,Quả cà chua,qua ca chua
+VDD_4006,Trái cà pháo,trai ca phao
+VDD_4007,Củ cà rốt,cu ca rot
+VDD_4007002,Củ cà rốt,cu ca rot
+VDD_4008,Củ cà rốt,cu ca rot
+VDD_4009,Trái cà tím,trai ca tim
+VDD_4009,Cà dái dê,ca dai de
+VDD_4009002,Trái cà tím,trai ca tim
+VDD_4009002,Cà dái dê,ca dai de
+VDD_4013,Tần ô,tan o
+VDD_4013,Rau tần ô,rau tan o
+VDD_4023,Củ sắn,cu san
+VDD_4023,Củ sắn nước,cu san nuoc
+VDD_4026,Bạc hà,bac ha
+VDD_4026,Cây bạc hà,cay bac ha
+VDD_4027,Dưa leo,dua leo
+VDD_4027,Trái dưa leo,trai dua leo
+VDD_4029,Đậu que,dau que
+VDD_4029,Trái đậu que,trai dau que
+VDD_4029,Đậu cove,dau cove
+VDD_4029002,Đậu que,dau que
+VDD_4029002,Trái đậu que,trai dau que
+VDD_4029002,Đậu cove,dau cove
+VDD_4030,Đậu dải,dau dai
+VDD_4030002,Đậu dải,dau dai
+VDD_4036,Giá đỗ,gia do
+VDD_4036,Giá,gia
+VDD_4036,Giá sống,gia song
+VDD_4036002,Giá đỗ,gia do
+VDD_4036002,Giá,gia
+VDD_4036002,Giá sống,gia song
+VDD_4037,Hành tím,hanh tim
+VDD_4037,Hành củ tím,hanh cu tim
+VDD_4037,Củ hành tím,cu hanh tim
+VDD_4037_phi_convert,Hành tím,hanh tim
+VDD_4037_phi_convert,Hành củ tím,hanh cu tim
+VDD_4037_phi_convert,Củ hành tím,cu hanh tim
+VDD_4038,Hành hoa,hanh hoa
+VDD_4038,Hành lá,hanh la
+VDD_4042,Rau hẹ,rau he
+VDD_4042,Lá hẹ,la he
+VDD_4042,Hẹ,he
+VDD_4049,Lá khoai mì,la khoai mi
+VDD_4055,Khổ qua,kho qua
+VDD_4055,Trái khổ qua,trai kho qua
+VDD_4055,Quả khổ qua,qua kho qua
+VDD_4055002,Khổ qua,kho qua
+VDD_4055002,Trái khổ qua,trai kho qua
+VDD_4055002,Quả khổ qua,qua kho qua
+VDD_4058,Bắp non,bap non
+VDD_4058,Bắp bao tử,bap bao tu
+VDD_4081,Ngò rí,ngo ri
+VDD_4081,Rau ngò,rau ngo
+VDD_4081,Ngò,ngo
+VDD_4082,Ngò gai,ngo gai
+VDD_4082,Rau ngò gai,rau ngo gai
+VDD_4088,Rau răm,rau ram
+VDD_4088,Lá rau răm,la rau ram
+VDD_4099,Bông cải trắng,bong cai trang
+VDD_4099,Bông cải,bong cai
+VDD_4099002,Bông cải trắng,bong cai trang
+VDD_4099002,Bông cải,bong cai
+VDD_4100,Bông cải xanh,bong cai xanh
+VDD_4100,Bông cải,bong cai
+VDD_4100,Broccoli,broccoli
+VDD_4100002,Bông cải xanh,bong cai xanh
+VDD_4100002,Bông cải,bong cai
+VDD_4100002,Broccoli,broccoli
+VDD_4112,Trái cà chua,trai ca chua
+VDD_4112,Quả cà chua,qua ca chua
+VDD_4113,Trái cà pháo,trai ca phao
+VDD_4114,Trái cà pháo,trai ca phao
+VDD_4118,Dưa leo,dua leo
+VDD_4118,Trái dưa leo,trai dua leo
+VDD_4119,Giá đỗ,gia do
+VDD_4119,Giá,gia
+VDD_4119,Giá sống,gia song
+VDD_4120,Hành tím,hanh tim
+VDD_4120,Hành củ tím,hanh cu tim
+VDD_4120,Củ hành tím,cu hanh tim
+VDD_4122,Đỗ xanh,do xanh
+VDD_4125,Nấm mèo,nam meo
+VDD_4125,Nấm mèo khô,nam meo kho
+VDD_5014,Thơm,thom
+VDD_5014,Khóm,khom
+VDD_5014,Trái thơm,trai thom
+VDD_5014,Trái khóm,trai khom
+VDD_7016,Thịt heo (mỡ - tươi),thit heo mo tuoi
+VDD_7016,Mỡ heo,mo heo
+VDD_7016,Tóp mỡ,top mo
+VDD_7017,Thịt heo (nạc - tươi),thit heo nac tuoi
+VDD_7018,Thịt heo (nửa nạc nửa mỡ - tươi),thit heo nua nac nua mo tuoi
+VDD_7018,Thịt ba rọi,thit ba roi
+VDD_7018,Ba rọi heo,ba roi heo
+VDD_7018,Thịt ba chỉ,thit ba chi
+VDD_7018,Ba rọi,ba roi
+VDD_7018,Thịt heo ba rọi,thit heo ba roi
+VDD_7018,Thịt heo ba chỉ,thit heo ba chi
+VDD_7030,Bầu dục heo (tươi),bau duc heo tuoi
+VDD_7030,Cật heo,cat heo
+VDD_7030,Bầu dục heo,bau duc heo
+VDD_7030002,Bầu dục heo (luộc),bau duc heo luoc
+VDD_7030002,Cật heo,cat heo
+VDD_7030002,Bầu dục heo,bau duc heo
+VDD_7031,Bì heo (tươi),bi heo tuoi
+VDD_7031,Da heo,da heo
+VDD_7031,Bì heo,bi heo
+VDD_7031,Da lợn,da lon
+VDD_7032,Chân giò heo (tươi),chan gio heo tuoi
+VDD_7032,Giò heo,gio heo
+VDD_7032,Móng giò,mong gio
+VDD_7032,Móng heo,mong heo
+VDD_7032,Chân giò heo,chan gio heo
+VDD_7032002,Thịt chân giò heo (luộc),thit chan gio heo luoc
+VDD_7032002,Giò heo,gio heo
+VDD_7032002,Móng giò,mong gio
+VDD_7032002,Móng heo,mong heo
+VDD_7032002,Chân giò heo,chan gio heo
+VDD_7034,Dạ dày heo (tươi),da day heo tuoi
+VDD_7034,Bao tử heo,bao tu heo
+VDD_7034,Bao tử,bao tu
+VDD_7034,Bao tử lợn,bao tu lon
+VDD_7034002,Dạ dày heo (luộc),da day heo luoc
+VDD_7034002,Bao tử heo,bao tu heo
+VDD_7034002,Bao tử,bao tu
+VDD_7034002,Bao tử lợn,bao tu lon
+VDD_7036,Đầu heo (tươi - không bao gồm óc),dau heo tuoi khong bao gom oc
+VDD_7038,Đuôi heo (tươi),duoi heo tuoi
+VDD_7038,Đuôi heo,duoi heo
+VDD_7041,Gan heo (tươi),gan heo tuoi
+VDD_7041,Gan heo,gan heo
+VDD_7041002,Gan heo (luộc),gan heo luoc
+VDD_7041002,Gan heo,gan heo
+VDD_7045,Lưỡi heo (tươi),luoi heo tuoi
+VDD_7045,Lưỡi heo,luoi heo
+VDD_7045002,Lưỡi heo (luộc),luoi heo luoc
+VDD_7045002,Lưỡi heo,luoi heo
+VDD_7046,Lòng heo (ruột dịch - tươi),long heo ruot dich tuoi
+VDD_7050,Óc heo (tươi),oc heo tuoi
+VDD_7050002,Óc heo (luộc),oc heo luoc
+VDD_7052,Phổi heo (tươi),phoi heo tuoi
+VDD_7053,Sườn heo (tươi),suon heo tuoi
+VDD_7053,Sườn heo,suon heo
+VDD_7053,Dẻ sườn heo,de suon heo
+VDD_7053,Sườn non heo,suon non heo
+VDD_7054,Tai heo (tươi),tai heo tuoi
+VDD_7054,Tai heo,tai heo
+VDD_7054,Lỗ tai heo,lo tai heo
+VDD_7054002,Tai heo (luộc),tai heo luoc
+VDD_7054002,Tai heo,tai heo
+VDD_7054002,Lỗ tai heo,lo tai heo
+VDD_7057,Tim heo (tươi),tim heo tuoi
+VDD_7057,Tim heo,tim heo
+VDD_7057002,Tim heo (luộc),tim heo luoc
+VDD_7057002,Tim heo,tim heo
+VDD_7059,Tiết heo (luộc),tiet heo luoc
+VDD_7059,Huyết heo,huyet heo
+VDD_7059,Huyết lợn,huyet lon
+VDD_7059,Huyết,huyet
+VDD_7060,Tiết heo (tươi),tiet heo tuoi
+VDD_7060,Huyết heo,huyet heo
+VDD_7060,Huyết lợn,huyet lon
+VDD_7060,Huyết,huyet
+VDD_7062,Tủy xương heo (tươi),tuy xuong heo tuoi
+VDD_7063,Ba tê heo,ba te heo
+VDD_7063,Pate,pate
+VDD_7063,Pate heo,pate heo
+VDD_7063,Ba tê,ba te
+VDD_7064,Chả heo,cha heo
+VDD_7065,Chả quế heo,cha que heo
+VDD_7066,Dăm bông heo,dam bong heo
+VDD_7066,Dăm bông,dam bong
+VDD_7066,Jambon,jambon
+VDD_7066,Thịt nguội,thit nguoi
+VDD_7067,Dồi heo (chín),doi heo chin
+VDD_7067,Dồi heo,doi heo
+VDD_7067,Dồi huyết,doi huyet
+VDD_7070,Giò thủ heo (chín),gio thu heo chin
+VDD_7070,Giò xào,gio xao
+VDD_7070,Chả thủ,cha thu
+VDD_7074,Ruốc thịt heo,ruoc thit heo
+VDD_7083,Thịt heo (nạc vai - tươi),thit heo nac vai tuoi
+VDD_7083,Nạc dăm heo,nac dam heo
+VDD_7083,Nạc dăm,nac dam
+VDD_7083,Thịt nạc vai,thit nac vai
+VDD_7083002,Thịt heo (nạc vai - luộc),thit heo nac vai luoc
+VDD_7083002,Nạc dăm heo,nac dam heo
+VDD_7083002,Nạc dăm,nac dam
+VDD_7083002,Thịt nạc vai,thit nac vai
+VDD_7084,Thịt heo (nạc mông - tươi),thit heo nac mong tuoi
+VDD_7084,Thịt mông heo,thit mong heo
+VDD_7084,Nạc mông heo,nac mong heo
+VDD_7084002,Thịt heo (nạc mông - luộc),thit heo nac mong luoc
+VDD_7084002,Thịt mông heo,thit mong heo
+VDD_7084002,Nạc mông heo,nac mong heo
+VDD_7085,Thịt heo (nạc thăn - tươi),thit heo nac than tuoi
+VDD_7085,Thăn heo,than heo
+VDD_7085,Thịt thăn heo,thit than heo
+VDD_7085,Thịt nạc thăn,thit nac than
+VDD_7085002,Thịt heo (nạc thăn - luộc),thit heo nac than luoc
+VDD_7085002,Thăn heo,than heo
+VDD_7085002,Thịt thăn heo,thit than heo
+VDD_7085002,Thịt nạc thăn,thit nac than
+VDD_7112,Thịt heo (mông - sống),thit heo mong song
+VDD_7112,Thịt mông heo,thit mong heo
+VDD_7112,Nạc mông heo,nac mong heo
+VDD_8003,Cá gáy,ca gay
+VDD_8003_hap_convert,Cá gáy,ca gay
+VDD_8003_ran_convert,Cá gáy,ca gay
+VDD_8022,Cá lóc,ca loc
+VDD_8022,Cá chuối,ca chuoi
+VDD_8022,Cá tràu,ca trau
+VDD_8022_chien_convert,Cá lóc,ca loc
+VDD_8022_chien_convert,Cá chuối,ca chuoi
+VDD_8022_chien_convert,Cá tràu,ca trau
+VDD_8022_luoc_convert,Cá lóc,ca loc
+VDD_8022_luoc_convert,Cá chuối,ca chuoi
+VDD_8022_luoc_convert,Cá tràu,ca trau
+VDD_8033,Cua biển,cua bien
+VDD_8033,Cua thịt,cua thit
+VDD_8033_luoc_convert,Cua biển,cua bien
+VDD_8033_luoc_convert,Cua thịt,cua thit
+VDD_8051,Tôm sú,tom su
+VDD_8051,Tôm biển,tom bien
+VDD_8051,Tôm thẻ,tom the
+VDD_8051_chien_convert,Tôm sú,tom su
+VDD_8051_chien_convert,Tôm biển,tom bien
+VDD_8051_chien_convert,Tôm thẻ,tom the
+VDD_8051002,Tôm sú,tom su
+VDD_8051002,Tôm biển,tom bien
+VDD_8051002,Tôm thẻ,tom the
+VDD_8051014,Tôm sú,tom su
+VDD_8051014,Tôm biển,tom bien
+VDD_8051014,Tôm thẻ,tom the
+VDD_8052,Tôm sông,tom song
+VDD_8052,Tôm đất,tom dat
+VDD_8052_chien_convert,Tôm sông,tom song
+VDD_8052_chien_convert,Tôm đất,tom dat
+VDD_8052002,Tôm sông,tom song
+VDD_8052002,Tôm đất,tom dat
+VDD_8052014,Tôm sông,tom song
+VDD_8052014,Tôm đất,tom dat
+VDD_8053,Tôm sú,tom su
+VDD_8053,Tôm biển,tom bien
+VDD_8053,Tôm thẻ,tom the
+VDD_8062_chien_convert,Cá diêu hồng,ca dieu hong
+VDD_8062_hap_convert,Cá diêu hồng,ca dieu hong
+VDD_9001,Hột gà ta,hot ga ta
+VDD_9001,Hột gà,hot ga
+VDD_9001_luoc_convert,Hột gà ta (luộc),hot ga ta luoc
+VDD_9001_luoc_convert,Hột gà,hot ga
+VDD_9001_luoc_convert,Hột gà luộc,hot ga luoc
+VDD_9001_luoc_convert,Trứng gà luộc,trung ga luoc
+VDD_9001_ran_convert,Hột gà (chiên / rán),hot ga chien ran
+VDD_9001_ran_convert,Hột gà,hot ga
+VDD_9001_ran_convert,Hột gà chiên,hot ga chien
+VDD_9001_ran_convert,Trứng ốp la,trung op la
+VDD_9001_ran_convert,Hột gà ốp la,hot ga op la
+VDD_9001_ran_convert,Trứng chiên,trung chien
+VDD_9002,Lòng đỏ hột gà,long do hot ga
+VDD_9002,Hột gà,hot ga
+VDD_9003,Lòng trắng hột gà,long trang hot ga
+VDD_9003,Hột gà,hot ga
+VDD_9004,Hột vịt,hot vit
+VDD_9004_luoc_convert,Hột vịt (luộc),hot vit luoc
+VDD_9004_luoc_convert,Hột vịt,hot vit
+VDD_9004_ran_convert,Hột vịt (chiên / rán),hot vit chien ran
+VDD_9004_ran_convert,Hột vịt,hot vit
+VDD_9004_ran_convert,Hột vịt chiên,hot vit chien
+VDD_9005,Lòng đỏ hột vịt,long do hot vit
+VDD_9005,Hột vịt,hot vit
+VDD_9006,Lòng trắng hột vịt,long trang hot vit
+VDD_9006,Hột vịt,hot vit
+VDD_9007,Hột chim cút,hot chim cut
+VDD_9007,Hột cút,hot cut
+VDD_9007,Trứng cút,trung cut
+VDD_9007_luoc_convert,Hột chim cút (luộc),hot chim cut luoc
+VDD_9007_luoc_convert,Hột cút,hot cut
+VDD_9007_luoc_convert,Trứng cút,trung cut
+VDD_9007_luoc_convert,Hột cút luộc,hot cut luoc
+VDD_9007_luoc_convert,Trứng cút luộc,trung cut luoc
+VDD_9007_ran_convert,Hột chim cút (chiên / rán),hot chim cut chien ran
+VDD_9007_ran_convert,Hột cút,hot cut
+VDD_9007_ran_convert,Trứng cút,trung cut
+VDD_9010,Hột vịt lộn,hot vit lon
+VDD_9010,Hột vịt,hot vit
+VDD_9012,Hột gà công nghiệp,hot ga cong nghiep
+VDD_9012,Hột gà,hot ga
+VDD_9012_luoc_convert,Hột gà công nghiệp (luộc),hot ga cong nghiep luoc
+VDD_9012_luoc_convert,Hột gà,hot ga
+VDD_9012_luoc_convert,Hột gà luộc,hot ga luoc
+VDD_9012_luoc_convert,Trứng gà luộc,trung ga luoc
+VDD_11019,Thịt heo hộp,thit heo hop
+VDD_13019,Nước tương,nuoc tuong
+VDD_13019,Xì dầu,xi dau
+VDD_13019,Tàu vị yểu,tau vi yeu
+VDD_13022,Nước tương,nuoc tuong
+VDD_13022,Tàu vị yểu,tau vi yeu
+VDD_13032,Trái cà chua,trai ca chua
+VDD_13032,Quả cà chua,qua ca chua
+VDD_13046,Bột lọc,bot loc
+VDD_13046,Bột đao,bot dao
+VDD_13046,Tinh bột khoai mì,tinh bot khoai mi
+VDD_14006,Nước dừa tươi,nuoc dua tuoi
+VDD_14006,Nước dừa xiêm,nuoc dua xiem
+USDA_170172,Nước dừa béo,nuoc dua beo
+USDA_170172,Sữa dừa,sua dua
+USDA_174261,Đậu phộng,dau phong
+USDA_174261,Đậu phụng,dau phung
+USDA_174261,Đậu phộng rang,dau phong rang
+USDA_174261,Đậu phụng rang,dau phung rang
+USDA_174261,Hạt đậu phộng,hat dau phong
+USDA_2709733,Trái cà chua,trai ca chua
+USDA_2709733,Quả cà chua,qua ca chua
+MANUAL_SOT_BO_TRUNG,Sốt bơ hột (bơ bánh mì),sot bo hot bo banh mi
+LONGCHAU_SA_TUOI,Sả củ,sa cu
+LONGCHAU_SA_TUOI,Sả cây,sa cay
