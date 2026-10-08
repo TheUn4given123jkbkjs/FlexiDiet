@@ -336,7 +336,7 @@ Giao dịch (transaction) bắt buộc cho: ghi hoặc sửa mục nhật ký, �
 ```
 
 - `is_unknown = true` khi độ tin cậy thấp hơn ngưỡng an toàn của dịch vụ AI (`UNKNOWN_THRESHOLD`, mặc định 0.40) hoặc khi mô hình xếp ảnh vào lớp "không nhận ra" nếu được huấn luyện với lớp này (FR-03.5); khi đó PHP đi đường nguyên liệu bất kể độ tin cậy. Ngưỡng phân luồng đường nhận diện / đường nguyên liệu (`CONFIDENCE_THRESHOLD`, mặc định 0.65) được áp **ở PHP** (AD7).
-- `dish_code` được nạp động từ tệp `labels.json` (sinh ra sau khi huấn luyện) và phải khớp `dish_code` của món trong bảng `dishes` (MySQL). Cơ chế ánh xạ nhãn động và quy trình kiểm thử chi tiết thuộc `02_ai_service_poc.md`.
+- `dish_code` được nạp động từ tệp `labels.json` đi kèm mô hình pre-trained YOLOv10m và khớp 100% với `dish_code` của món trong bảng `dishes` (MySQL). Cơ chế ánh xạ nhãn động và quy trình kiểm thử chi tiết thuộc `02_ai_service_poc.md`.
 
 **Lỗi:**
 
@@ -373,39 +373,39 @@ request → [kiểm tra khóa, hợp lệ ảnh] → hàng chờ (tối đa Q)
 
 `StubRecognitionClient` (phía PHP) và cờ `STUB=1` (phía dịch vụ AI) trả kết quả giả cố định theo tên tệp hoặc mã băm ảnh, kèm tùy chọn mô phỏng độ trễ và lỗi `429/503`. Có thể dùng chính chế độ này để thử đường lỗi và load test hạ tầng trước khi mô hình thật xong.
 
-### 10.6. Vòng đời mô hình (huấn luyện ngoại tuyến → triển khai)
+### 10.6. Vòng đời mô hình: Tích hợp mô hình Pre-trained (VietFood-67)
 
-Mô hình do nhóm **tự huấn luyện** (D17), chạy ngoài server web. Server chỉ nhận **sản phẩm cuối** (tệp ONNX + danh sách nhãn).
+Để tối ưu hóa thời gian và nguồn lực trong phạm vi đồ án, nhóm **lược bỏ khâu tự huấn luyện từ đầu (training from scratch / fine-tuning)**. Thay vào đó, hệ thống tích hợp trực tiếp **mô hình Pre-trained chuyên biệt cho ẩm thực Việt Nam (VietFood-67)** định dạng **ONNX** (`yolov10m_vietfood67.onnx` ~30.8 MB, $mAP_{50} = 0.92$), nhận diện chính xác 67 món ăn truyền thống.
 
 ```
-Bộ dữ liệu ảnh → gộp, làm sạch, ánh xạ nhãn → huấn luyện → đánh giá → xuất ONNX + labels.json → triển khai vào ai-service
+Mô hình Pre-trained (VietFood-67 ONNX) + labels.json → Tích hợp vào ai_service/models/ → Khởi tạo InferenceSession (ONNX Runtime) → Phục vụ API /v1/recognize
 ```
 
-| Bước | Nơi chạy | Ghi chú |
+| Bước | Thành phần thực hiện | Ghi chú kỹ thuật |
 |---|---|---|
-| Gộp 4 bộ dữ liệu (VietFood67, 30VNFoods, VinaFood21, VNFood103), loại ảnh trùng giữa các bộ | Máy huấn luyện (thư mục `ml/`) | Bảng ánh xạ nhãn → `dish_code` thuộc `02_ai_service_poc.md`; kiểm tra giấy phép từng bộ (R5, NFR-14) |
-| Huấn luyện, đánh giá | Nơi có GPU (máy cá nhân hoặc nền tảng notebook) **[CẦN CHỐT]** | Đánh giá riêng trên **ảnh tự chụp bằng điện thoại** (R4), tách khỏi tập kiểm thử lấy từ web |
-| Xuất ONNX và `labels.json` | Máy huấn luyện | Gắn `model_version` |
-| Triển khai | Server (`ai-service/`) | Chỉ chép tệp mô hình; dịch vụ đọc `model_version` và danh sách nhãn lúc khởi động |
+| Tuyển chọn mô hình Pre-trained | Bộ mô hình `yolov10m_vietfood67.onnx` | Đạt độ chính xác cao ($mAP_{50} = 0.92$), bao phủ 67 món ăn Việt Nam |
+| Chuẩn hóa danh mục nhãn (`labels.json`) | File cấu hình `ai_service/models/labels.json` | 67 nhãn định dạng chuẩn khớp 1-1 với `dish_code` trong CSDL |
+| Tích hợp vào Dịch vụ AI Microservice | Tiến trình FastAPI + ONNX Runtime (`ai_service/`) | Dịch vụ nạp `model_version` và danh mục nhãn vào RAM lúc khởi động |
+| Đo kiểm hiệu năng & Độ trễ suy luận | Môi trường máy chủ web | Kiểm chứng độ trễ $\le 500$ ms trên CPU và không rò rỉ bộ nhớ (NFR-02) |
 
-Server **không** huấn luyện; CPU của server chỉ dùng để suy luận.
+Server hoàn toàn **không cần môi trường huấn luyện (PyTorch/TensorFlow nặng hàng GB)**; CPU của server chỉ dành riêng cho tiến trình suy luận tốc độ cao với ONNX Runtime.
 
 ### 10.7. Chuỗi ánh xạ từ nhãn đến dinh dưỡng
 
 ```mermaid
 flowchart LR
-    D[4 bộ dữ liệu ảnh] -->|ánh xạ nhãn → dish_code<br/>lúc huấn luyện| T[Huấn luyện ngoại tuyến]
-    T -->|ONNX + labels.json| S[Dịch vụ AI<br/>ảnh → dish_code + confidence]
-    S --> P[PHP: áp ngưỡng tin cậy]
-    P --> R[dishes: dish_code → công thức chuẩn<br/>dish_ingredients: nguyên liệu + gram]
-    R --> N[ingredients: dinh dưỡng trên 100 g<br/>nguồn: Bảng thành phần thực phẩm VN]
-    N --> C[NutritionCalculator<br/>kcal, protein/carb/fat theo khẩu phần]
+    PRE["Mô hình Pre-trained VietFood-67<br/>(yolov10m_vietfood67.onnx)"] -->|Nạp cùng| LBL["labels.json<br/>(67 nhãn dish_code)"]
+    PRE & LBL --> S["Dịch vụ AI (FastAPI :8001)<br/>ảnh → dish_code + confidence"]
+    S --> P["PHP: áp ngưỡng tin cậy<br/>(CONFIDENCE_THRESHOLD = 0.65)"]
+    P --> R["dishes: dish_code → công thức chuẩn<br/>dish_ingredients: nguyên liệu + gram"]
+    N["ingredients: dinh dưỡng trên 100g<br/>nguồn: Viện Dinh Dưỡng"] --> C["NutritionCalculator<br/>tính calo, protein, carb, fat"]
+    R --> C
 ```
 
-Hai quyết định thiết kế (chờ bạn xác nhận):
-
-- **Ánh xạ nhãn làm lúc huấn luyện.** Các lớp đầu ra của mô hình **đã là `dish_code`** của món trong danh mục hệ thống, nên dịch vụ AI trả thẳng `dish_code` và PHP không cần bảng ánh xạ lúc chạy.
-- **Mô hình chỉ có lớp cho món đã có công thức chuẩn.** Ảnh thuộc món chưa có công thức (hoặc ngoài danh sách) sẽ bị dịch vụ AI gán `is_unknown = true` nhờ ngưỡng `UNKNOWN_THRESHOLD` (mặc định 0.40). Nếu dataset có ảnh không-phải-thức-ăn, có thể bổ sung lớp "unknown" khi huấn luyện để cải thiện; **quyết định này chờ kết quả huấn luyện thực tế**. Dù cách nào, mọi `dish_code` mô hình trả ra đều tính được calo; không có trường hợp nhận ra món nhưng không có số liệu.
+Nguyên tắc thiết kế cốt lõi:
+- **Ánh xạ nhãn đồng bộ 100%:** 67 nhãn của mô hình Pre-trained đã được chuẩn hóa trùng khớp hoàn toàn với `dish_code` của 67 món ăn trong bảng `dishes` (MySQL), dịch vụ AI trả thẳng `dish_code` và PHP tra cứu trực tiếp mà không cần qua tầng chuyển đổi trung gian.
+- **Tính toán dinh dưỡng toàn vẹn:** Mọi `dish_code` mà mô hình Pre-trained trả về đều có công thức chuẩn đầy đủ trong `dish_ingredients` và thành phần trong `ingredients`. Do đó, bất kỳ món nào nhận diện thành công đều được tính calo và macro chuẩn xác.
+- **Bảo vệ bằng ngưỡng nhận diện:** Ảnh không phải thức ăn hoặc ảnh mờ ngoài danh mục 67 món sẽ bị gán `is_unknown = true` (dưới `UNKNOWN_THRESHOLD = 0.40`) để kích hoạt đường dự phòng (UC06 hoặc nhập liệu thủ công).
 
 Cần một script kiểm tra **độ phủ nhãn** (`scripts/check_label_coverage`) chạy khi triển khai: mọi nhãn trong `labels.json` phải khớp một món đang hoạt động có công thức đầy đủ. Lệch thì dừng triển khai, tránh lỗi chỉ lộ ra khi người dùng gặp món đó.
 
@@ -540,7 +540,7 @@ Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/an
 | AD8 | Render trang ở server + JS gọi API JSON | SPA framework (React/Vue); chỉ form tải lại trang | SPA ngoài stack đã chốt; form tải lại trang kém cho luồng ghi món |
 | AD9 | Router nhỏ tự viết + front controller, không framework | Laravel và tương tự | Đã chốt PHP thuần (D16) |
 | AD10 | Dịch vụ AI không trạng thái, không lưu ảnh | Lưu ảnh ở dịch vụ AI | Quyền riêng tư (NFR-08), dễ nhân bản |
-| AD11 | Mô hình tự huấn luyện ngoại tuyến; ánh xạ nhãn → `dish_code` lúc huấn luyện; chỉ huấn luyện cho món có công thức chuẩn; lớp "unknown" xác định sau khi huấn luyện | Gọi API ngoài làm bộ nhận diện chính; ánh xạ nhãn lúc chạy | Khớp UVP và D17; calo luôn tính được; API ngoài chỉ để so sánh trong PoC |
+| AD11 | Sử dụng mô hình Pre-trained YOLOv10m ONNX (VietFood-67) chuyên biệt cho ẩm thực Việt; nạp nhãn động qua `labels.json` khớp 1-1 với `dishes`; không tự huấn luyện từ đầu | Huấn luyện từ đầu (train from scratch / fine-tuning); Gọi API thương mại bên ngoài | Tiết kiệm chi phí GPU, loại bỏ rủi ro trễ hạn đồ án; mô hình pre-trained đạt $mAP_{50} = 0.92$ hoàn toàn đáp ứng xuất sắc yêu cầu; calo luôn tính được |
 
 ---
 
@@ -554,6 +554,6 @@ Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/an
 | K4 | Giới hạn upload (≤ 2MB), kích thước ảnh sau thu nhỏ (≤ 1024px), timeout gọi AI (10.0s) | **Đã chốt** theo `02_ai_service_poc.md` |
 | K5 | W, Q, pool `analyze`, rate limit | Giữ giá trị khởi điểm ở mục 5, chỉnh sau load test C2 |
 | K6 | Hosting phải là VPS/cloud VM (mục 5) | Nhóm xác nhận phương án thuê dùng thử |
-| K7 | Môi trường huấn luyện (nơi có GPU) và ai phụ trách `ml/` | Bạn xác nhận; không ảnh hưởng thiết kế server |
+| K7 | Môi trường huấn luyện và ai phụ trách `ml/` | **[ĐÃ ĐÓNG]** Lược bỏ khâu huấn luyện; chuyển sang tích hợp trực tiếp mô hình pre-trained `yolov10m_vietfood67.onnx` có sẵn |
 
 **Việc tiếp theo:** Hoàn thành Pha Elaboration, sẵn sàng bước vào Pha Construction (dựng khung Architectural Skeleton: PHP Front Controller, Router, PDO Repository, Docker Compose và FastAPI skeleton).

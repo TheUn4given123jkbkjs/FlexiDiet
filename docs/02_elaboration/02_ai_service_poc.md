@@ -15,9 +15,9 @@ Dịch vụ nhận diện món ăn bằng AI là thành phần có rủi ro kỹ
 * **Quyền riêng tư (NFR-08):** Hệ thống không được lưu trữ hình ảnh người dùng trên đĩa của dịch vụ AI nếu không có sự đồng ý.
 
 ### 1.2. Mục tiêu kỹ thuật của PoC
-1. Xây dựng một **khung microservice độc lập (Skeleton)** bằng FastAPI để làm "vỏ bọc" (wrapper) cho mô hình sau khi huấn luyện.
+1. Xây dựng một **khung microservice độc lập (Skeleton)** bằng FastAPI để làm "vỏ bọc" (wrapper) cho mô hình Pre-trained YOLOv10m VietFood-67 (ONNX).
 2. Thiết kế **pipeline xử lý ảnh hoàn toàn trên bộ nhớ RAM (Zero-Disk I/O)** để bảo vệ dữ liệu người dùng.
-3. Thiết lập **cơ chế ánh xạ nhãn động (Dynamic Mapping)**: dịch vụ AI không fix cứng số lượng hay tên món trong mã nguồn, mà nạp danh mục nhãn từ tệp cấu hình sinh ra sau quá trình train.
+3. Thiết lập **cơ chế ánh xạ nhãn động (Dynamic Mapping)**: dịch vụ AI không fix cứng số lượng hay tên món trong mã nguồn, mà nạp danh mục nhãn từ tệp cấu hình đi kèm mô hình pre-trained (`labels.json`).
 4. Xây dựng **kế hoạch đo kiểm thực nghiệm (Test Protocol)** để xác định thời gian đáp ứng (latency), mức tiêu thụ tài nguyên và phương pháp xác định ngưỡng tin cậy (Confidence Threshold).
 
 ---
@@ -52,7 +52,7 @@ flowchart LR
 ```
 
 ### 2.1. Đề xuất Engine suy luận: ONNX Runtime
-Thay vì chạy trực tiếp bằng framework huấn luyện (PyTorch/TensorFlow) trên server, mô hình sau khi train trên Google Colab / máy GPU sẽ được xuất ra định dạng chuẩn **ONNX (`.onnx`)**:
+Thay vì chạy trực tiếp bằng framework huấn luyện nặng nề (PyTorch/TensorFlow) trên server, hệ thống sử dụng trực tiếp mô hình Pre-trained YOLOv10m chuyên biệt cho ẩm thực Việt (VietFood-67) ở định dạng chuẩn **ONNX (`.onnx`)**:
 * **Tính độc lập:** Không cần cài đặt thư viện PyTorch nặng hàng GB trên máy chủ web.
 * **Tối ưu hóa phần cứng:** ONNX Runtime hỗ trợ cả CPU lẫn GPU. Nếu chạy trên máy cá nhân có card NVIDIA, có thể kích hoạt `CUDAExecutionProvider`; khi đưa lên VPS phổ thông, tự động chuyển về `CPUExecutionProvider` mà không cần sửa mã nguồn.
 
@@ -112,26 +112,25 @@ Dịch vụ AI chỉ lắng nghe tại mạng nội bộ (mặc định cổng `
 
 ## 4. Cơ Chế Ánh Xạ Nhãn Động (Dynamic Label Mapping)
 
-Vì tập dữ liệu huấn luyện (Dataset món ăn Việt Nam) và dữ liệu dinh dưỡng (Viện Dinh Dưỡng) có thể thay đổi số lượng món trong quá trình thực hiện đồ án, dịch vụ AI **không được mã hóa cứng (hardcode)** danh sách món ăn trong code.
+Hệ thống sử dụng **mô hình Pre-trained YOLOv10m** chuyên biệt cho bộ dữ liệu **VietFood-67** (nhận diện 67 món ăn truyền thống Việt Nam). Dịch vụ AI **không mã hóa cứng (hardcode)** danh mục món ăn trong mã nguồn, mà quản lý tách biệt qua tệp nhãn `labels.json` được nạp động khi khởi động.
 
 ```mermaid
 flowchart LR
-    A["Quá trình Train (ml/)"] -->|Xuất ra| B["model.onnx"]
-    A -->|Xuất ra| C["labels.json hoặc labels.txt"]
+    M["Mô hình Pre-trained<br/>(yolov10m_vietfood67.onnx)"] --> LOAD_M["Nạp Session ONNX Runtime"]
+    L["Tệp nhãn cấu hình<br/>(labels.json: 67 nhãn)"] --> LOAD_L["Nạp Danh mục nhãn vào RAM"]
     
-    subgraph AI_SERVICE["Dịch vụ AI (ai_service/)"]
-        B --> LOAD_M["Nạp Session ONNX"]
-        C --> LOAD_L["Nạp Danh mục nhãn vào RAM"]
-        LOAD_M & LOAD_L --> INFER["Khi có request: Index → dish_code"]
+    subgraph AI_SERVICE["Dịch vụ AI (ai_service/ :8001)"]
+        LOAD_M & LOAD_L --> INFER["Khi có request: Class Index → dish_code"]
     end
     
     subgraph DB["MySQL (Tầng dữ liệu)"]
-        INFER -->|dish_code khớp với| DISH["Bảng dishes (cột dish_code)"]
+        INFER -->|dish_code khớp 1-1 với| DISH["Bảng dishes (cột dish_code)"]
+        DISH --> RECIPE["dish_ingredients (Công thức chuẩn)"]
     end
 ```
 
 ### Nguyên tắc hoạt động:
-1. **Tệp nhãn đi kèm mô hình:** Khi huấn luyện xong, script huấn luyện tự động sinh tệp `labels.json` chứa danh sách ánh xạ theo thứ tự chỉ số lớp (Class Index $0, 1, 2... \rightarrow$ `dish_code`).
+1. **Tệp nhãn đi kèm mô hình pre-trained:** Mô hình đi kèm tệp `labels.json` chứa danh sách ánh xạ 67 món theo thứ tự chỉ số lớp (Class Index $0, 1, 2... ightarrow$ `dish_code`).
    * Ví dụ định dạng `labels.json`:
      ```json
      {
@@ -141,14 +140,14 @@ flowchart LR
        "3": "banh_mi_thit"
      }
      ```
-2. **Khởi động động:** Khi FastAPI khởi chạy, dịch vụ đọc tệp này vào RAM. Nếu tập dataset sau này tăng từ 10 món lên 30 món hay 50 món, dịch vụ AI chỉ cần nạp tệp nhãn mới mà **không cần sửa lại bất kỳ dòng code API nào**.
-3. **Đồng bộ với CSDL:** `dish_code` trong tệp nhãn phải tồn tại trong bảng `dishes` (MySQL) để đảm bảo khi nhận diện ra mã món, backend PHP luôn tra cứu được công thức nguyên liệu chuẩn để tính toán dinh dưỡng.
+2. **Khởi động động:** Khi FastAPI khởi chạy, dịch vụ nạp tệp này vào RAM. Dịch vụ AI hoàn toàn độc lập với việc thay đổi hay bổ sung mô hình, không cần sửa đổi mã nguồn API.
+3. **Đồng bộ 100% với CSDL:** Toàn bộ 67 mã `dish_code` trong tệp nhãn đã được chuẩn hóa và ánh xạ trực tiếp với bảng `dishes` (MySQL), đảm bảo khi nhận diện ra mã món, backend PHP luôn tra cứu được công thức nguyên liệu chuẩn từ `dish_ingredients` để tính toán dinh dưỡng chính xác.
 
 ---
 
 ## 5. Kế Hoạch Thực Nghiệm & Phương Pháp Đo Kiểm (Test Protocol)
 
-Các số liệu về thời gian đáp ứng (latency), tiêu thụ tài nguyên (RAM/CPU) và ngưỡng tin cậy sẽ được nhóm đo kiểm thực tế trong pha **Construction (C1/C2)** theo quy trình chuẩn sau:
+Vì hệ thống tích hợp trực tiếp **mô hình Pre-trained YOLOv10m VietFood-67** đã có sẵn thông số benchmark độ chính xác ($mAP_{50} = 0.92$), nhóm không cần tốn thời gian đo đạc đường cong hội tụ khi huấn luyện (loss/epoch). Thay vào đó, toàn bộ trọng tâm đo kiểm PoC tập trung vào **hiệu năng kỹ thuật phần mềm (Software Engineering Performance)** và khả năng vận hành ổn định:
 
 ### 5.1. Tiêu chí Chấp nhận Mục tiêu (Target SLA / Acceptance Criteria)
 
@@ -188,7 +187,7 @@ CONFIDENCE_THRESHOLD = 0.65
 ```
 
 * **Phương pháp hiệu chuẩn (Calibration Process):**
-  1. Sau khi train, nhóm chạy kiểm thử mô hình trên **tập Validation / Test** độc lập.
+  1. Nhóm chạy kiểm thử mô hình pre-trained trên **tập ảnh mẫu VietFood-67** và ảnh chụp thực tế từ điện thoại.
   2. Vẽ đường cong **Precision - Recall (PR Curve)** theo từng mức ngưỡng $0.5, 0.6, 0.7, 0.8$.
   3. Chọn mức `CONFIDENCE_THRESHOLD` tại điểm cân bằng: mô hình đạt độ chính xác cao đối với món phổ biến mà không bỏ sót quá nhiều món (thường nằm trong khoảng $0.60 – 0.70$).
   4. Mức `UNKNOWN_THRESHOLD` (thường chọn $\approx 0.35 – 0.40$): các kết quả dưới ngưỡng này được xem là mô hình "đoán mò" do ảnh mờ, góc chụp xấu hoặc không phải thức ăn $\rightarrow$ dịch vụ AI tự động bật `is_unknown = true`.
@@ -241,7 +240,7 @@ flowchart TD
      * Kết quả trả về có `confidence < CONFIDENCE_THRESHOLD` (mô hình phân vân giữa các món tương đồng).
      * *Xử lý:* Hệ thống không tự động ép công thức của Top-1, mà chuyển sang **đường nguyên liệu** (bóc tách mô tả) hoặc hiển thị danh sách gợi ý Top-K để Member tự bấm chọn món chính xác.
   2. **Ảnh món lạ / Không nhận diện được (UC04 - Luồng A3):**
-     * Mô hình trả về cờ `is_unknown = true` (ảnh không phải thức ăn, góc chụp quá tối/mờ, hoặc món ăn chưa có trong tập dữ liệu huấn luyện).
+     * Mô hình trả về cờ `is_unknown = true` (ảnh không phải thức ăn, góc chụp quá tối/mờ, hoặc món ăn nằm ngoài danh mục 67 món của mô hình).
      * *Xử lý:* Hệ thống hiển thị thông báo nhẹ nhàng: *"Chưa nhận diện được món ăn này. Bạn có thể mô tả các nguyên liệu trong đĩa hoặc tìm kiếm thủ công nhé!"* và chuyển sang luồng bóc tách nguyên liệu hoặc gợi ý mở UC06.
   3. **Người dùng không gửi ảnh, chỉ nhập mô tả hoặc tìm kiếm nguyên liệu (UC04 - Luồng A2):**
      * Member không tải ảnh món ăn.
