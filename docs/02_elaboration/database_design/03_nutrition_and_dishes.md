@@ -128,22 +128,26 @@ Lưu trữ các từ đồng nghĩa, tên gọi địa phương 3 miền (Bắc 
 ---
 
 ### 2.3. Bảng `portion_units`
-Bảng quy đổi ước lượng đơn vị dân gian Việt Nam sang gram theo từng nguyên liệu.
+Bảng quy đổi ước lượng đơn vị dân gian Việt Nam sang gram theo từng nguyên liệu, hỗ trợ giao diện người dùng (UI/UX) điều chỉnh khẩu phần trực quan theo 3 nấc (`small`, `medium`, `large`).
 
 | Cột | Kiểu dữ liệu | Null | Mặc định | Ý nghĩa & Quy tắc |
 |---|---|:---:|---|---|
 | `id` | `BIGINT UNSIGNED` | No | AUTO_INCREMENT | Khóa chính |
-| `ingredient_id` | `BIGINT UNSIGNED` | No | | Mã nguyên liệu |
-| `unit_name` | `VARCHAR(40)` | No | | Tên đơn vị (bát, chén, quả, đùi, miếng...) |
-| `unit_norm` | `VARCHAR(40)` | No | | Chuẩn hóa tên đơn vị |
-| `size_label` | `ENUM('small','medium','large')` | No | `'medium'` | Kích thước (nhỏ, vừa, lớn) |
-| `grams_per_unit` | `DECIMAL(7,1)` | No | | Số gram tương ứng |
-| `note` | `VARCHAR(150)` | Yes | `NULL` | Ghi chú |
+| `ingredient_id` | `BIGINT UNSIGNED` | No | | Mã nguyên liệu gốc |
+| `unit_name` | `VARCHAR(40)` | No | | Tên đơn vị dân gian (bát, chén, quả, cái, bìa, miếng, muỗng canh, thìa cà phê...) |
+| `unit_norm` | `VARCHAR(40)` | No | | Chuẩn hóa tên đơn vị không dấu |
+| `size_label` | `ENUM('small','medium','large')` | No | `'medium'` | Kích thước / nấc định lượng: `small` (nhỏ/ít), `medium` (vừa/chuẩn), `large` (lớn/nhiều) |
+| `grams_per_unit` | `DECIMAL(7,1)` | No | | Số gram mốc đại diện chuẩn (anchor point) dùng cho tính toán dinh dưỡng |
+| `note` | `VARCHAR(150)` | Yes | `NULL` | Ghi chú dải gram tham chiếu (ví dụ: "Khoảng 1-10g", "Khoảng 11-20g", "1 quả vừa ~ 55g") phục vụ UI/UX hiển thị và tự động chuyển nấc |
 
 * **Khóa chính:** `PRIMARY KEY (id)`
 * **Ràng buộc duy nhất:** `UNIQUE KEY uq_portion (ingredient_id, unit_norm, size_label)`
 * **Khóa ngoại:** `CONSTRAINT fk_portion_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE`
 * **Ràng buộc kiểm tra:** `CONSTRAINT ck_portion_positive CHECK (grams_per_unit > 0)`
+
+**Quy tắc vận hành UI/UX (Ràng buộc hai chiều - Bidirectional Binding):**
+1. **Chiều chọn nhanh (Tier -> Grams):** Khi người dùng chọn nấc kích thước (`Small` / `Medium` / `Large`), UI tự động gán giá trị đại diện chuẩn `grams_per_unit` vào ô khối lượng.
+2. **Chiều kéo trượt / nhập số (Grams -> Tier):** Khi người dùng kéo thanh trượt (slider) hoặc gõ gram trực tiếp, UI căn cứ vào dải gram tham chiếu (được quy định ở `note` và các mốc chuyển tiếp) để tự động sáng đèn nấc kích cỡ tương ứng (`small` / `medium` / `large`), giúp người dùng có cảm nhận định lượng trực quan ngay lập tức.
 
 ---
 
