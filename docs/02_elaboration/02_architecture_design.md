@@ -45,25 +45,26 @@ Không chọn microservices cho toàn hệ thống: nhóm 3 người, 23 ngày, 
 
 ```mermaid
 flowchart LR
-    B([Trình duyệt<br/>HTML + Bootstrap + JS])
+    B([Trình duyệt Mobile / Desktop<br/>HTML + CSS + Vanilla JS])
     subgraph SERVER[Server / VPS]
-        NG[Nginx<br/>HTTPS, giới hạn kích thước upload]
-        subgraph PHP[PHP-FPM]
-            W[Pool web<br/>trang + API thường]
-            A[Pool analyze<br/>chỉ /api/food/analyze]
+        NG[Web Server / Nginx<br/>Phục vụ public/ & Reverse Proxy]
+        subgraph PHP[PHP Backend Monolith]
+            API[backend/index.php<br/>REST API Controllers & Services]
+            POOL_A[Pool analyze<br/>chuyên /api/food/analyze]
         end
-        DB[(MySQL)]
-        ST[[storage/<br/>tmp, images, logs]]
-        AI[Dịch vụ AI<br/>FastAPI + ONNX Runtime<br/>chỉ nghe nội bộ]
+        DB[(MySQL 8.0<br/>flexidiet: 18 bảng)]
+        ST[[storage/<br/>tmp, uploads, logs]]
+        AI[Python AI Microservice (:8001)<br/>FastAPI + ONNX Runtime<br/>yolov10m_vietfood67.onnx]
     end
-    B -- HTTPS --> NG
-    NG -- FastCGI --> W
-    NG -- FastCGI --> A
-    W --> DB
-    A --> DB
-    W --> ST
-    A --> ST
-    A -- HTTP nội bộ + khóa dịch vụ --> AI
+    B -- "HTTPS (Static Files)" --> NG
+    B -- "AJAX / Fetch API (JSON)" --> NG
+    NG -- "Tệp tĩnh (index.html, app.html, assets/)" --> B
+    NG -- FastCGI --> API
+    NG -- FastCGI --> POOL_A
+    API --> DB
+    POOL_A --> DB
+    API --> ST
+    POOL_A -- "cURL HTTP nội bộ + X-Service-Key" --> AI
 ```
 
 ---
@@ -99,44 +100,83 @@ Lưu ý bộ nhớ: mỗi tiến trình PHP-FPM chỉ chờ I/O ở pool `analyz
 
 ## 6. Cấu trúc ứng dụng PHP
 
-### 6.1. Cây thư mục đề xuất
+### 6.1. Cây thư mục thực tế của dự án (`FlexiDiet`)
+
+Cấu trúc thư mục thực tế được module hóa rõ ràng, phân tách rạch ròi giữa **Giao diện Web Client (`public/`)**, **Mã nguồn REST API Backend (`backend/`)**, **Dịch vụ AI Microservice (`ai_service/`)** và **Cơ sở dữ liệu (`database/`)**:
 
 ```
-flexidiet/
-├── public/                 # document root: index.php (front controller), assets/
-├── src/
-│   ├── Http/               # Router, Request, Response, Middleware/
-│   ├── Controllers/        # mỏng: nhận request, gọi Service, trả JSON/HTML
-│   ├── Services/           # EnergyEngine, BudgetService, FoodLogService, ...
-│   ├── Domain/
-│   │   ├── Strategies/     # BMR, ExerciseCreditPolicy, CalorieSource
-│   │   └── ...             # NutritionCalculator, PortionConverter, ...
-│   ├── Repositories/       # chỉ lớp này chạm PDO
-│   └── Clients/            # RecognitionClient (HTTP + Stub)
-├── views/                  # mẫu trang PHP
-├── config/                 # cấu hình, đọc từ biến môi trường
-├── database/               # schema.sql, seeds/
-├── scripts/                # seed_*.php, cleanup_tmp.php
-├── storage/                # tmp/, images/, logs/  (ngoài docroot)
-├── ai-service/             # dịch vụ suy luận: chỉ chạy mô hình đã huấn luyện + Dockerfile
-└── ml/                     # huấn luyện ngoại tuyến: gộp dữ liệu, ánh xạ nhãn, huấn luyện, đánh giá, xuất ONNX
-                            # (không triển khai lên server web)
+FlexiDiet/
+├── ai_service/                 # Dịch vụ Python AI Microservice độc lập (FastAPI + ONNX Runtime)
+│   ├── models/                 # Chứa mô hình pre-trained và cấu hình nhãn món ăn
+│   │   ├── yolov10m_vietfood67.onnx  # Model pre-trained VietFood-67 (30.8 MB, mAP50 = 0.92)
+│   │   └── labels.json         # Danh mục 67 nhãn món ăn chuẩn khớp 1-1 với dishes.dish_code
+│   ├── app.py                  # Ứng dụng FastAPI chính (POST /v1/recognize, GET /health)
+│   ├── requirements.txt        # Thư viện: onnxruntime, fastapi, uvicorn, pillow, numpy
+│   └── Dockerfile              # Đóng gói container chạy độc lập cổng 8001
+├── backend/                    # Toàn bộ mã nguồn PHP Monolith Backend (phục vụ REST API JSON)
+│   ├── api/                    # Bộ định tuyến endpoint (auth, food, workout, budget, dashboard...)
+│   ├── config/                 # Cấu hình hệ thống (database.php, app.php, đọc từ .env)
+│   ├── controllers/            # Controller mỏng: nhận request, validate, gọi Service, trả JSON
+│   ├── models/                 # Data Models & Entities (User, MealEntry, Workout, Ingredient...)
+│   ├── services/               # Lớp nghiệp vụ chuyên sâu:
+│   │   ├── EnergyEngine.php    # Tính BMR, Baseline, Ngân sách calo (áp sàn calo)
+│   │   ├── BudgetService.php   # Quản lý ngân sách ngày, tính calo tập được cộng, calo còn lại
+│   │   ├── FoodLogService.php  # Quản lý nhật ký ăn uống dạng snapshot bất biến (DD2)
+│   │   ├── NutritionCalculator.php # Nơi duy nhất tính kcal/macro từ gram (FR-03.20)
+│   │   ├── DescriptionParser.php   # Tách mô tả khẩu phần bằng Regex (số lượng, đơn vị, tên)
+│   │   ├── PortionConverter.php    # Quy đổi đơn vị dân gian sang gram qua portion_units (3 nấc)
+│   │   ├── CatalogService.php  # Tra cứu món/nguyên liệu (hỗ trợ bí danh qua ingredient_aliases)
+│   │   ├── WorkoutService.php  # Ghi bài tập, tính calo thô theo MET / thiết bị
+│   │   └── RecognitionClient.php   # Giao tiếp HTTP nội bộ với ai_service (:8001), có Stub
+│   └── index.php               # Front Controller tiếp nhận request API và điều phối middleware
+├── database/                   # Lược đồ DDL và bộ dữ liệu Seed thực tế (Hoàn thành 100%)
+│   ├── schema.sql              # Lược đồ DDL chính thức 18 bảng (InnoDB, utf8mb4, CHECK constraints)
+│   ├── seeds/                  # Bộ 5 file script SQL nạp dữ liệu hoàn chỉnh
+│   │   ├── 01_dishes.sql            # 67 món ăn chuẩn VietFood-67
+│   │   ├── 02_ingredients.sql       # 446 nguyên liệu chuẩn Viện Dinh Dưỡng & USDA
+│   │   ├── 03_dish_ingredients.sql  # 421 công thức thành phần định lượng cho 67 món
+│   │   ├── 04_ingredient_aliases.sql # 360 bí danh đồng nghĩa 3 miền Bắc - Trung - Nam
+│   │   └── 05_portion_units.sql     # 732 quy đổi khẩu phần dân gian (3 nấc kèm note dải gram)
+│   └── *.csv                   # Dữ liệu nguồn CSV đối soát (dishes, ingredients, aliases, portions)
+├── public/                     # Thư mục Web gốc (Document Root) phục vụ giao diện người dùng
+│   ├── index.html              # Landing Page: Giới thiệu giải pháp, tính thử TDEE/BMR, modal đăng nhập/đăng ký
+│   ├── app.html                # Web App SPA-like: Dashboard, Nhật ký ăn (camera/AI), Bài tập, Gợi ý, Hồ sơ
+│   ├── assets/                 # Tài nguyên tĩnh phục vụ giao diện
+│   │   ├── css/                # app.css (giao diện web app), home.css (landing), theme.css
+│   │   └── js/                 # app.js, home.js, theme.js (ES Modules, tương tác API qua fetch)
+│   └── uploads/                # Thư mục lưu trữ tạm thời ảnh upload / ảnh chụp món ăn
+└── storage/                    # Thư mục lưu trữ nội bộ (logs/, tmp/) ngoài Document Root
 ```
 
 ### 6.2. Quy tắc phân tầng
 
-1. Controller không chứa logic nghiệp vụ; chỉ kiểm tra đầu vào, gọi Service, định dạng kết quả.
-2. Chỉ **Repository** được dùng PDO; luôn dùng prepared statements (NFR-06).
-3. Mọi truy vấn dữ liệu cá nhân phải kèm điều kiện `user_id` lấy từ **phiên**, không lấy từ tham số do client gửi. Đây là chốt chặn chính chống truy cập chéo dữ liệu người dùng.
-4. Các lớp tính toán (`EnergyEngine`, `NutritionCalculator`, các Strategy) là **hàm thuần**, không đọc CSDL, để kiểm thử đơn vị dễ.
+1. **Controller mỏng:** Chỉ nhận HTTP request, xác thực định dạng đầu vào (input validation), ủy quyền xử lý cho Service tương ứng và trả JSON chuẩn.
+2. **Repository & Models:** Chỉ tầng này được phép tương tác trực tiếp với PDO MySQL; 100% truy vấn dùng prepared statements chống SQL Injection (NFR-06).
+3. **Chốt chặn phân quyền dữ liệu:** Mọi truy vấn đọc/ghi dữ liệu cá nhân (`meal_entries`, `workouts`, `weight_logs`, `daily_budgets`) đều bắt buộc kèm điều kiện `user_id` lấy từ **Session đã xác thực**, tuyệt đối không nhận `user_id` từ tham số do client gửi lên (NFR-07).
+4. **Hàm thuần trong tính toán:** Các lớp tính toán nghiệp vụ lõi (`EnergyEngine`, `NutritionCalculator`, `PortionConverter`) là các hàm thuần (Pure Functions) nhận tham số đầu vào và trả kết quả tính toán, không truy vấn CSDL trực tiếp, giúp việc viết unit test cực kỳ đơn giản và tin cậy.
 
 ### 6.3. Vòng đời một request
 
 ```
-Nginx → public/index.php (front controller) → Router
-      → Middleware: Session → Auth → CSRF → RateLimit (route nhạy cảm)
-      → Controller → Service → Repository (PDO) / Client (AI)
-      → Response (HTML hoặc JSON)
+Trình duyệt Web (public/index.html hoặc app.html)
+   │
+   ▼ Gọi Fetch API (kèm X-CSRF-Token, Cookie Session)
+Nginx / Web Server
+   │
+   ▼ Điều hướng request /api/*
+backend/index.php (Front Controller)
+   │
+   ▼ Pipeline Middleware: SessionManager → Authenticator → CsrfProtector → RateLimiter
+Controllers (API Endpoints)
+   │
+   ▼ Gọi nghiệp vụ
+Services (EnergyEngine, FoodLogService, CatalogService...)
+   │
+   ├── Truy vấn dữ liệu: Models / PDO MySQL (Prepared Statements)
+   └── Phân tích ảnh: RecognitionClient ──(HTTP JSON)──> ai_service:8001 (ONNX Runtime)
+   │
+   ▼ Chuẩn hóa dữ liệu trả về
+Response JSON (HTTP 200/400/401/422/500) ──> Client cập nhật DOM thời gian thực (Zero Page Reload)
 ```
 
 ### 6.4. Quy ước API
@@ -482,25 +522,36 @@ Chi tiết tham số và phản hồi sẽ viết khi bắt đầu C1, theo từ
 
 ---
 
-## 15. Kiến trúc giao diện
+## 15. Kiến trúc giao diện (Frontend Architecture)
 
-- **Trang** (theo `idea.md`): `/` (landing + modal đăng nhập), `/register`, `/dashboard`, `/food-log`, `/workout-log`, `/suggestions`, `/profile`, và `/admin` (Should).
-- **Render ở server** bằng PHP, khung Bootstrap 5 responsive, mobile-first.
-- **JavaScript theo mô-đun** (ES modules, không bundler): gọi API bằng `fetch` kèm mã CSRF, xử lý chụp/chọn ảnh (`<input type="file" accept="image/*" capture>`), thu nhỏ ảnh bằng canvas, vẽ biểu đồ (thư viện biểu đồ nhẹ).
-- Thao tác chính của UC04 (chụp, mô tả, xác nhận) làm được bằng một tay (NFR-11).
-- Thanh "Còn lại" là thành phần dùng chung ở `/dashboard` và `/food-log`, gọi `GET /api/budget`, được giữ ngay cả khi rút gọn Dashboard (FR-02.2).
+Giao diện FlexiDiet được thiết kế theo mô hình **Client-Side SPA-like nhẹ nhàng bằng Vanilla HTML5 / CSS3 / ES Modules** (không phụ thuộc vào framework cồng kềnh như React/Vue), giao tiếp với Backend qua REST API JSON:
+
+1. **Phân chia trang giao diện chính (`public/`):**
+   * **`public/index.html` (Landing Page):** Giới thiệu sản phẩm, giải thích cơ chế Ngân sách Calo Động, công cụ tính nhanh TDEE/BMR cho khách vãng lai (Guest), tích hợp modal đăng nhập/đăng ký đa bước (UC01, UC02).
+   * **`public/app.html` (Main Application):** Giao diện làm việc trung tâm của Member sau khi đăng nhập, tổ chức theo kiến trúc Single-Page Application (SPA) điều hướng chuyển đổi tab mượt mà không tải lại trang:
+     * *Tab Dashboard (UC09):* Thanh đo năng lượng ngân sách động ngày (FR-02.2), vòng tròn phân bổ macro (P/C/F), theo dõi lượng nước uống (FR-06.4) và biểu đồ cân nặng.
+     * *Tab Nhật ký ăn uống (UC04, UC05, UC06):* Tích hợp camera chụp ảnh hoặc tải ảnh món ăn, gọi AI phân tích, bảng bản nháp nguyên liệu trực quan với **thanh trượt 3 dải màu phân vùng (Small/Medium/Large)** đồng bộ 2 chiều với ô nhập gram, hỗ trợ tìm kiếm bổ sung nguyên liệu (tra bí danh 3 miền).
+     * *Tab Nhật ký tập luyện (UC07):* Ghi nhận buổi tập, tính calo tiêu hao theo MET hoặc thiết bị, áp chính sách cộng thưởng calo vào ngân sách ngày.
+     * *Tab Gợi ý món ăn (UC10 - Could):* Gợi ý món ăn thông minh dựa trên lượng calo và protein còn thiếu trong ngày.
+     * *Tab Hồ sơ cá nhân (UC03):* Cập nhật chỉ số thể chất, mục tiêu cân nặng, thay đổi công thức BMR và chính sách cộng calo tập.
+
+2. **Quy chuẩn mã nguồn JavaScript (`public/assets/js/`):**
+   * **`home.js`:** Quản lý tương tác trang chủ, tính thử TDEE, form validation đăng ký 4 bước, AJAX modal đăng nhập.
+   * **`app.js`:** Điều phối trạng thái ứng dụng (State Management), định tuyến tab view, gọi API `fetch()` kèm mã chống CSRF và xử lý phản hồi JSON, đồng bộ thanh trượt khẩu phần 3 màu với ô nhập gram.
+   * **`theme.js`:** Hỗ trợ chuyển đổi giao diện Sáng / Tối (Light / Dark Mode).
+   * **Xử lý ảnh client-side:** Sử dụng HTML5 `<input type="file" accept="image/*" capture>` để mở trực tiếp camera trên điện thoại; tự động thu nhỏ ảnh bằng HTML5 Canvas (cạnh dài tối đa $\le 1024$ px, nén JPEG 85%) trước khi gửi lên server, giúp tiết kiệm băng thông và giảm tối đa độ trễ truyền tải (NFR-11).
 
 ---
 
-## 16. Kế hoạch kiểm chứng kiến trúc
+## 16. Kế hoạch kiểm chứng kiến trúc (Milestone Status)
 
-| Việc | Khi nào | Kết quả cần có |
-|---|---|---|
-| Hợp đồng AI + `Stub` chạy được từ PHP | **07/10** | PHP và giao diện làm UC04 độc lập với mô hình thật |
-| Tích hợp mô hình ONNX + kiểm thử pipeline | **07/10 – 11/10** | Kiểm chứng end-to-end từ ảnh → dish_code → CSDL calo; đáp ứng NFR-02, NFR-04 |
-| Tích hợp PHP ↔ AI thật | C1 | Thay `Stub` bằng `Http`; kiểm thử tích hợp |
-| Load test nhẹ | C2 | p50/p95 của `/v1/recognize`, tỉ lệ `429`, CPU/RAM; chỉnh W, Q, pool `analyze`, timeout |
-| Thử đường lỗi | C2 | Tắt dịch vụ AI → các chức năng khác vẫn chạy (NFR-12) |
+| Hạng mục kiểm chứng | Thời hạn | Trạng thái hiện tại | Kết quả & Ghi chú kỹ thuật |
+|---|:---:|:---:|---|
+| **Đặc tả SRS, Use Case, CSDL & Hợp đồng AI** | **07/10** | ✅ **HOÀN THÀNH** | Đã chốt 14 Use Case, hợp đồng API AI `/v1/recognize` và 7 Quyết định thiết kế CSDL (DD1-DD7). |
+| **Lược đồ CSDL 18 bảng & Seed dinh dưỡng** | **08/10** | ✅ **HOÀN THÀNH** | Đã nạp thành công 67 món (`dishes`), 446 nguyên liệu (`ingredients`), 421 công thức (`dish_ingredients`), 360 bí danh (`ingredient_aliases`) và 732 quy đổi khẩu phần (`portion_units`) vào MySQL thật. |
+| **Tích hợp mô hình Pre-trained YOLOv10m ONNX** | **08/10 – 11/10** | 🔄 **ĐANG TIẾN HÀNH** | Đã có model `yolov10m_vietfood67.onnx` (30.8MB) và `labels.json`. Đang dựng FastAPI microservice (`ai_service/`) phục vụ `/v1/recognize`. |
+| **Khung kết nối PHP Backend ↔ AI & CSDL** | **09/10 – 11/10** | 🔄 **ĐANG TIẾN HÀNH** | Dựng Front Controller, PDO connection, `RecognitionClient` gọi sang AI microservice để hoàn thành **Executable Architectural Baseline**. |
+| **Tích hợp toàn diện & Load Test** | **Pha C1/C2** | ⏳ *Kế hoạch* | Kiểm thử tải đồng thời, đo latency $p50/p95$, tinh chỉnh hàng chờ Q, worker W và hoàn tất Web App. |
 
 Kịch bản load test: tăng dần số người dùng ảo gọi `/api/food/analyze` (có rate limit), ghi lại ngưỡng bắt đầu xuất hiện `429` và thời gian phản hồi. Chính các con số này là nội dung để trình bày điểm nhấn "quản lý nhiều người dùng gọi mô hình".
 
