@@ -197,36 +197,43 @@ Response JSON (HTTP 200/400/401/422/500) ──> Client cập nhật DOM thời 
 
 ```mermaid
 flowchart TB
-    subgraph PRES[Trình bày]
-        PG[Trang PHP + Bootstrap]
-        JS[JS: fetch API, resize ảnh, biểu đồ]
+    subgraph PRES["Tầng Trình Bày (Web Frontend)"]
+        UI["Giao diện Web (index.html, app.html)"]
+        JS["JS Client Modules (fetch API, Canvas, Chart)"]
     end
-    subgraph APP[Ứng dụng / Nghiệp vụ]
-        AUTH[AuthService]
-        PRO[ProfileService]
-        EE[EnergyEngine<br/>Strategy: BMR]
-        BUD[BudgetService<br/>Strategy: chính sách calo tập]
-        FL[FoodLogService]
-        REC[RecognitionOrchestrator]
-        DP[DescriptionParser]
-        PC[PortionConverter]
-        NC[NutritionCalculator]
-        CAT[CatalogService<br/>hệ thống + cá nhân]
-        WK[WorkoutService<br/>Strategy: nguồn calo]
-        DSH[DashboardService]
+    subgraph APP["Tầng Ứng Dụng & Nghiệp Vụ (Backend Services)"]
+        AUTH["AuthService"]
+        PRO["ProfileService"]
+        EE["EnergyEngine<br/>Strategy: BMR"]
+        BUD["BudgetService<br/>Strategy: chính sách calo tập"]
+        FL["FoodLogService"]
+        REC["RecognitionOrchestrator"]
+        DP["DescriptionParser"]
+        PC["PortionConverter"]
+        NC["NutritionCalculator"]
+        CAT["CatalogService<br/>hệ thống + cá nhân"]
+        WK["WorkoutService<br/>Strategy: nguồn calo"]
+        DSH["DashboardService"]
     end
-    subgraph DATA[Dữ liệu / Tích hợp]
-        REPO[Repositories - PDO]
-        RC[RecognitionClient<br/>HTTP / Stub]
+    subgraph DATA["Tầng Dữ Liệu & Tích Hợp"]
+        REPO["Repositories - PDO MySQL"]
+        RC["RecognitionClient<br/>HTTP / Stub"]
     end
-    PG --> JS
-    JS --> AUTH & PRO & BUD & FL & WK & DSH & CAT
+    UI --> JS
+    JS --> AUTH
+    JS --> PRO
+    JS --> BUD
+    JS --> FL
+    JS --> WK
+    JS --> DSH
+    JS --> CAT
     PRO --> EE
     EE --> BUD
     WK --> BUD
     FL --> REC
     REC --> RC
-    REC --> DP --> PC
+    REC --> DP
+    DP --> PC
     REC --> CAT
     FL --> NC
     CAT --> REPO
