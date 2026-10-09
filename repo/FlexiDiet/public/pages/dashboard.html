@@ -1,0 +1,83 @@
+<section class="page-view fd-dashboard" id="view-dashboard">
+  <div class="fd-page-head">
+    <div>
+      <span class="fd-eyebrow"><span class="fd-live-dot"></span> HÀNH TRÌNH KHỎE MẠNH</span>
+      <h1 id="dashboardGreeting">Một ngày tốt lành!</h1>
+      <p>Chăm sóc bản thân bắt đầu từ những lựa chọn nhỏ mỗi ngày.</p>
+    </div>
+    <button class="fd-date-chip" type="button" aria-label="Ngày hiện tại"><i class="fa-regular fa-calendar"></i><span id="dashboardDate">Hôm nay</span></button>
+  </div>
+
+  <div class="fd-overview-grid">
+    <article class="fd-calorie-hero">
+      <div class="fd-hero-sun"><i class="fa-solid fa-sun"></i></div>
+      <div class="fd-hero-topline"><span><i class="fa-solid fa-fire-flame-curved"></i> NGÂN SÁCH NĂNG LƯỢNG</span><span class="fd-hero-badge">HÔM NAY</span></div>
+      <div class="fd-hero-body">
+        <div class="fd-hero-copy">
+          <span class="fd-hero-overline">Calo bạn còn có thể nạp</span>
+          <div class="fd-big-number"><strong id="dashRemaining">950</strong><span>kcal</span></div>
+          <p id="dashEnergyHint">Bạn đang tiến gần mục tiêu. Cứ tiếp tục nhé!</p>
+          <button class="fd-hero-button" onclick="openCreateQuickModal()"><i class="fa-solid fa-plus"></i> Ghi bữa ăn</button>
+        </div>
+        <div class="fd-ring-wrap">
+          <div class="fd-ring" id="dashRing" style="--ring-pct: 67%;">
+            <div class="fd-ring-center"><i class="fa-solid fa-utensils"></i><strong id="dashPercent">67%</strong><span>đã sử dụng</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fd-hero-breakdown" aria-label="Cách tính ngân sách">
+        <div><span>Mục tiêu</span><strong id="dashTarget">1.850</strong><small>kcal</small></div>
+        <div><span>Đã ăn</span><strong id="dashConsumed">1.240</strong><small>kcal</small></div>
+        <div><span>Tập được cộng</span><strong id="dashBurned">+340</strong><small>kcal</small></div>
+      </div>
+    </article>
+
+    <div class="fd-mini-stats">
+      <article class="fd-stat-card">
+        <div class="fd-stat-icon fd-stat-orange"><i class="fa-solid fa-bowl-rice"></i></div>
+        <div><span>Đã nạp hôm nay</span><strong><span id="dashStatFood">1.240</span> <small>kcal</small></strong><p>Từ các bữa ăn đã ghi</p></div>
+        <i class="fa-solid fa-arrow-up-right-dots fd-stat-watermark"></i>
+      </article>
+      <article class="fd-stat-card">
+        <div class="fd-stat-icon fd-stat-lime"><i class="fa-solid fa-person-running"></i></div>
+        <div><span>Calo tập được cộng</span><strong><span id="dashStatWorkout">340</span> <small>kcal</small></strong><p>Góp phần tăng ngân sách</p></div>
+        <i class="fa-solid fa-heart-pulse fd-stat-watermark"></i>
+      </article>
+      <article class="fd-stat-card fd-stat-water">
+        <div class="fd-water-top"><div class="fd-stat-icon fd-stat-blue"><i class="fa-solid fa-droplet"></i></div><button type="button" class="fd-small-plus" onclick="addWaterQuick(0.25)" title="Thêm 250 ml nước"><i class="fa-solid fa-plus"></i><span>250ml</span></button></div>
+        <div><span>Nước đã uống</span><strong><span id="dashWater">1,75</span> <small>/ 2,5 L</small></strong></div>
+        <div class="fd-water-progress"><div id="dashWaterFill" style="width:70%"></div></div>
+        <p>Uống đủ nước cũng là một thành tựu nhỏ.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="fd-section-title fd-actions-heading"><div><span class="fd-section-kicker">DỄ DÀNG MỖI NGÀY</span><h2>Bạn muốn làm gì tiếp?</h2></div></div>
+  <div class="fd-action-grid">
+    <button class="fd-action-tile" onclick="openCreateQuickModal()"><span class="fd-action-symbol orange"><i class="fa-solid fa-plus"></i></span><span><strong>Thêm bữa ăn</strong><small>Ghi nhanh món vừa ăn</small></span><i class="fa-solid fa-arrow-up-right-from-square fd-action-arrow"></i></button>
+    <button class="fd-action-tile" onclick="switchTab('food-log')"><span class="fd-action-symbol violet"><i class="fa-solid fa-camera"></i></span><span><strong>Quét món ăn AI</strong><small>Nhận diện bằng ảnh · demo</small></span><i class="fa-solid fa-arrow-up-right-from-square fd-action-arrow"></i></button>
+    <button class="fd-action-tile" onclick="openCreateQuickModal(null, 'workout')"><span class="fd-action-symbol green"><i class="fa-solid fa-dumbbell"></i></span><span><strong>Ghi buổi tập</strong><small>Theo dõi calo đốt cháy</small></span><i class="fa-solid fa-arrow-up-right-from-square fd-action-arrow"></i></button>
+    <button class="fd-action-tile" onclick="switchTab('suggestions')"><span class="fd-action-symbol yellow"><i class="fa-solid fa-wand-magic-sparkles"></i></span><span><strong>Gợi ý món ăn</strong><small>Ăn ngon và cân bằng</small></span><i class="fa-solid fa-arrow-up-right-from-square fd-action-arrow"></i></button>
+  </div>
+
+  <div class="fd-lower-grid">
+    <article class="fd-panel fd-meals-panel">
+      <div class="fd-panel-head"><div><span class="fd-section-kicker">NHẬT KÝ DINH DƯỠNG</span><h2>Bữa ăn hôm nay</h2></div><button class="fd-text-button" onclick="switchTab('list')">Xem tất cả <i class="fa-solid fa-arrow-right"></i></button></div>
+      <div id="dashMeals" class="fd-meals-list" aria-live="polite"></div>
+      <button class="fd-dashed-button" onclick="openCreateQuickModal()"><i class="fa-solid fa-plus"></i> Ghi thêm món ăn</button>
+    </article>
+    <div class="fd-right-panels">
+      <article class="fd-panel fd-macro-panel">
+        <div class="fd-panel-head"><div><span class="fd-section-kicker">DINH DƯỠNG</span><h2>Phân bổ hôm nay</h2></div><span class="fd-panel-icon"><i class="fa-solid fa-chart-pie"></i></span></div>
+        <div id="dashMacros" class="fd-macro-list"></div>
+        <p class="fd-help-note">Các chỉ số đang là dữ liệu minh họa và sẽ lấy từ backend sau khi tích hợp.</p>
+      </article>
+      <article class="fd-motivation-card">
+        <span><i class="fa-solid fa-sparkles"></i> LỜI NHẮC NHỎ</span>
+        <h3>Không cần hoàn hảo.<br>Chỉ cần đều đặn.</h3>
+        <p>Một bữa ăn cân bằng và vài phút vận động hôm nay đều đáng được ghi nhận.</p>
+        <button onclick="switchTab('workout-log')">Xem nhật ký vận động <i class="fa-solid fa-arrow-right"></i></button>
+      </article>
+    </div>
+  </div>
+</section>

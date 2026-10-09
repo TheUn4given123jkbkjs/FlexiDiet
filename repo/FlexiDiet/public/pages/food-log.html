@@ -1,0 +1,136 @@
+<!-- FlexiDiet page module: food-log -->
+<section class="page-view" id="view-food-log">
+<div class="prototype-notice"><i class="fa-solid fa-circle-info"></i> AI Vision hiện là bản demo: kết quả quét ảnh/mô tả đang dùng dữ liệu mẫu, chưa kết nối mô hình thực.</div>
+<div class="view-inner-container">
+<p class="sub-muted" role="status" style="margin:10px 0">Nhận diện AI chưa được kết nối. Chỉ dùng chức năng ghi món thủ công hoặc món mẫu để thử nghiệm.</p>
+<div class="jira-section-header">
+<div>
+<span class="section-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Vision &amp; Food Logging</span>
+<h2>Nhật Ký Ăn Uống &amp; Nhận Diện Món Ăn Bằng AI</h2>
+</div>
+<div class="quick-filter-pills">
+<button class="btn-jira-tool" onclick="showToast('Đang lọc theo bữa ăn...', 'info')">Tất Cả Các Bữa</button>
+</div>
+</div>
+<!-- MySQL food catalog: nutrition is calculated on the server from recipe ingredients. -->
+<div class="jira-card-box" style="margin:18px 0;padding:20px;">
+  <h3 style="margin:0 0 10px"><i class="fa-solid fa-magnifying-glass"></i> Tìm món ăn từ cơ sở dữ liệu</h3>
+  <p class="sub-muted" style="margin-bottom:12px">Chọn món từ danh mục Việt Nam: calo và dinh dưỡng do PHP tính theo công thức lưu trong MySQL.</p>
+  <div class="form-row">
+    <div class="form-group" style="flex:2;min-width:180px"><label for="foodCatalogSearch">Tìm tên món</label><input class="jira-input" id="foodCatalogSearch" type="search" placeholder="Ví dụ: Phở bò, bún chả..."></div>
+    <div class="form-group"><label for="foodCatalogMeal">Bữa ăn</label><select class="jira-select" id="foodCatalogMeal"><option value="breakfast">Bữa sáng</option><option value="lunch" selected>Bữa trưa</option><option value="dinner">Bữa tối</option><option value="snack">Bữa phụ</option></select></div>
+  </div>
+  <div id="foodCatalogResults" role="status" aria-live="polite" style="margin-top:10px"></div>
+</div>
+<!-- AI SCANNER & PROMPT SECTION -->
+<div class="ai-scanner-card">
+<div class="scanner-left-zone">
+<div class="scanner-drop-area" id="dropArea" onclick="document.getElementById('foodImageInput').click()">
+<input accept="image/*" id="foodImageInput" onchange="handleImageUpload(event)" style="display:none;" type="file"/>
+<div class="drop-content" id="dropAreaContent">
+<i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+<h4>Kéo thả hoặc tải ảnh món ăn lên</h4>
+<p>AI Vision sẽ quét hình dạng, ước tính khối lượng và bóc tách Calories &amp; Macros</p>
+<span class="btn-select-file"><i class="fa-solid fa-camera"></i> Chọn Ảnh Chụp</span>
+</div>
+<!-- Image preview box -->
+<div class="image-preview-wrap" id="imagePreviewWrap" style="display: none;">
+<img alt="Scanned Food" id="scannedImagePreview" src=""/>
+<div class="laser-scanner" id="laserScanner"></div>
+</div>
+</div>
+<!-- Quick Demo Food Photos for 1-Click Testing -->
+<div class="demo-samples-row">
+<span class="sample-lbl">Ảnh mẫu thử nhanh:</span>
+<button class="sample-btn" onclick="loadFoodSample('pho_bo')">🍜 Phở Bò</button>
+<button class="sample-btn" onclick="loadFoodSample('com_tam')">🍖 Cơm Tấm</button>
+<button class="sample-btn" onclick="loadFoodSample('bun_cha')">🥗 Bún Chả</button>
+<button class="sample-btn" onclick="loadFoodSample('banh_mi')">🥖 Bánh Mì</button>
+<button class="sample-btn" onclick="loadFoodSample('salad_ga')">🥗 Salad Gà</button>
+<button class="sample-btn" onclick="loadFoodSample('goi_cuon')">🍤 Gỏi Cuốn</button>
+</div>
+</div>
+<!-- Prompt description and AI Result Box -->
+<div class="scanner-right-zone">
+<div class="prompt-box">
+<label><i class="fa-solid fa-pen-to-square"></i> Hoặc mô tả bữa ăn tự nhiên (Prompt):</label>
+<div class="prompt-input-row">
+<input id="foodPromptInput" placeholder="Ví dụ: 1 bát cơm trắng, 150g ức gà áp chảo, 1 đĩa rau cải luộc..." type="text"/>
+<button class="btn-ai-analyze" onclick="triggerAIAnalysis()">
+<i class="fa-solid fa-wand-magic-sparkles"></i>
+<span>Phân Tích AI</span>
+</button>
+</div>
+</div>
+<!-- AI Result Card (Interactive Correction) -->
+<div class="ai-result-panel" id="aiResultPanel">
+<div class="arp-header">
+<div class="arp-title">
+<span class="badge-ai-acc"><i class="fa-solid fa-check"></i> Độ chính xác: <strong id="resConfidence">98.5%</strong></span>
+<h3 id="resFoodName">Phở Bò Tái Nạm (Bát Vừa)</h3>
+</div>
+<div class="arp-meal-select">
+<select class="jira-select" id="resMealType">
+<option selected="" value="breakfast">Bữa Sáng</option>
+<option value="lunch">Bữa Trưa</option>
+<option value="dinner">Bữa Tối</option>
+<option value="snack">Bữa Phụ</option>
+</select>
+</div>
+</div>
+<div class="arp-macros-grid">
+<div class="macro-box">
+<span class="mb-label">Calo</span>
+<span class="mb-val text-orange" id="resCal">485 <small>kcal</small></span>
+</div>
+<div class="macro-box">
+<span class="mb-label">Protein</span>
+<span class="mb-val text-blue" id="resProt">32.5 <small>g</small></span>
+</div>
+<div class="macro-box">
+<span class="mb-label">Carb</span>
+<span class="mb-val text-green" id="resCarb">68.0 <small>g</small></span>
+</div>
+<div class="macro-box">
+<span class="mb-label">Fat</span>
+<span class="mb-val text-amber" id="resFat">11.2 <small>g</small></span>
+</div>
+</div>
+<!-- Grams Correction Slider -->
+<div class="arp-grams-adjust">
+<div class="adjust-header">
+<span>Điều chỉnh khối lượng thực tế:</span>
+<strong id="gramsDisplay">450 g</strong>
+</div>
+<input id="gramsSlider" max="1000" min="50" oninput="adjustGrams(this.value)" step="10" type="range" value="450"/>
+</div>
+<div class="arp-actions">
+<button class="btn-jira-create btn-full" onclick="saveScannedFoodToLog()">
+<i class="fa-solid fa-plus"></i> Lưu Vào Nhật Ký &amp; Cập Nhật Calo
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Thư viện món ăn & Tìm kiếm (bổ sung theo spec) -->
+<div class="jira-card-box" style="margin-top: 20px;">
+<div class="box-head">
+<h3><i class="fa-solid fa-book-open text-green"></i> Thư Viện Món Ăn Việt Nam &amp; Món Của Tôi</h3>
+<span class="sub-muted">Tìm món có sẵn hoặc thêm món ăn tự tạo (My Foods)</span>
+</div>
+<div class="form-group full-width" style="margin-bottom: 14px;">
+<div class="input-unit-wrap">
+<i class="fa-solid fa-magnifying-glass" style="opacity:.5; margin-right:6px;"></i>
+<input class="jira-input" id="foodLibrarySearch" placeholder="Tìm món ăn, ví dụ: bún chả, cơm tấm..." style="border:none; padding-left:0;" type="text"/>
+</div>
+</div>
+<div class="food-library-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); gap:12px;">
+<div class="wh-item"><div class="wh-icon bg-purple"><i class="fa-solid fa-bowl-rice"></i></div><div class="wh-meta"><h4>Phở Bò Tái Nạm</h4><span class="wh-sub">485 kcal · 32g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+<div class="wh-item"><div class="wh-icon bg-blue"><i class="fa-solid fa-drumstick-bite"></i></div><div class="wh-meta"><h4>Cơm Tấm Sườn Bì</h4><span class="wh-sub">650 kcal · 34g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+<div class="wh-item"><div class="wh-icon bg-purple"><i class="fa-solid fa-utensils"></i></div><div class="wh-meta"><h4>Bún Chả Hà Nội</h4><span class="wh-sub">510 kcal · 28g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+<div class="wh-item"><div class="wh-icon bg-blue"><i class="fa-solid fa-baguette"></i></div><div class="wh-meta"><h4>Bánh Mì Thịt</h4><span class="wh-sub">450 kcal · 20g Protein</span></div><button class="btn-tbl-del" style="color:var(--primary);" title="Thêm nhanh vào nhật ký"><i class="fa-solid fa-plus"></i></button></div>
+<div class="wh-item" onclick="openCreateQuickModal('breakfast')" style="border-style:dashed; cursor:pointer;"><div class="wh-icon bg-purple"><i class="fa-solid fa-plus"></i></div><div class="wh-meta"><h4>Tạo món của tôi</h4><span class="wh-sub">Lưu món cá nhân (My Foods)</span></div></div>
+</div>
+</div>
+</div>
+</section>

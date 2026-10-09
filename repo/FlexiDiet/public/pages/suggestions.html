@@ -1,0 +1,96 @@
+<!-- FlexiDiet page module: suggestions -->
+<section class="page-view" id="view-suggestions">
+<div class="view-inner-container">
+<!-- Smart Alert Banner -->
+<div class="smart-alert-banner">
+<div class="sab-icon"><i class="fa-solid fa-lightbulb"></i></div>
+<div class="sab-content">
+<h3>Gợi Ý Bữa Ăn Theo Khoảng Calo Còn Thiếu</h3>
+<p>Ngân sách calo còn lại hôm nay: <strong class="text-green">950 kcal</strong> và bạn còn thiếu <strong class="text-blue">41g Protein</strong>. Dưới đây là các món ăn tối ưu nhất!</p>
+</div>
+<div class="sab-actions">
+<button class="btn-jira-tool" onclick="filterSuggestions('high_prot')"><i class="fa-solid fa-dna"></i> Lọc High-Protein</button>
+</div>
+</div>
+<!-- Quick Filters -->
+<div class="suggestions-filter-bar">
+<button class="s-filter-btn active" onclick="filterSuggestions('all', this)">Tất Cả Món Gợi Ý</button>
+<button class="s-filter-btn" onclick="filterSuggestions('high_prot', this)">🍗 Nhiều Đạm (&gt; 25g Protein)</button>
+<button class="s-filter-btn" onclick="filterSuggestions('viet', this)">🇻🇳 Món Việt Thơm Ngon</button>
+<button class="s-filter-btn" onclick="filterSuggestions('quick', this)">⚡ Nhanh Gọn (&lt; 15 Phút)</button>
+<button class="s-filter-btn" onclick="filterSuggestions('low_cal', this)">🥗 Ít Calo (&lt; 350 kcal)</button>
+</div>
+<!-- Suggestions Cards Grid -->
+<div class="suggestions-cards-grid" id="suggestionsGrid">
+<!-- Card 1: Salad Ức Gà -->
+<div class="suggest-card" data-tags="high_prot quick low_cal">
+<div class="sc-img-wrap">
+<img alt="Salad Ức Gà" src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
+<span class="sc-badge match-high">Khớp 99% Mục Tiêu</span>
+<span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15 phút</span>
+</div>
+<div class="sc-body">
+<h4>Salad Ức Gà Áp Chảo Rau Củ Healthy</h4>
+<p class="sc-desc">Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.</p>
+<div class="sc-nutrition-chips">
+<span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
+<span class="snc snc-prot">P: 38g</span>
+<span class="snc snc-carb">C: 14g</span>
+<span class="snc snc-fat">F: 8g</span>
+</div>
+</div>
+<div class="sc-footer">
+<button class="btn-jira-create btn-full" onclick="quickAddFood('Salad Ức Gà Áp Chảo', 340, 38, 14, 8)">
+<i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+</div>
+</div>
+<!-- Card 2: Bún Chả -->
+<div class="suggest-card" data-tags="viet high_prot">
+<div class="sc-img-wrap">
+<img alt="Bún Chả" src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
+<span class="sc-badge match-med">Món Việt Quen Thuộc</span>
+<span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 20 phút</span>
+</div>
+<div class="sc-body">
+<h4>Bún Chả Hà Nội Nướng Than Hoa</h4>
+<p class="sc-desc">Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.</p>
+<div class="sc-nutrition-chips">
+<span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 510 kcal</span>
+<span class="snc snc-prot">P: 28g</span>
+<span class="snc snc-carb">C: 64g</span>
+<span class="snc snc-fat">F: 16g</span>
+</div>
+</div>
+<div class="sc-footer">
+<button class="btn-jira-create btn-full" onclick="quickAddFood('Bún Chả Hà Nội', 510, 28, 64, 16)">
+<i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+</div>
+</div>
+<!-- Card 3: Gỏi Cuốn Tôm Thịt -->
+<div class="suggest-card" data-tags="viet quick low_cal">
+<div class="sc-img-wrap">
+<img alt="Gỏi Cuốn" src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
+<span class="sc-badge match-high">Ăn Nhẹ &amp; Thanh Lọc</span>
+<span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 10 phút</span>
+</div>
+<div class="sc-body">
+<h4>Gỏi Cuốn Tôm Thịt (3 Cuốn)</h4>
+<p class="sc-desc">Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.</p>
+<div class="sc-nutrition-chips">
+<span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 280 kcal</span>
+<span class="snc snc-prot">P: 22g</span>
+<span class="snc snc-carb">C: 34g</span>
+<span class="snc snc-fat">F: 6g</span>
+</div>
+</div>
+<div class="sc-footer">
+<button class="btn-jira-create btn-full" onclick="quickAddFood('Gỏi Cuốn Tôm Thịt', 280, 22, 34, 6)">
+<i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+              </button>
+</div>
+</div>
+</div>
+</div>
+</section>

@@ -1,0 +1,82 @@
+<!-- FlexiDiet page module: list -->
+<section class="page-view" id="view-list">
+<div class="view-inner-container">
+<div class="jira-section-header">
+<div>
+<span class="section-tag">Nhật Ký Chi Tiết</span>
+<h2>Danh Sách Nhật Ký Ăn Uống &amp; Bài Tập Trong Ngày</h2>
+</div>
+<div class="btn-group">
+<button class="btn-jira-create" onclick="openCreateQuickModal()"><i class="fa-solid fa-plus"></i> Thêm Món Mới</button>
+</div>
+</div>
+<div class="jira-table-card">
+<table class="jira-data-table">
+<thead>
+<tr>
+<th>Loại</th>
+<th>Tên Món / Bài Tập</th>
+<th>Bữa / Thời Gian</th>
+<th>Khối Lượng / Thời Lượng</th>
+<th>Calo (kcal)</th>
+<th>Protein (g)</th>
+<th>Carb (g)</th>
+<th>Fat (g)</th>
+<th>Trạng Thái</th>
+<th>Thao Tác</th>
+</tr>
+</thead>
+<tbody id="listTableBody">
+<tr>
+<td><span class="type-pill food"><i class="fa-solid fa-utensils"></i> Món Ăn</span></td>
+<td><strong>Phở Bò Tái Nạm</strong></td>
+<td>Bữa Sáng (07:30)</td>
+<td>450 g</td>
+<td><strong class="text-orange">485</strong></td>
+<td>32.5g</td>
+<td>68.0g</td>
+<td>11.2g</td>
+<td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+<td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+</tr>
+<tr>
+<td><span class="type-pill food"><i class="fa-solid fa-utensils"></i> Món Ăn</span></td>
+<td><strong>Cơm Tấm Sườn Bì Chả</strong></td>
+<td>Bữa Trưa (12:15)</td>
+<td>420 g</td>
+<td><strong class="text-orange">650</strong></td>
+<td>34.0g</td>
+<td>82.0g</td>
+<td>21.5g</td>
+<td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+<td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+</tr>
+<tr>
+<td><span class="type-pill food"><i class="fa-solid fa-apple-whole"></i> Ăn Nhẹ</span></td>
+<td><strong>Táo Gala &amp; Hạnh Nhân</strong></td>
+<td>Bữa Phụ (15:30)</td>
+<td>150 g</td>
+<td><strong class="text-orange">105</strong></td>
+<td>2.0g</td>
+<td>24.0g</td>
+<td>1.0g</td>
+<td><span class="badge-done"><i class="fa-solid fa-check"></i> Đã nạp</span></td>
+<td><button class="btn-tbl-del" onclick="showToast('Đã xóa món ăn!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+</tr>
+<tr>
+<td><span class="type-pill workout"><i class="fa-solid fa-person-running"></i> Luyện Tập</span></td>
+<td><strong>Chạy Bộ Ngoài Trời (Pace 6.2)</strong></td>
+<td>Buổi Sáng (06:30)</td>
+<td>30 phút (4.8 km)</td>
+<td><strong class="text-green">-290</strong></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td><span class="badge-done-workout"><i class="fa-solid fa-dumbbell"></i> Đã hoàn thành</span></td>
+<td><button class="btn-tbl-del" onclick="showToast('Đã xóa bài tập!', 'info')"><i class="fa-solid fa-trash-can"></i></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>

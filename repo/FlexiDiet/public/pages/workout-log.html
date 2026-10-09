@@ -1,0 +1,126 @@
+<!-- FlexiDiet page module: workout-log -->
+<section class="page-view" id="view-workout-log">
+<div class="view-inner-container">
+<div class="jira-section-header">
+<div>
+<span class="section-tag">Luyện Tập &amp; Calo Tiêu Hao</span>
+<h2>Nhật Ký Luyện Tập &amp; Tính Calo Tiêu Hao (Công Thức MET)</h2>
+</div>
+<span class="badge-status-green" id="workoutTodayBurned"><i class="fa-solid fa-fire"></i> Hôm nay đã đốt: +340 kcal</span>
+</div>
+<!-- Heatmap data loaded from workouts in MySQL. -->
+<section class="fd-workout-heatmap" aria-labelledby="workoutHeatmapHeading">
+  <div class="fd-hm-heading">
+    <div class="fd-hm-heading-left">
+      <div class="fd-hm-logo" aria-hidden="true"><i class="fa-solid fa-chart-simple"></i></div>
+      <div>
+        <span class="fd-hm-subtitle">YOUR CONSISTENCY</span>
+        <h3 id="workoutHeatmapHeading">Hành trình luyện tập</h3>
+        <p>Mỗi chấm tròn là một ngày. Tập càng lâu, sắc xanh càng đậm.</p>
+      </div>
+    </div>
+    <label>
+      <select id="workoutHeatmapYear" class="fd-hm-year" aria-label="Chọn năm thống kê"></select>
+    </label>
+  </div>
+  <div class="fd-hm-stats">
+    <div class="fd-hm-stat"><span>Ngày có luyện tập</span><strong id="workoutHeatmapActiveDays">0</strong><small>ngày trong năm</small></div>
+    <div class="fd-hm-stat"><span>Tổng thời gian</span><strong id="workoutHeatmapTotalTime">0 phút</strong><small id="workoutHeatmapTotalTimeNote">lấy từ nhật ký của bạn</small></div>
+    <div class="fd-hm-stat"><span>Chuỗi liên tục dài nhất</span><strong id="workoutHeatmapStreak">0 ngày</strong><small>ngày có vận động</small></div>
+  </div>
+  <div class="fd-hm-scroll" tabindex="0" role="region" aria-label="Lịch luyện tập theo năm, cuộn ngang để xem các tháng">
+    <div class="fd-hm-calendar">
+      <div id="workoutHeatmapMonths" class="fd-hm-months" aria-hidden="true"></div>
+      <div class="fd-hm-layout">
+        <div class="fd-hm-weekdays" aria-hidden="true"><span></span><span>T2</span><span></span><span>T4</span><span></span><span>T6</span><span></span></div>
+        <div id="workoutHeatmapGrid" class="fd-hm-grid" aria-label="Lịch luyện tập"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fd-hm-bottom">
+    
+    <div class="fd-hm-legend" aria-label="Chú giải: từ không tập đến 90 phút trở lên">
+      <span class="fd-hm-legend-label">Ít</span>
+      <span class="fd-hm-legend-dot" aria-hidden="true"></span>
+      <span class="fd-hm-legend-dot" data-level="1" aria-hidden="true"></span>
+      <span class="fd-hm-legend-dot" data-level="2" aria-hidden="true"></span>
+      <span class="fd-hm-legend-dot" data-level="3" aria-hidden="true"></span>
+      <span class="fd-hm-legend-dot" data-level="4" aria-hidden="true"></span>
+      <span class="fd-hm-legend-label">Nhiều</span>
+    </div>
+  </div>
+  <div class="fd-hm-selection" aria-live="polite">
+    <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+    <span id="workoutHeatmapSelection">Bấm vào một ngày để xem số phút tập.</span>
+  </div>
+  <p class="fd-hm-footnote" id="workoutHeatmapNote">Biểu đồ được tổng hợp từ những buổi tập đã lưu trên máy chủ.</p>
+</section>
+<div class="workout-logging-grid">
+<!-- Workout Form -->
+<div class="jira-card-box">
+<div class="box-head">
+<h3><i class="fa-solid fa-dumbbell text-purple"></i> Ghi Nhận Buổi Tập Mới</h3>
+<p>Calo = MET × Cân nặng (68.5kg) × Thời gian (giờ)</p>
+</div>
+<form id="workoutForm" onsubmit="handleWorkoutSubmit(event)">
+<div class="form-row">
+<div class="form-group full-width">
+<label>Chọn Môn Thể Thao / Hoạt Động</label>
+<select class="jira-select" id="sportSelect" onchange="updateMETPreview()">
+<option data-met="8.5" selected="" value="running">Chạy bộ vừa (8.5 METs)</option>
+<option data-met="7.5" value="cycling">Đạp xe ngoài trời (7.5 METs)</option>
+<option data-met="5.0" value="gym">Tập Gym / Nâng tạ kháng lực (5.0 METs)</option>
+<option data-met="8.0" value="swimming">Bơi lội tự do (8.0 METs)</option>
+<option data-met="10.0" value="hiit">HIIT Cardio cường độ cao (10.0 METs)</option>
+<option data-met="11.0" value="jump_rope">Nhảy dây tốc độ cao (11.0 METs)</option>
+<option data-met="3.5" value="walking">Đi bộ nhanh 5km/h (3.5 METs)</option>
+<option data-met="2.8" value="yoga">Yoga / Dãn cơ phục hồi (2.8 METs)</option>
+<option data-met="6.0" value="badminton">Đánh cầu lông (6.0 METs)</option>
+<option data-met="9.0" value="football">Đá bóng sân cỏ (9.0 METs)</option>
+</select>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Thời Lượng Tập (Phút)</label>
+<div class="input-unit-wrap">
+<input id="workoutDuration" max="300" min="5" oninput="calculateBurnedCalPreview()" type="number" value="30"/>
+<span class="unit-tag">phút</span>
+</div>
+</div>
+<div class="form-group">
+<label>Quãng Đường (Nếu có)</label>
+<div class="input-unit-wrap">
+<input id="workoutDistance" min="0" step="0.1" type="number" value="4.8"/>
+<span class="unit-tag">km</span>
+</div>
+</div>
+</div>
+<!-- Live Burned Calorie Preview Box -->
+<div class="burned-preview-card">
+<div class="bpc-left">
+<span class="bpc-label">Ước Tính Calo Đốt Cháy:</span>
+<div class="bpc-val"><strong id="previewBurnedVal">291</strong> <small>kcal</small></div>
+</div>
+<div class="bpc-right">
+<i class="fa-solid fa-fire-flame-curved fire-anim"></i>
+</div>
+</div>
+<button class="btn-jira-create btn-full" style="margin-top: 16px;" type="submit">
+<i class="fa-solid fa-plus"></i> Thêm Vào Lịch Sử Luyện Tập
+              </button>
+</form>
+</div>
+<!-- Workout History Table -->
+<div class="jira-card-box">
+<div class="box-head">
+<h3><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Các Buổi Tập Gần Đây</h3>
+<span class="sub-muted">Chỉ cộng một phần theo chính sách ngân sách</span>
+</div>
+<div class="workout-history-list" id="workoutHistoryList">
+<!-- Được dựng từ appState.workoutLog bởi workout-heatmap.js. -->
+</div>
+</div>
+</div>
+</div>
+</section>

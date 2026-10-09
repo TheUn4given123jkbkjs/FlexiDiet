@@ -3,7 +3,7 @@ const signupPage = document.getElementById('signup-page');
 const signinOverlay = document.getElementById('signin-overlay');
 
 const APP_URL = 'app.html';
-const USER_KEY = 'flexidiet-user';
+// Authentication uses the PHP session cookie; not localStorage.
 
 function showSignup() {
   signinOverlay.classList.remove('open');
@@ -43,11 +43,9 @@ function showForgotPane() {
   document.getElementById('fp-email').focus();
 }
 
-// Đăng nhập / đăng ký thành công (demo): lưu người dùng rồi chuyển sang app.
-function goToApp(name, email) {
-  try { localStorage.setItem(USER_KEY, JSON.stringify({ name: name, email: email })); } catch (e) {}
-  location.href = APP_URL;
-}
+// Chuyển trang chỉ sau khi server xác thực thành công.
+function goToApp() { location.href = APP_URL; }
+function showAuthError(error) { alert(error.message || 'Có lỗi xảy ra.'); }
 
 document.getElementById('open-signup').addEventListener('click', showSignup);
 document.getElementById('open-signup-2').addEventListener('click', showSignup);
@@ -59,27 +57,26 @@ document.getElementById('to-signup').addEventListener('click', showSignup);
 document.getElementById('open-forgot').addEventListener('click', showForgotPane);
 document.getElementById('back-to-signin').addEventListener('click', showSigninPane);
 
-// Demo: chưa có backend nên chỉ hiển thị thông báo đã gửi email.
-// Khi có server, gọi API gửi mail đặt lại mật khẩu ở đây.
-forgotForm.addEventListener('submit', (e) => {
+// Chưa triển khai reset password: không giả thông báo đã gửi email.
+forgotForm.addEventListener('submit', e => {
   e.preventDefault();
-  document.getElementById('fp-sent-email').textContent = document.getElementById('fp-email').value.trim();
-  forgotForm.hidden = true;
-  forgotSuccess.hidden = false;
+  alert('Tính năng khôi phục mật khẩu đang được phát triển. Vui lòng liên hệ quản trị viên để được hỗ trợ.');
 });
 
 document.getElementById('to-signin').addEventListener('click', () => { showHome(); openSignin(); });
 
-document.getElementById('signin-form').addEventListener('submit', (e) => {
+document.getElementById('signin-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const email = document.getElementById('si-email').value.trim();
-  // Form đăng nhập không có tên: dùng tên đã lưu nếu cùng email, không thì lấy phần trước @
-  let name = email.split('@')[0];
+  const submit = e.currentTarget.querySelector('[type="submit"]');
+  if (submit) submit.disabled = true;
   try {
-    const prev = JSON.parse(localStorage.getItem(USER_KEY));
-    if (prev && prev.email === email && prev.name) name = prev.name;
-  } catch (e) {}
-  goToApp(name, email);
+    await FlexiAPI.request('/auth/login', {method:'POST', data:{
+      email:document.getElementById('si-email').value.trim(),
+      password:document.getElementById('si-pass').value
+    }});
+    goToApp();
+  } catch (error) { showAuthError(error); }
+  finally { if (submit) submit.disabled = false; }
 });
 
 signinOverlay.addEventListener('click', (e) => { if (e.target === signinOverlay) closeSignin(); });
@@ -88,7 +85,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSigni
 // ==============================================================================
 // ĐĂNG KÝ & ONBOARDING — Form 4 bước (Tài khoản → Chỉ số → Mục tiêu → Kế hoạch)
 // ==============================================================================
-const regState = { gender: 'male', goal: 'lose', calorieOffset: -500 };
+const regState = { gender: 'male', goal: 'lose', calorieOffset: -0.15 };
 
 function goToStep(step) {
   for (let i = 1; i <= 4; i++) {
@@ -115,7 +112,8 @@ function selectGoal(goal, offset, el) {
 }
 
 function calculateAndShowStep4() {
-  const age = parseInt(document.getElementById('ob-age').value, 10) || 24;
+  const birth = document.getElementById('ob-birth').value;
+  const age = birth ? Math.floor((Date.now() - new Date(birth).getTime()) / 31556952000) : 24;
   const height = parseInt(document.getElementById('ob-height').value, 10) || 170;
   const weight = parseFloat(document.getElementById('ob-weight').value) || 60;
   const gender = regState.gender;
@@ -125,9 +123,9 @@ function calculateAndShowStep4() {
   bmr = gender === 'male' ? bmr + 5 : bmr - 161;
   bmr = Math.round(bmr);
 
-  const pal = 1.375; // mặc định: vận động nhẹ
-  const tdee = Math.round(bmr * pal);
-  const target = Math.round(tdee + regState.calorieOffset);
+  const tdee = Math.round(bmr * 1.2); // baseline theo SRS
+  const floor = gender === 'male' ? 1500 : 1200;
+  const target = Math.max(floor, Math.round(tdee * (1 + regState.calorieOffset)));
 
   const setText = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
   setText('res-bmr', `${bmr.toLocaleString()} <small>kcal</small>`);
@@ -137,10 +135,24 @@ function calculateAndShowStep4() {
   goToStep(4);
 }
 
-function finishOnboardingToDashboard() {
-  const name = (document.getElementById('su-name').value || '').trim() || 'Bạn';
-  const email = (document.getElementById('su-email').value || '').trim();
-  goToApp(name, email);
+async function finishOnboardingToDashboard() {
+  const submit = document.querySelector('#step-pane-4 .btn-jira-create');
+  if (submit) submit.disabled = true;
+  try {
+    await FlexiAPI.request('/auth/register', {method:'POST', data:{
+      display_name:document.getElementById('su-name').value.trim(),
+      email:document.getElementById('su-email').value.trim(),
+      password:document.getElementById('su-pass').value,
+      sex:regState.gender,
+      birth_date:document.getElementById('ob-birth').value,
+      height_cm:Number(document.getElementById('ob-height').value),
+      weight_kg:Number(document.getElementById('ob-weight').value),
+      goal:regState.goal,
+      weekly_workout_goal:3
+    }});
+    goToApp();
+  } catch(error) { showAuthError(error); }
+  finally { if (submit) submit.disabled = false; }
 }
 
 // Video placeholder: nếu #guide-video có <source> thật thì tự ẩn placeholder

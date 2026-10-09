@@ -1,0 +1,99 @@
+<!-- FlexiDiet page module: profile -->
+<section class="page-view" id="view-profile">
+<div class="view-inner-container">
+<div class="jira-section-header">
+<div>
+<span class="section-tag">Tài Khoản &amp; Chỉ Số</span>
+<h2>Hồ Sơ Cá Nhân &amp; Quản Lý Chỉ Số Thể Chất</h2>
+</div>
+<button class="btn-top-landing" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng Xuất Về Trang Chủ</button>
+</div>
+<!-- Charts will be implemented after historical weight/budget APIs. Avoid fake statistics. -->
+<div class="jira-card-box" style="margin-bottom:24px;padding:22px;">
+  <h3><i class="fa-solid fa-chart-line"></i> Biểu đồ tiến trình</h3>
+  <p class="sub-muted" style="margin-top:10px;">Chưa có biểu đồ lịch sử thực. Hồ sơ và cân nặng hiện tại đã lưu trong MySQL; phiên bản tiếp theo sẽ tổng hợp các bản ghi <code>weight_logs</code>.</p>
+</div>
+<div class="profile-two-col-grid">
+<!-- Profile Card -->
+<div class="jira-card-box">
+<div class="profile-user-hero">
+<div class="profile-avatar-orange-lg">
+<i class="fa-solid fa-user"></i>
+</div>
+<div class="puh-info">
+<h3 id="profileName">Nguyễn Minh Anh</h3>
+<span class="puh-email" id="profileEmail">minhanh@gmail.com</span>
+<div class="puh-badges">
+<span class="badge-streak"><i class="fa-solid fa-fire"></i> Đang theo dõi</span>
+<span class="badge-level"><i class="fa-solid fa-shield-halved"></i> Thành viên FlexiDiet</span>
+</div>
+</div>
+</div>
+<hr class="jira-divider"/>
+<div class="form-grid">
+<div class="form-group">
+<label>Cân Nặng Hiện Tại (kg)</label>
+<input class="jira-input" id="prof-weight" step="0.1" type="number" value="68.5"/>
+</div>
+<div class="form-group">
+<label>Chiều Cao (cm)</label>
+<input class="jira-input" id="prof-height" type="number" value="172"/>
+</div>
+<div class="form-group">
+<label>Mục Tiêu Thể Hình</label>
+<select class="jira-select" id="prof-goal">
+<option selected="" value="lose">Giảm cân (−15% baseline)</option>
+<option value="maintain">Duy trì vóc dáng</option>
+<option value="gain">Tăng cân (+10% baseline)</option>
+<option value="build_muscle">Tăng cơ giảm mỡ</option>
+</select>
+</div>
+<div class="form-group">
+<label>Chính sách cộng calo vận động</label>
+<select class="jira-select" id="prof-credit-policy">
+  <option value="partial">Cộng 50% calo tập (mặc định)</option>
+  <option value="full">Cộng toàn bộ calo tập</option>
+  <option value="capped">Cộng tối đa 500 kcal/ngày</option>
+</select>
+</div>
+<div class="form-group">
+<label>Cân Nặng Mục Tiêu (kg)</label>
+<input class="jira-input" id="prof-target-weight" step="0.5" type="number" value="63.0"/>
+</div>
+</div>
+<button class="btn-jira-create btn-full" onclick="updateProfileMetrics()" style="margin-top: 16px;">
+<i class="fa-solid fa-floppy-disk"></i> Lưu &amp; Cập Nhật Lại BMR/TDEE
+            </button>
+</div>
+<!-- Account Settings & Preferences -->
+<div class="jira-card-box">
+<div class="box-head">
+<h3><i class="fa-solid fa-sliders"></i> Tùy Chọn Ứng Dụng FlexiDiet</h3>
+</div>
+<div class="pref-list">
+<div class="pref-item">
+<div>
+<h4>Giao Diện Nền Tối</h4>
+<p>Tối ưu thị giác khi làm việc ban đêm.</p>
+</div>
+<input checked="" class="jira-toggle" disabled="" type="checkbox"/>
+</div>
+<div class="pref-item">
+<div>
+<h4>Nhắc Nhở Uống Nước Tự Động</h4>
+<p>Gửi thông báo nhắc nhở mỗi 2 tiếng.</p>
+</div>
+<input checked="" class="jira-toggle" onchange="showToast('Đã cập nhật nhắc nhở uống nước!', 'info')" type="checkbox"/>
+</div>
+<div class="pref-item">
+<div>
+<h4>Tự Động Phân Tích AI Vision</h4>
+<p>Tự động nhận diện sau khi chọn ảnh.</p>
+</div>
+<input checked="" class="jira-toggle" onchange="showToast('Đã kích hoạt AI Vision auto-scan!', 'info')" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>

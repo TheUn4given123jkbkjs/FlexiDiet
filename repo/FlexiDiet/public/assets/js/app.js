@@ -2,9 +2,15 @@
  * FLEXIDIET - APP (Board, Food/Workout Log, AI Scanner, Charts, Onboarding, Profile)
  */
 
+// Calendar dates use the browser's LOCAL day (not UTC), avoiding midnight shifts.
+function localDayKey(date = new Date()) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 // Application State
 const appState = {
-  activeTab: 'board',
+  activeTab: 'dashboard',
   currentStep: 1,
   user: {
     name: 'Nguyễn Minh Anh',
@@ -30,6 +36,13 @@ const appState = {
     waterTarget: 2.5,
     steps: 7850
   },
+  foodLog: [
+    {name:'Phở bò tái nạm',meal:'breakfast',cal:485,prot:32.5,carb:68,fat:11.2,time:'07:30'},
+    {name:'Cơm tấm sườn bì chả',meal:'lunch',cal:650,prot:34,carb:82,fat:21.5,time:'12:15'},
+    {name:'Táo Gala & hạnh nhân',meal:'snack',cal:105,prot:2,carb:24,fat:1,time:'15:30'}
+  ],
+  workoutLog: [{name:'Chạy bộ ngoài trời',minutes:30,burned:290,time:'06:30',date:localDayKey()},{name:'Đi bộ nhẹ',minutes:15,burned:50,time:'17:00',date:localDayKey()}],
+  macros: {protein:94,carbs:145,fat:36,targets:{protein:135,carbs:205,fat:52}},
   foodPresets: {
     pho_bo: {
       name: 'Phở Bò Tái Nạm (Bát Vừa)',
@@ -100,52 +113,34 @@ let currentScannedBase = null;
 // 1. NAVIGATION TAB ROUTER (SWITCHING PAGES ON 1 MAIN PAGE)
 // ==============================================================================
 function switchTab(tabId) {
-  if (!document.getElementById('view-' + tabId)) tabId = 'board';
+  if (!document.getElementById('view-' + tabId)) tabId = 'dashboard';
   appState.activeTab = tabId;
-
-  // Update Navigation Tab Active Classes
-  const tabs = document.querySelectorAll('.jira-tab');
-  tabs.forEach(tab => {
-    if (tab.getAttribute('data-target') === tabId) {
-      tab.classList.add('active');
-    } else {
-      tab.classList.remove('active');
-    }
+  document.querySelectorAll('.app-nav-link').forEach(link => {
+    const active = link.dataset.target === tabId;
+    link.classList.toggle('active', active);
+    if (active) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
   });
-
-  // Update Page View Visibility
-  const views = document.querySelectorAll('.page-view');
-  views.forEach(view => {
-    if (view.id === `view-${tabId}`) {
-      view.classList.add('active');
-    } else {
-      view.classList.remove('active');
-    }
+  document.querySelectorAll('.page-view').forEach(view => {
+    view.classList.toggle('active', view.id === `view-${tabId}`);
   });
-
-  // Show/Hide Jira Sub-toolbar on specific pages (Hide on Landing for maximum focus)
-  const subToolbar = document.getElementById('jiraSubToolbar');
-  if (subToolbar) {
-    if (tabId === 'home') {
-      subToolbar.style.display = 'none';
-    } else {
-      subToolbar.style.display = 'block';
-    }
-  }
-
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Update URL hash
-  if (history.pushState) {
-    history.pushState(null, null, `#${tabId}`);
-  }
+  const pageNames = {
+    'dashboard':'Tổng quan', 'food-log':'Nhật ký ăn uống',
+    'workout-log':'Luyện tập', 'suggestions':'Gợi ý món ăn',
+    'profile':'Hồ sơ', 'list':'Danh sách chi tiết', 'board':'Bảng cũ'
+  };
+  const label = document.getElementById('currentPageLabel');
+  if (label) label.textContent = pageNames[tabId] || 'Tổng quan';
+  if (tabId === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+  if (location.hash !== `#${tabId}`) history.pushState(null, '', `#${tabId}`);
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 // ==============================================================================
 // 2. QUICK CREATE MODAL (+ CREATE BUTTON)
 // ==============================================================================
-function openCreateQuickModal(defaultMeal) {
+function openCreateQuickModal(defaultMeal, type = 'food') {
+  switchCreateTab(type);
   const modal = document.getElementById('createQuickModal');
   if (modal) {
     modal.classList.add('open');
@@ -198,7 +193,8 @@ function handleQuickFoodSubmit(e) {
 
   addCardToKanban(name, meal, cal, prot, carb, fat);
   closeCreateQuickModal();
-  showToast(`Đã thêm món "${name}" vào Kanban Board!`, 'success');
+  showToast(`Đã thêm món "${name}" vào nhật ký!`, 'success');
+  switchTab('dashboard');
 }
 
 function handleQuickWorkoutSubmit(e) {
@@ -207,22 +203,26 @@ function handleQuickWorkoutSubmit(e) {
   const duration = parseInt(document.getElementById('qwDuration').value) || 0;
   const burned = parseInt(document.getElementById('qwBurned').value) || 0;
 
+  appState.workoutLog.unshift({name:sport,minutes:duration,burned,time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}),date:localDayKey()});
   appState.energy.burned += burned;
   updateEnergyDisplay();
 
   closeCreateQuickModal();
   showToast(`Đã ghi nhận buổi tập "${sport}" (+${burned} kcal)!`, 'success');
+  switchTab('dashboard');
 }
 
 function addCardToKanban(name, meal, cal, prot, carb, fat) {
   const colContainer = document.getElementById(`cards-${meal}`);
-  if (!colContainer) return;
+  // Some meal types (e.g. snack) do not have a legacy Kanban column.
+  // Food still must be saved in the shared demo state.
 
+  const safeName = String(name).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const card = document.createElement('div');
   card.className = 'kanban-card';
   card.innerHTML = `
     <div class="card-title-row">
-      <span class="card-item-title">${name}</span>
+      <span class="card-item-title">${safeName}</span>
       <span class="card-key-tag">${meal.toUpperCase().slice(0, 3)}-${Math.floor(Math.random() * 90 + 10)}</span>
     </div>
     <p class="card-desc">Được thêm nhanh từ Quick Create Menu.</p>
@@ -237,9 +237,13 @@ function addCardToKanban(name, meal, cal, prot, carb, fat) {
       <div class="card-assignee-avatar orange"><i class="fa-solid fa-user"></i></div>
     </div>
   `;
-  colContainer.prepend(card);
+  if (colContainer) colContainer.prepend(card);
 
   // Update Energy
+  appState.foodLog.unshift({name,meal,cal,prot,carb,fat,time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})});
+  appState.macros.protein += prot;
+  appState.macros.carbs += carb;
+  appState.macros.fat += fat;
   appState.energy.consumed += cal;
   updateEnergyDisplay();
 
@@ -274,12 +278,17 @@ function updateEnergyDisplay() {
   if (elSumRemain) elSumRemain.innerText = `${appState.energy.remaining} kcal`;
   if (elSumConsumed) elSumConsumed.innerText = `-${appState.energy.consumed}`;
   if (elSumBurned) elSumBurned.innerText = `+${appState.energy.burned}`;
+  if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof renderActivityList === 'function') renderActivityList();
+  if (typeof renderWorkoutHeatmap === 'function') renderWorkoutHeatmap();
+  if (typeof renderWorkoutHistory === 'function') renderWorkoutHistory();
 }
 
 function addWaterQuick(amount) {
   appState.energy.water = Math.min(appState.energy.waterTarget, +(appState.energy.water + amount).toFixed(2));
   const el = document.getElementById('boardWaterVal');
   if (el) el.innerText = `${appState.energy.water} / ${appState.energy.waterTarget}L`;
+  if (typeof renderDashboard === 'function') renderDashboard();
   showToast(`Đã ghi nhận +${amount * 1000}ml nước uống! 💧`, 'info');
 }
 
@@ -384,13 +393,13 @@ function saveScannedFoodToLog() {
 
   addCardToKanban(currentScannedBase.name, mealType, cal, prot, carb, fat);
   showToast(`Đã lưu "${currentScannedBase.name}" vào nhật ký ${mealType}!`, 'success');
-  switchTab('board');
+  switchTab('dashboard');
 }
 
 function quickAddFood(name, cal, prot, carb, fat) {
   addCardToKanban(name, 'dinner', cal, prot, carb, fat);
   showToast(`Đã thêm "${name}" vào thực đơn Bữa Tối!`, 'success');
-  switchTab('board');
+  switchTab('dashboard');
 }
 
 // ==============================================================================
@@ -422,28 +431,13 @@ function handleWorkoutSubmit(e) {
   const distance = parseFloat(document.getElementById('workoutDistance').value) || 0;
   const burned = calculateBurnedCalPreview();
 
-  // Add to History
-  const historyList = document.getElementById('workoutHistoryList');
-  if (historyList) {
-    const item = document.createElement('div');
-    item.className = 'wh-item';
-    item.innerHTML = `
-      <div class="wh-icon bg-purple"><i class="fa-solid fa-person-running"></i></div>
-      <div class="wh-meta">
-        <h4>${sportName}</h4>
-        <span class="wh-sub">Hôm nay • ${duration} phút ${distance > 0 ? `• ${distance} km` : ''}</span>
-      </div>
-      <div class="wh-cal text-purple">+${burned} kcal</div>
-    `;
-    historyList.prepend(item);
-  }
-
+  appState.workoutLog.unshift({name:sportName, minutes:duration, burned,time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}),date:localDayKey()});
   // Update Energy
   appState.energy.burned += burned;
   updateEnergyDisplay();
 
   showToast(`Đã lưu buổi tập "${sportName}" (+${burned} kcal)!`, 'success');
-  switchTab('board');
+  switchTab('dashboard');
 }
 
 // ==============================================================================
@@ -477,7 +471,9 @@ function showToast(msg, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast-item ${type}`;
-  toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${msg}</span>`;
+  const icon = document.createElement('i'); icon.className = 'fa-solid fa-circle-info';
+  const span = document.createElement('span'); span.textContent = msg;
+  toast.append(icon, span);
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -555,6 +551,7 @@ function applyCurrentUser() {
   setText('profileName', user.name);
   if (user.email) setText('profileEmail', user.email);
   setText('greetingName', 'Xin chào, ' + user.name);
+  if (typeof renderDashboard === 'function') renderDashboard();
 
   document.querySelectorAll('[title*="Minh Anh"]').forEach(el => {
     el.title = el.title.replace(/(Nguyễn )?Minh Anh/, () => user.name);
@@ -573,14 +570,15 @@ window.addEventListener('hashchange', () => {
 });
 
 // Initialize on Load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('flexidiet:pages-ready', () => {
   applyCurrentUser();
   const hash = window.location.hash.replace('#', '');
   if (hash) {
     switchTab(hash);
   } else {
-    switchTab('board');
+    switchTab('dashboard');
   }
+  updateEnergyDisplay();
   calculateBurnedCalPreview();
 });
   

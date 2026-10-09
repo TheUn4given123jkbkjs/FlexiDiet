@@ -1,0 +1,88 @@
+/* Workout contribution calendar — independent styles, no dependency on dashboard.css. */
+.fd-workout-heatmap {
+  --hm-off: #eef1ec;
+  --hm-1: #d4f3db;
+  --hm-2: #93dfac;
+  --hm-3: #46bd77;
+  --hm-4: #17834c;
+  --hm-future: #f5f6f3;
+  margin: 0 0 24px;
+  padding: 25px 27px 22px;
+  border: 1px solid var(--fd-border, var(--line, #e5e7eb));
+  border-radius: 20px;
+  background: var(--fd-surface, var(--surface, #fff));
+  color: var(--fd-ink, var(--text, #193325));
+  box-shadow: var(--fd-shadow, 0 10px 25px rgba(20, 60, 35, .04));
+  font-family: 'DM Sans', sans-serif;
+}
+.fd-workout-heatmap * { box-sizing: border-box; }
+.fd-hm-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.fd-hm-heading-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fd-hm-logo { width: 43px; height: 43px; flex: none; border-radius: 13px; background: #e4f5e7; color: #298953; display: grid; place-items: center; font-size: 18px; }
+.fd-hm-subtitle { color: #8ba297; font-size: 10px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
+.fd-hm-heading h3 { margin: 5px 0 5px; font: 800 clamp(16px, 2vw, 20px)/1.3 'Plus Jakarta Sans', sans-serif; color: inherit; }
+.fd-hm-heading p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--fd-subtle, var(--text-soft, #718276)); }
+.fd-hm-year { flex: none; border-radius: 11px; border: 1px solid var(--fd-border, #e6e9e7); color: inherit; background: var(--fd-surface, #fff); font: 700 12px 'DM Sans', sans-serif; padding: 10px 12px; cursor: pointer; }
+.fd-hm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 23px 0 21px; gap: 12px; }
+.fd-hm-stat { border: 1px solid var(--fd-border, #e8eeeb); border-radius: 13px; background: color-mix(in srgb, var(--fd-green-soft, #eef7ef) 42%, var(--fd-surface, #fff)); padding: 15px 17px; display: grid; gap: 5px; }
+.fd-hm-stat span { color: var(--fd-subtle, #718276); font-size: 11px; font-weight: 600; }
+.fd-hm-stat strong { font: 800 clamp(19px, 2.5vw, 25px)/1.25 'Plus Jakarta Sans', sans-serif; letter-spacing: -.6px; color: var(--fd-ink, #143a23); }
+.fd-hm-stat small { font: 600 10px 'DM Sans', sans-serif; color: var(--fd-subtle, #718276); }
+.fd-hm-scroll { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2px 0 14px; scrollbar-width: thin; scrollbar-color: #b9d3c2 transparent; }
+.fd-hm-calendar { width: max-content; min-width: 100%; }
+.fd-hm-months { display: grid; grid-auto-columns: 13px; column-gap: 4px; grid-auto-flow: column; height: 24px; padding-left: 30px; font-size: 10px; font-weight: 700; color: var(--fd-subtle, #718276); }
+.fd-hm-months span { align-self: start; white-space: nowrap; }
+.fd-hm-layout { display: flex; gap: 8px; align-items: flex-start; }
+.fd-hm-weekdays { display: grid; grid-template-rows: repeat(7, 13px); row-gap: 4px; width: 22px; flex: none; color: var(--fd-subtle, #718276); font-size: 9px; font-weight: 700; line-height: 13px; text-align: right; }
+.fd-hm-grid { display: grid; grid-template-rows: repeat(7, 13px); grid-auto-flow: column; grid-auto-columns: 13px; gap: 4px; }
+.fd-hm-day { display: block; width: 13px; height: 13px; margin: 0; padding: 0; border: 1px solid rgba(19, 95, 42, .035); border-radius: 50%; background: var(--hm-off); cursor: pointer; transition: outline .1s, transform .1s; }
+.fd-hm-day[data-level="1"] { background: var(--hm-1); }
+.fd-hm-day[data-level="2"] { background: var(--hm-2); }
+.fd-hm-day[data-level="3"] { background: var(--hm-3); }
+.fd-hm-day[data-level="4"] { background: var(--hm-4); }
+.fd-hm-day:hover { transform: scale(1.16); outline: 2px solid color-mix(in srgb, var(--hm-4) 24%, transparent); outline-offset: 2px; }
+.fd-hm-day:focus-visible { outline: 3px solid #2e8e57; outline-offset: 2px; }
+.fd-hm-day[aria-pressed="true"] { outline: 2px solid #276d47; outline-offset: 2px; }
+.fd-hm-day.is-future { background: var(--hm-future); cursor: default; border: 1px dashed var(--fd-border, #e5ebe6); opacity: .55; }
+.fd-hm-day.is-future:hover { transform: none; outline: none; }
+.fd-hm-placeholder { width: 13px; height: 13px; visibility: hidden; }
+.fd-hm-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 13px; padding-top: 5px; }
+.fd-hm-legend { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--fd-subtle, #718276); }
+.fd-hm-legend-label { margin: 0 5px; }
+.fd-hm-legend-dot { height: 12px; width: 12px; border-radius: 50%; background: var(--hm-off); }
+.fd-hm-legend-dot[data-level="1"] { background: var(--hm-1); }
+.fd-hm-legend-dot[data-level="2"] { background: var(--hm-2); }
+.fd-hm-legend-dot[data-level="3"] { background: var(--hm-3); }
+.fd-hm-legend-dot[data-level="4"] { background: var(--hm-4); }
+.fd-hm-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: var(--fd-subtle, #718276); cursor: pointer; user-select: none; }
+.fd-hm-toggle input { width: 15px; height: 15px; margin: 0; accent-color: #28784c; }
+.fd-hm-selection { display: flex; align-items: center; gap: 9px; margin-top: 18px; border-radius: 11px; background: var(--fd-green-soft, #ecf7ef); border: 1px solid var(--fd-border, #dcece0); padding: 11px 14px; font-size: 12px; color: var(--fd-ink, #1b4430); line-height: 1.5; }
+.fd-hm-selection i { color: #3c9a67; }
+.fd-hm-selection strong { font-weight: 800; }
+.fd-hm-footnote { margin: 11px 0 0; font-size: 10px; line-height: 1.6; color: var(--fd-subtle, #718276); }
+:root[data-theme="dark"] .fd-workout-heatmap {
+  --hm-off: #303a32; --hm-1: #355d45; --hm-2: #397c53; --hm-3: #46af71; --hm-4: #85df9f; --hm-future: #242c26;
+}
+:root[data-theme="dark"] .fd-hm-logo { background: #284732; color: #8cdaa5; }
+:root[data-theme="dark"] .fd-hm-day[aria-pressed="true"] { outline-color: #95e3a9; }
+:root[data-theme="dark"] .fd-hm-selection i { color: #9de1ab; }
+@media(max-width: 720px) {
+  .fd-workout-heatmap { padding: 19px 16px; border-radius: 16px; }
+  .fd-hm-heading { gap: 10px; }
+  .fd-hm-heading-left { align-items: flex-start; }
+  .fd-hm-logo { width: 35px; height: 35px; font-size: 15px; }
+  .fd-hm-heading h3 { font-size: 16px; }
+  .fd-hm-year { padding: 8px; }
+  .fd-hm-stats { gap: 7px; }
+  .fd-hm-stat { padding: 11px 9px; }
+  .fd-hm-stat span, .fd-hm-stat small { font-size: 9px; }
+  .fd-hm-stat strong { font-size: 17px; }
+  .fd-hm-scroll { margin-right: -5px; }
+}
+@media(prefers-reduced-motion: reduce) { .fd-hm-day { transition: none; } }
+
+/* Related workout history actions, to keep the calendar and log in sync. */
+.fd-workout-heatmap + .workout-logging-grid .fd-hm-delete { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border: 1px solid var(--fd-border, #e5e7eb); border-radius: 8px; background: transparent; color: var(--fd-subtle, #76877c); cursor: pointer; }
+.fd-workout-heatmap + .workout-logging-grid .fd-hm-delete:hover { color: #bf4848; background: rgba(191,72,72,.07); }
+.fd-workout-heatmap + .workout-logging-grid .wh-meta { min-width: 0; }
+@media(max-width: 470px) { .fd-workout-heatmap + .workout-logging-grid .wh-cal { font-size: 11px; } }

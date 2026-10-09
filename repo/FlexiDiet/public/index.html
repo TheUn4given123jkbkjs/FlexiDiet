@@ -384,7 +384,7 @@
             <!-- STEP 2 -->
             <div class="step-pane" id="step-pane-2">
               <div class="pane-header">
-                <h3><i class="fa-solid fa-heart-pulse"></i> Bước 2: Chỉ Số Cơ Thể & Mức Độ Vận Động (PAL)</h3>
+                <h3><i class="fa-solid fa-heart-pulse"></i> Bước 2: Chỉ Số Cơ Thể & Thông Tin Sinh Học</h3>
                 <p>Công thức Mifflin-St Jeor sử dụng các thông số này để tính mức trao đổi chất BMR.</p>
               </div>
               <div class="form-grid">
@@ -402,8 +402,8 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>Tuổi</label>
-                  <input type="number" id="ob-age" value="24" class="jira-input">
+                  <label>Ngày sinh</label>
+                  <input type="date" id="ob-birth" value="2002-01-01" class="jira-input" required>
                 </div>
                 <div class="form-group">
                   <label>Chiều Cao (cm)</label>
@@ -427,25 +427,25 @@
                 <p>Lựa chọn mức thâm hụt hoặc thặng dư Calo để điều chỉnh vóc dáng.</p>
               </div>
               <div class="goal-cards-grid">
-                <div class="goal-card active" onclick="selectGoal('lose', -500, this)">
+                <div class="goal-card active" onclick="selectGoal('lose', -0.15, this)">
                   <div class="goal-icon text-orange"><i class="fa-solid fa-fire"></i></div>
                   <h4>Giảm Cân & Đốt Mỡ</h4>
-                  <p>Thâm hụt -500 kcal/ngày</p>
+                  <p>Thâm hụt 15% so với baseline</p>
                 </div>
                 <div class="goal-card" onclick="selectGoal('maintain', 0, this)">
                   <div class="goal-icon text-blue"><i class="fa-solid fa-scale-balanced"></i></div>
                   <h4>Duy Trì Vóc Dáng</h4>
                   <p>Cân bằng Calo Nạp = Tiêu</p>
                 </div>
-                <div class="goal-card" onclick="selectGoal('gain', 400, this)">
+                <div class="goal-card" onclick="selectGoal('gain', 0.10, this)">
                   <div class="goal-icon text-green"><i class="fa-solid fa-arrow-trend-up"></i></div>
                   <h4>Tăng Cân Sạch</h4>
-                  <p>Thặng dư +400 kcal/ngày</p>
+                  <p>Thặng dư 10% so với baseline</p>
                 </div>
-                <div class="goal-card" onclick="selectGoal('recomp', -200, this)">
+                <div class="goal-card" onclick="selectGoal('build_muscle', 0.10, this)">
                   <div class="goal-icon text-purple"><i class="fa-solid fa-hand-fist"></i></div>
                   <h4>Tăng Cơ Giảm Mỡ</h4>
-                  <p>Giàu Đạm, Ít Tinh Bột</p>
+                  <p>Thặng dư 10% so với baseline</p>
                 </div>
               </div>
               <div class="step-nav-actions" style="margin-top: 20px;">
@@ -459,7 +459,7 @@
               <div class="pane-header text-center">
                 <div class="success-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
                 <h3>Kế Hoạch Dinh Dưỡng Của Bạn Đã Hoàn Tất!</h3>
-                <p>Công thức Mifflin-St Jeor & TDEE theo PAL:</p>
+                <p>Công thức Mifflin-St Jeor & Baseline theo sinh hoạt cơ bản:</p>
               </div>
               <div class="results-dashboard-card">
                 <div class="metrics-row">
@@ -532,6 +532,7 @@
   </div>
 </div>
 
+<script src="assets/js/api-client.js"></script>
 <script src="assets/js/home.js"></script>
 
 </body>

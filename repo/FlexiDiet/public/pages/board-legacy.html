@@ -1,0 +1,271 @@
+<!-- FlexiDiet page module: board-legacy -->
+<section class="page-view" id="view-board">
+<!-- Top Energy Summary Bar -->
+<div class="board-top-summary-strip">
+<div class="strip-card">
+<div class="sc-icon text-blue"><i class="fa-solid fa-bullseye"></i></div>
+<div class="sc-info">
+<span class="sc-label">Mục Tiêu Ngày</span>
+<span class="sc-value" id="boardTargetCal">1,850 <small>kcal</small></span>
+</div>
+</div>
+<div class="strip-card">
+<div class="sc-icon text-orange"><i class="fa-solid fa-utensils"></i></div>
+<div class="sc-info">
+<span class="sc-label">Đã Nạp (Food)</span>
+<span class="sc-value" id="boardConsumedCal">1,240 <small>kcal</small></span>
+</div>
+</div>
+<div class="strip-card">
+<div class="sc-icon text-purple"><i class="fa-solid fa-fire"></i></div>
+<div class="sc-info">
+<span class="sc-label">Tiêu Hao (Workout)</span>
+<span class="sc-value" id="boardBurnedCal">+340 <small>kcal</small></span>
+</div>
+</div>
+<div class="strip-card highlight-card">
+<div class="sc-icon text-green"><i class="fa-solid fa-bolt"></i></div>
+<div class="sc-info">
+<span class="sc-label">Calo Còn Lại (Remaining)</span>
+<span class="sc-value text-green" id="boardRemainCal">950 <small>kcal</small></span>
+</div>
+</div>
+<!-- Quick Water & Steps Mini Pill -->
+<div class="strip-card mini-trackers">
+<div class="mini-tracker-item" onclick="addWaterQuick(0.25)" title="Bấm để uống +250ml nước">
+<i class="fa-solid fa-droplet text-blue"></i>
+<span id="boardWaterVal">1.75 / 2.5L</span>
+<button class="mini-plus-btn">+</button>
+</div>
+<div class="mini-tracker-item" onclick="switchTab('workout-log')" title="Xem chi tiết bước chân">
+<i class="fa-solid fa-shoe-prints text-green"></i>
+<span id="boardStepsVal">7,850 bước</span>
+</div>
+</div>
+</div>
+<!-- Phân bổ dinh dưỡng & lời khuyên AI (gộp từ "Tổng quan" vào Dashboard) -->
+<div class="summary-widgets-grid" style="margin-bottom: 20px;">
+<!-- Widget 1: Calorie Balance Circle -->
+<div class="summary-card">
+<div class="sc-head">
+<h3><i class="fa-solid fa-fire text-warning"></i> Cân Bằng Năng Lượng</h3>
+<span class="badge-status-green">Đang trong ngưỡng thâm hụt</span>
+</div>
+<div class="energy-calc-display">
+<div class="calc-col">
+<span class="c-label">Mục Tiêu (TDEE Deficit)</span>
+<span class="c-val" id="sumTarget">1,850</span>
+</div>
+<div class="calc-op">+</div>
+<div class="calc-col">
+<span class="c-label">Tiêu Hao (Tập Luyện)</span>
+<span class="c-val text-purple" id="sumBurned">+340</span>
+</div>
+<div class="calc-op">-</div>
+<div class="calc-col">
+<span class="c-label">Đã Nạp (Thức Ăn)</span>
+<span class="c-val text-orange" id="sumConsumed">-1,240</span>
+</div>
+<div class="calc-op">=</div>
+<div class="calc-col highlight">
+<span class="c-label">Calo Còn Lại</span>
+<span class="c-val text-green" id="sumRemain">950 kcal</span>
+</div>
+</div>
+<div class="progress-bar-lg">
+<div class="progress-fill" style="width: 67%; background: linear-gradient(90deg, var(--secondary), var(--primary));"></div>
+</div>
+</div>
+<!-- Widget 2: Macronutrients Breakdown -->
+<div class="summary-card">
+<div class="sc-head">
+<h3><i class="fa-solid fa-chart-pie text-blue"></i> Phân Bổ Dinh Dưỡng Đa Lượng</h3>
+<span>94g / 135g Protein</span>
+</div>
+<div class="macros-summary-bars">
+<div class="m-row">
+<div class="m-info"><span>Protein (Đạm)</span> <strong>94g / 135g (70%)</strong></div>
+<div class="m-bar"><div class="m-fill bg-blue" style="width: 70%;"></div></div>
+</div>
+<div class="m-row">
+<div class="m-info"><span>Carb (Tinh Bột)</span> <strong>145g / 205g (71%)</strong></div>
+<div class="m-bar"><div class="m-fill bg-green" style="width: 71%;"></div></div>
+</div>
+<div class="m-row">
+<div class="m-info"><span>Fat (Chất Béo Tốt)</span> <strong>36g / 52g (69%)</strong></div>
+<div class="m-bar"><div class="m-fill bg-amber" style="width: 69%;"></div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- KANBAN COLUMNS (To Do / Bữa Sáng, In Progress / Bữa Trưa, In Review / Bữa Tối, Done / Bữa Phụ) -->
+<div class="jira-kanban-board">
+<!-- COLUMN 1: BỮA SÁNG (BREAKFAST) -->
+<div class="kanban-column" id="col-breakfast">
+<div class="column-header">
+<div class="column-title">
+<span class="status-name">Bữa Sáng</span>
+<span class="column-count" id="count-breakfast">1</span>
+</div>
+<button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+</div>
+<div class="kanban-cards-list" id="cards-breakfast">
+<!-- Card 1: Phở Bò -->
+<div class="kanban-card" onclick="openCreateQuickModal('breakfast')">
+<div class="card-title-row">
+<span class="card-item-title">Phở Bò Tái Nạm (Bát Vừa)</span>
+<span class="card-key-tag">BRK-1</span>
+</div>
+<p class="card-desc">Bát vừa 450g, nước dùng trong, nhiều thịt bò nạc giàu đạm.</p>
+<div class="card-macros-pills">
+<span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 485 kcal</span>
+<span class="macro-mini p">P: 32g</span>
+<span class="macro-mini c">C: 68g</span>
+<span class="macro-mini f">F: 11g</span>
+</div>
+<div class="card-footer-meta">
+<div class="card-due-tag">
+<i class="fa-regular fa-clock"></i> 07:30 AM
+                </div>
+<div class="card-assignee-avatar orange" title="Minh Anh">
+<i class="fa-solid fa-user"></i>
+</div>
+</div>
+</div>
+</div>
+<button class="btn-create-in-column" onclick="openCreateQuickModal('breakfast')">
+<i class="fa-solid fa-plus"></i>
+<span>Thêm món ăn</span>
+</button>
+</div>
+<!-- COLUMN 2: BỮA TRƯA (LUNCH) -->
+<div class="kanban-column" id="col-lunch">
+<div class="column-header">
+<div class="column-title">
+<span class="status-name">Bữa Trưa</span>
+<span class="column-count" id="count-lunch">1</span>
+</div>
+<button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+</div>
+<div class="kanban-cards-list" id="cards-lunch">
+<!-- Card 2: Cơm Tấm Sườn Bì -->
+<div class="kanban-card" onclick="openCreateQuickModal('lunch')">
+<div class="card-title-row">
+<span class="card-item-title">Cơm Tấm Sườn Nướng &amp; Chả Trứng</span>
+<span class="card-key-tag">LUN-1</span>
+</div>
+<p class="card-desc">1 đĩa 420g cơm tấm, sườn nướng ít mỡ, chả hấp, dưa leo.</p>
+<div class="card-macros-pills">
+<span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 650 kcal</span>
+<span class="macro-mini p">P: 34g</span>
+<span class="macro-mini c">C: 82g</span>
+<span class="macro-mini f">F: 21g</span>
+</div>
+<div class="card-footer-meta">
+<div class="card-due-tag">
+<i class="fa-regular fa-clock"></i> 12:15 PM
+                </div>
+<div class="card-assignee-avatar orange" title="Minh Anh">
+<i class="fa-solid fa-user"></i>
+</div>
+</div>
+</div>
+</div>
+<button class="btn-create-in-column" onclick="openCreateQuickModal('lunch')">
+<i class="fa-solid fa-plus"></i>
+<span>Thêm món ăn</span>
+</button>
+</div>
+<!-- COLUMN 3: BỮA TỐI (DINNER - KẾ HOẠCH) -->
+<div class="kanban-column" id="col-dinner">
+<div class="column-header">
+<div class="column-title">
+<span class="status-name">Bữa Tối</span>
+<span class="column-count" id="count-dinner">1</span>
+</div>
+<button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+</div>
+<div class="kanban-cards-list" id="cards-dinner">
+<!-- Card 3: Salad Ức Gà (Đề xuất thông minh) -->
+<div class="kanban-card card-suggested" onclick="switchTab('suggestions')">
+<div class="card-badge-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Gợi ý AI</div>
+<div class="card-title-row">
+<span class="card-item-title">Salad Ức Gà Áp Chảo &amp; Sốt Sữa Chua</span>
+<span class="card-key-tag">DIN-1</span>
+</div>
+<p class="card-desc">Món ăn chuẩn Macro bù đắp 38g Protein còn thiếu hôm nay.</p>
+<div class="card-macros-pills">
+<span class="macro-mini cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
+<span class="macro-mini p">P: 38g</span>
+<span class="macro-mini c">C: 14g</span>
+<span class="macro-mini f">F: 8g</span>
+</div>
+<div class="card-footer-meta">
+<div class="card-due-tag due-soon">
+<i class="fa-regular fa-clock"></i> 07:00 PM (Dự kiến)
+                </div>
+<div class="card-assignee-avatar green" title="Khuyến nghị">
+<i class="fa-solid fa-check"></i>
+</div>
+</div>
+</div>
+</div>
+<button class="btn-create-in-column" onclick="openCreateQuickModal('dinner')">
+<i class="fa-solid fa-plus"></i>
+<span>Thêm món ăn</span>
+</button>
+</div>
+<!-- COLUMN 4: LUYỆN TẬP & HOÀN THÀNH (DONE / WORKOUT) -->
+<div class="kanban-column" id="col-done">
+<div class="column-header">
+<div class="column-title">
+<span class="status-name">Hoàn Thành &amp; Luyện Tập</span>
+<span class="column-count" id="count-done">2</span>
+</div>
+<button class="col-more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+</div>
+<div class="kanban-cards-list" id="cards-done">
+<!-- Card 4: Chạy bộ ngoài trời -->
+<div class="kanban-card card-done-workout" onclick="switchTab('workout-log')">
+<div class="card-title-row">
+<span class="card-item-title"><i class="fa-solid fa-person-running text-purple"></i> Chạy Bộ Ngoài Trời</span>
+<span class="card-key-tag workout-tag">WRK-1</span>
+</div>
+<p class="card-desc">Thời gian 30 phút, pace 6.2 min/km. Công thức MET: 8.5.</p>
+<div class="card-macros-pills">
+<span class="macro-mini burned"><i class="fa-solid fa-fire-flame-curved"></i> Đốt cháy: -290 kcal</span>
+<span class="macro-mini distance">4.8 km</span>
+</div>
+<div class="card-footer-meta">
+<div class="card-due-tag done-tag">
+<i class="fa-solid fa-check-circle text-green"></i> 06:30 AM (Xong)
+                </div>
+<div class="card-assignee-avatar orange" title="Minh Anh">
+<i class="fa-solid fa-user"></i>
+</div>
+</div>
+</div>
+<!-- Card 5: Uống 7 ly nước -->
+<div class="kanban-card card-done-water" onclick="addWaterQuick(0.25)">
+<div class="card-title-row">
+<span class="card-item-title"><i class="fa-solid fa-glass-water text-blue"></i> Uống 1.75L Nước Lọc</span>
+<span class="card-key-tag">WAT-1</span>
+</div>
+<p class="card-desc">Đã hoàn thành 70% mục tiêu 2.5 Lít nước trong ngày.</p>
+<div class="mini-progress-track">
+<div class="mini-progress-fill" style="width: 70%;"></div>
+</div>
+<div class="card-footer-meta">
+<div class="card-due-tag done-tag">
+<i class="fa-solid fa-check-circle text-blue"></i> Đang duy trì
+                </div>
+</div>
+</div>
+</div>
+<button class="btn-create-in-column" onclick="switchTab('workout-log')">
+<i class="fa-solid fa-plus"></i>
+<span>Ghi bài tập</span>
+</button>
+</div>
+</div>
+</section>
