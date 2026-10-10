@@ -70,10 +70,18 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
   const submit = e.currentTarget.querySelector('[type="submit"]');
   if (submit) submit.disabled = true;
   try {
-    await FlexiAPI.request('/auth/login', {method:'POST', data:{
+    const res = await FlexiAPI.request('/auth/login', {method:'POST', data:{
       email:document.getElementById('si-email').value.trim(),
       password:document.getElementById('si-pass').value
     }});
+    if (res?.user) {
+      localStorage.setItem('flexidiet-user', JSON.stringify({
+        id: res.user.id,
+        name: res.user.display_name,
+        email: res.user.email,
+        role: res.user.role
+      }));
+    }
     goToApp();
   } catch (error) { showAuthError(error); }
   finally { if (submit) submit.disabled = false; }
@@ -139,7 +147,7 @@ async function finishOnboardingToDashboard() {
   const submit = document.querySelector('#step-pane-4 .btn-jira-create');
   if (submit) submit.disabled = true;
   try {
-    await FlexiAPI.request('/auth/register', {method:'POST', data:{
+    const res = await FlexiAPI.request('/auth/register', {method:'POST', data:{
       display_name:document.getElementById('su-name').value.trim(),
       email:document.getElementById('su-email').value.trim(),
       password:document.getElementById('su-pass').value,
@@ -150,6 +158,14 @@ async function finishOnboardingToDashboard() {
       goal:regState.goal,
       weekly_workout_goal:3
     }});
+    if (res?.user) {
+      localStorage.setItem('flexidiet-user', JSON.stringify({
+        id: res.user.id,
+        name: res.user.display_name,
+        email: res.user.email,
+        role: res.user.role
+      }));
+    }
     goToApp();
   } catch(error) { showAuthError(error); }
   finally { if (submit) submit.disabled = false; }

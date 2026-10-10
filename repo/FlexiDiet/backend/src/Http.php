@@ -63,7 +63,10 @@ function verifyCsrf(): void {
         $host = parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST);
         $originPort = parse_url($origin, PHP_URL_PORT);
         $targetPort = parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_PORT);
-        if ($originHost !== $host || $originPort !== $targetPort) fail(403, 'ORIGIN_REJECTED', 'Origin không hợp lệ.');
+        $isLocal = in_array($originHost, ['localhost', '127.0.0.1', '::1'], true) && in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+        if (($isLocal && $originPort !== $targetPort) || (!$isLocal && ($originHost !== $host || $originPort !== $targetPort))) {
+            fail(403, 'ORIGIN_REJECTED', 'Origin không hợp lệ.');
+        }
     }
     $sent = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
     if (!is_string($sent) || $sent === '' || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $sent)) fail(419, 'CSRF_INVALID', 'Mã bảo vệ phiên không hợp lệ. Tải lại trang.');

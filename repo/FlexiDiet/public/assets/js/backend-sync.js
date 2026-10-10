@@ -88,7 +88,15 @@ async function fdRefreshDashboard() {
 }
 async function fdInitialLoad() {
   try {
-    await FlexiAPI.request('/auth/me');
+    const auth = await FlexiAPI.request('/auth/me');
+    if (auth?.user) {
+      localStorage.setItem('flexidiet-user', JSON.stringify({
+        id: auth.user.id,
+        name: auth.user.display_name,
+        email: auth.user.email,
+        role: auth.user.role
+      }));
+    }
   } catch (e) {
     location.replace('index.html'); return;
   }
@@ -104,7 +112,11 @@ async function fdInitialLoad() {
 // On app initialization old applyCurrentUser() is replaced; no localStorage identities.
 applyCurrentUser = function() {};
 logout = async function() {
-  try { await FlexiAPI.request('/auth/logout', {method:'POST'}); location.replace('index.html'); }
+  try {
+    localStorage.removeItem('flexidiet-user');
+    await FlexiAPI.request('/auth/logout', {method:'POST'});
+    location.replace('index.html');
+  }
   catch (error) { fdAPIError(error); }
 };
 
