@@ -11,44 +11,45 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/app.css">
-  <link rel="stylesheet" href="assets/css/shell.css">
+  <link rel="stylesheet" href="assets/css/shell.css?v=1.1">
   <link rel="stylesheet" href="assets/css/dashboard.css">
   <link rel="stylesheet" href="assets/css/workout-heatmap.css">
+  <link rel="stylesheet" href="assets/css/food.css?v=1.1">
   <script src="assets/js/theme.js"></script>
 </head>
 <body class="fd-app">
   <div class="fd-layout">
-    <aside class="fd-sidebar" aria-label="Thanh điều hướng chính">
-      <a href="app.html#dashboard" class="fd-brand" onclick="switchTab('dashboard'); return false;">
-        <span class="fd-brand-mark"><i class="fa-solid fa-leaf"></i></span>
-        <span>flexi<span class="fd-brand-em">diet</span><small>HEALTH STUDIO</small></span>
-      </a>
+    <div class="fd-sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+    <aside class="fd-sidebar" id="appSidebar" aria-label="Thanh điều hướng chính">
+      <div class="fd-sidebar-top-row">
+        <a href="app.html#dashboard" class="fd-brand" onclick="switchTab('dashboard'); closeMobileSidebar(); return false;">
+          <span class="fd-brand-mark"><i class="fa-solid fa-leaf"></i></span>
+          <span>flexi<span class="fd-brand-em">diet</span><small>HEALTH STUDIO</small></span>
+        </a>
+        <button class="fd-sidebar-close-btn" type="button" onclick="closeMobileSidebar()" aria-label="Đóng menu"><i class="fa-solid fa-xmark"></i></button>
+      </div>
       <div class="fd-side-main">
         <div class="fd-nav-caption">KHÔNG GIAN CỦA BẠN</div>
         <nav class="fd-side-nav" aria-label="Các trang">
           <button class="app-nav-link active" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>Tổng quan</span></button>
-          <button class="app-nav-link" data-target="food-log" onclick="switchTab('food-log')"><i class="fa-solid fa-utensils"></i><span>Nhật ký ăn uống</span></button>
-          <button class="app-nav-link" data-target="workout-log" onclick="switchTab('workout-log')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
-          <button class="app-nav-link" data-target="suggestions" onclick="switchTab('suggestions')"><i class="fa-regular fa-lightbulb"></i><span>Gợi ý món ăn</span></button>
+          <button class="app-nav-link" data-target="food" onclick="switchTab('food')"><i class="fa-solid fa-utensils"></i><span>Ăn uống (Food Hub)</span></button>
+          <button class="app-nav-link" data-target="workout" onclick="switchTab('workout')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
         </nav>
         <div class="fd-nav-caption fd-nav-caption-spaced">QUẢN LÝ</div>
         <nav class="fd-side-nav" aria-label="Quản lý">
-          <button class="app-nav-link" data-target="list" onclick="switchTab('list')"><i class="fa-solid fa-list-check"></i><span>Danh sách chi tiết</span></button>
+          <button class="app-nav-link" data-target="history" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>Nhật ký chi tiết</span></button>
           <button class="app-nav-link" data-target="profile" onclick="switchTab('profile')"><i class="fa-regular fa-user"></i><span>Hồ sơ của tôi</span></button>
         </nav>
-        <details class="fd-legacy-details">
-          <summary><i class="fa-solid fa-chevron-right"></i> Bản cũ / đối chiếu</summary>
-          <button class="app-nav-link" data-target="board" onclick="switchTab('board')"><i class="fa-solid fa-table-columns"></i><span>Bảng Kanban cũ</span></button>
-        </details>
       </div>
       <div class="fd-sidebar-footer">
         <div class="fd-tip-box"><i class="fa-solid fa-seedling"></i><strong>Mỗi ngày một chút</strong><span>Thói quen bền vững bắt đầu từ những điều nhỏ.</span></div>
-        <span class="fd-demo-tag"><i class="fa-solid fa-circle"></i> Dữ liệu minh họa · Frontend demo</span>
+        <span class="fd-demo-tag"><i class="fa-solid fa-circle"></i> FlexiDiet · MySQL Synced</span>
       </div>
     </aside>
     <div class="fd-main-wrap">
       <header class="fd-topbar">
         <div class="fd-top-left">
+          <button class="fd-hamburger-btn" id="sidebarToggle" type="button" aria-label="Mở menu điều hướng" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i></button>
           <span class="fd-breadcrumb">Ứng dụng <i class="fa-solid fa-chevron-right"></i> <strong id="currentPageLabel">Tổng quan</strong></span>
         </div>
         <div class="fd-top-right">
@@ -58,7 +59,7 @@
           <div class="fd-top-avatar" aria-label="Ảnh đại diện"><i class="fa-solid fa-user"></i></div>
         </div>
       </header>
-      <!-- The six original views are now independently maintained HTML files. -->
+      <!-- Page modules loaded by pages-loader.js -->
       <main class="main-workspace" id="mainWorkspace" aria-live="polite">
         <div class="fd-loading" id="pagesLoading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải giao diện...</div>
       </main>
@@ -66,9 +67,9 @@
   </div>
   <nav class="fd-mobile-nav" aria-label="Điều hướng trên điện thoại">
     <button class="app-nav-link active" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>Tổng quan</span></button>
-    <button class="app-nav-link" data-target="food-log" onclick="switchTab('food-log')"><i class="fa-solid fa-utensils"></i><span>Ăn uống</span></button>
-    <button class="app-nav-link" data-target="workout-log" onclick="switchTab('workout-log')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
-    <button class="app-nav-link" data-target="suggestions" onclick="switchTab('suggestions')"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Gợi ý</span></button>
+    <button class="app-nav-link" data-target="food" onclick="switchTab('food')"><i class="fa-solid fa-utensils"></i><span>Ăn uống</span></button>
+    <button class="app-nav-link" data-target="workout" onclick="switchTab('workout')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
+    <button class="app-nav-link" data-target="history" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>Nhật ký</span></button>
     <button class="app-nav-link" data-target="profile" onclick="switchTab('profile')"><i class="fa-regular fa-user"></i><span>Hồ sơ</span></button>
   </nav>
   <div class="modal-backdrop" id="createQuickModal" onclick="handleCreateModalBackdrop(event)">
@@ -149,9 +150,10 @@
 </div>
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
   <script src="assets/js/api-client.js"></script>
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js?v=1.1"></script>
   <script src="assets/js/dashboard.js"></script>
   <script src="assets/js/workout-heatmap.js"></script>
+  <script src="assets/js/food-hub.js?v=1.1"></script>
   <script src="assets/js/backend-sync.js"></script>
   <script src="assets/js/pages-loader.js"></script>
 </body>

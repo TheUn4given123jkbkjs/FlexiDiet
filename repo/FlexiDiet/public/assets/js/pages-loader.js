@@ -5,21 +5,20 @@
  * Later these can be lazy-loaded behind a dedicated data/API layer.
  */
 const PAGE_MODULES = [
-  'dashboard', 'food-log', 'workout-log', 'suggestions',
-  'list', 'profile', 'board-legacy'
+  'dashboard', 'food/index', 'workout', 'history', 'profile'
 ];
 async function mountPageModules() {
   const target = document.getElementById('mainWorkspace');
-  const results = await Promise.all(PAGE_MODULES.map(async name => {
-    const response = await fetch(`pages/${name}.html`, {cache:'no-cache'});
-    if (!response.ok) throw new Error(`Không tải được pages/${name}.html (${response.status})`);
-    return {name, html:await response.text()};
+  const results = await Promise.all(PAGE_MODULES.map(async path => {
+    const response = await fetch(`pages/${path}.html`, {cache:'no-cache'});
+    if (!response.ok) throw new Error(`Không tải được pages/${path}.html (${response.status})`);
+    return {path, html:await response.text()};
   }));
-  for (const {name, html} of results) {
+  for (const {path, html} of results) {
     const fragment = document.createElement('template');
     fragment.innerHTML = html.trim();
     const view = fragment.content.firstElementChild;
-    if (!view?.classList.contains('page-view')) throw new Error(`Module ${name} không phải .page-view`);
+    if (!view?.classList.contains('page-view')) throw new Error(`Module ${path} không phải .page-view`);
     target.appendChild(view);
   }
   document.getElementById('pagesLoading')?.remove();

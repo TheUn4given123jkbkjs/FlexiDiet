@@ -140,11 +140,18 @@ FlexiDiet/
 │   └── *.csv                   # Dữ liệu nguồn CSV đối soát (dishes, ingredients, aliases, portions)
 ├── public/                     # Thư mục Web gốc (Document Root) phục vụ giao diện người dùng
 │   ├── index.html              # Landing Page: Giới thiệu giải pháp, tính thử TDEE/BMR, modal đăng nhập/đăng ký
-│   ├── app.html                # Web App SPA-like: Dashboard, Nhật ký ăn (camera/AI), Bài tập, Gợi ý, Hồ sơ
+│   ├── app.html                # Web App Shell: Quản lý điều hướng 5 phân hệ (Không gian của bạn & Quản lý)
 │   ├── admin.html              # (Should) Admin Panel SPA-like: CRUD nguyên liệu, món, khẩu phần, MET (UC11)
+│   ├── pages/                  # Các module giao diện động (Client-Side SPA Mount qua pages-loader.js)
+│   │   ├── dashboard.html      # Phân hệ Tổng quan: Ngân sách calo, macro, nước uống, cân nặng
+│   │   ├── food/               # Phân hệ Dinh Dưỡng & Ăn Uống (Food Hub)
+│   │   │   └── index.html      # 3 Sub-tabs: Quét ảnh AI (UC04), Danh mục 67 món (UC06), Tùy chỉnh (UC05)
+│   │   ├── workout.html        # Phân hệ Luyện tập: Ghi buổi tập theo MET/thiết bị, heatmap năm
+│   │   ├── history.html        # Phân hệ Quản lý: Nhật ký chi tiết toàn bộ hoạt động trong ngày
+│   │   └── profile.html        # Phân hệ Hồ sơ cá nhân: BMR, thể chất, chính sách calo tập
 │   ├── assets/                 # Tài nguyên tĩnh phục vụ giao diện
-│   │   ├── css/                # app.css, home.css, admin.css (Should), theme.css
-│   │   └── js/                 # app.js, home.js, admin.js (Should), theme.js (ES Modules, fetch API)
+│   │   ├── css/                # app.css, home.css, shell.css, dashboard.css, food.css, workout-heatmap.css...
+│   │   └── js/                 # app.js, food-hub.js, dashboard.js, workout-heatmap.js, backend-sync.js...
 │   └── uploads/                # Thư mục lưu trữ tạm thời ảnh upload / ảnh chụp món ăn
 └── storage/                    # Thư mục lưu trữ nội bộ (logs/, tmp/) ngoài Document Root
 ```
@@ -655,16 +662,24 @@ Giao diện FlexiDiet được thiết kế theo mô hình **Client-Side SPA-lik
 
 1. **Phân chia trang giao diện chính (`public/`):**
    * **`public/index.html` (Landing Page):** Giới thiệu sản phẩm, giải thích cơ chế Ngân sách Calo Động, công cụ tính nhanh TDEE/BMR cho khách vãng lai (Guest), tích hợp modal đăng nhập/đăng ký đa bước (UC01, UC02).
-   * **`public/app.html` (Main Application):** Giao diện làm việc trung tâm của Member sau khi đăng nhập, tổ chức theo kiến trúc Single-Page Application (SPA) điều hướng chuyển đổi tab mượt mà không tải lại trang:
-     * *Tab Dashboard (UC09):* Thanh đo năng lượng ngân sách động ngày (FR-02.2), vòng tròn phân bổ macro (P/C/F), theo dõi lượng nước uống (FR-06.4) và biểu đồ cân nặng.
-     * *Tab Nhật ký ăn uống (UC04, UC05, UC06):* Tích hợp camera chụp ảnh hoặc tải ảnh món ăn, gọi AI phân tích, bảng bản nháp nguyên liệu trực quan với **thanh trượt 3 dải màu phân vùng (Small/Medium/Large)** đồng bộ 2 chiều với ô nhập gram, hỗ trợ tìm kiếm bổ sung nguyên liệu (tra bí danh 3 miền).
-     * *Tab Nhật ký tập luyện (UC07):* Ghi nhận buổi tập, tính calo tiêu hao theo MET hoặc thiết bị, áp chính sách cộng thưởng calo vào ngân sách ngày.
-     * *Tab Gợi ý món ăn (UC10 - Could):* Gợi ý món ăn thông minh dựa trên lượng calo và protein còn thiếu trong ngày.
-     * *Tab Hồ sơ cá nhân (UC03):* Cập nhật chỉ số thể chất, mục tiêu cân nặng, thay đổi công thức BMR và chính sách cộng calo tập.
+   * **`public/app.html` (Main Application Shell):** Giao diện làm việc trung tâm của Member sau khi đăng nhập, tổ chức theo kiến trúc Single-Page Application (SPA) điều hướng chuyển đổi tab mượt mà không tải lại trang với 5 phân hệ chuẩn:
+     * **Nhóm 1 – Không gian của bạn:**
+       * *1. Tab Dashboard (`#view-dashboard` - UC09):* Thanh đo năng lượng ngân sách động ngày (FR-02.2), phân bổ macro (P/C/F), theo dõi lượng nước uống và tiến trình.
+       * *2. Tab Ăn uống (Food Hub - `#view-food`):* Tách bạch làm 3 luồng công việc rõ ràng:
+         - **Sub-tab 1 – Quét ảnh AI (UC04):** Drag-drop / camera chụp món ăn, hiệu ứng laser quét ảnh, 6 preset mẫu một chạm và bóc tách tự nhiên. Khi AI nhận diện xong hoặc chọn món mẫu, hệ thống tự động chuyển sang Sub-tab 3 (Trình tùy chỉnh) kèm toàn bộ công thức gốc.
+         - **Sub-tab 2 – Danh mục 67 món Việt & Món đã lưu (UC06, UC14):** Tra cứu nhanh 67 món chuẩn từ CSDL MySQL (tìm kiếm không dấu và có dấu), lọc theo món hệ thống vs món cá nhân, nút "+ Tạo Món Mới Tự Chế" (UC12). Bấm vào bất kỳ món nào để mở trình tùy chỉnh.
+         - **Sub-tab 3 – Tùy chỉnh & Phối món (Composer - UC05):** Nơi hội tụ của cả 3 luồng (AI / Danh mục / Tự tạo). Hiển thị công thức phân rã từng nguyên liệu với **thanh trượt 3 dải màu phân vùng (Nhỏ: Xanh | Vừa: Vàng | Lớn: Đỏ)** đồng bộ 2 chiều với ô nhập gram. Thanh tóm tắt dinh dưỡng cập nhật thời gian thực khi kéo trượt; cho phép thêm/xóa nguyên liệu/topping; hỗ trợ 2 hành vi lưu: *Xác nhận ghi nhật ký (Lưu Snapshot)* và *Lưu thành Món của tôi (UC13)*.
+       * *3. Tab Luyện tập (`#view-workout` - UC07):* Ghi nhận buổi tập, tính calo tiêu hao theo MET hoặc thiết bị, biểu đồ Heatmap luyện tập theo năm (dữ liệu thực từ MySQL).
+     * **Nhóm 2 – Quản lý:**
+       * *4. Tab Nhật ký chi tiết (`#view-history`):* Bảng lịch sử toàn bộ các hoạt động ăn uống và bài tập đã ghi trong ngày, trạng thái hoàn thành và thao tác xóa mục (cập nhật ngân sách tức thì).
+       * *5. Tab Hồ sơ cá nhân (`#view-profile` - UC03):* Cập nhật chỉ số thể chất, mục tiêu cân nặng, thay đổi công thức BMR và chính sách cộng calo tập.
 
 2. **Quy chuẩn mã nguồn JavaScript (`public/assets/js/`):**
+   * **`pages-loader.js`:** Tải song song các module view HTML (`pages/dashboard.html`, `pages/food/index.html`, `pages/workout.html`, `pages/history.html`, `pages/profile.html`) vào `#mainWorkspace` đúng 1 lần, phát sinh sự kiện `flexidiet:pages-ready`.
+   * **`food-hub.js`:** Module điều phối trung tâm của Food Hub: quản lý trạng thái bản nháp (`currentDraft`), chuyển đổi 3 sub-tabs, gọi API `/foods/{id}/recipe`, `/ingredients?q=`, `/dishes`, `/meals`, đồng bộ 2 chiều thanh trượt 3 màu với ô nhập gram và live tính calo/macro.
+   * **`backend-sync.js`:** Lớp kết nối API MySQL, đồng bộ ngân sách ngày và lịch sử luyện tập, thay thế hoàn toàn dữ liệu demo cũ.
+   * **`app.js`:** Điều phối trạng thái toàn cục, định tuyến `switchTab()`, xử lý giao diện chung.
    * **`home.js`:** Quản lý tương tác trang chủ, tính thử TDEE, form validation đăng ký 4 bước, AJAX modal đăng nhập.
-   * **`app.js`:** Điều phối trạng thái ứng dụng (State Management), định tuyến tab view, gọi API `fetch()` kèm mã chống CSRF và xử lý phản hồi JSON, đồng bộ thanh trượt khẩu phần 3 màu với ô nhập gram.
    * **`theme.js`:** Hỗ trợ chuyển đổi giao diện Sáng / Tối (Light / Dark Mode).
    * **Xử lý ảnh client-side:** Sử dụng HTML5 `<input type="file" accept="image/*" capture>` để mở trực tiếp camera trên điện thoại; tự động thu nhỏ ảnh bằng HTML5 Canvas (cạnh dài tối đa $\le 1024$ px, nén JPEG 85%) trước khi gửi lên server, giúp tiết kiệm băng thông và giảm tối đa độ trễ truyền tải (NFR-11).
 

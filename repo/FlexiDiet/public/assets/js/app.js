@@ -112,7 +112,26 @@ let currentScannedBase = null;
 // ==============================================================================
 // 1. NAVIGATION TAB ROUTER (SWITCHING PAGES ON 1 MAIN PAGE)
 // ==============================================================================
+function toggleMobileSidebar() {
+  const sb = document.getElementById('appSidebar');
+  const bd = document.getElementById('sidebarBackdrop');
+  if (sb) sb.classList.toggle('mobile-open');
+  if (bd) bd.classList.toggle('show');
+}
+
+function closeMobileSidebar() {
+  const sb = document.getElementById('appSidebar');
+  const bd = document.getElementById('sidebarBackdrop');
+  if (sb) sb.classList.remove('mobile-open');
+  if (bd) bd.classList.remove('show');
+}
+
 function switchTab(tabId) {
+  closeMobileSidebar();
+  // Legacy aliases
+  if (tabId === 'food-log') tabId = 'food';
+  if (tabId === 'workout-log') tabId = 'workout';
+  if (tabId === 'list') tabId = 'history';
   if (!document.getElementById('view-' + tabId)) tabId = 'dashboard';
   appState.activeTab = tabId;
   document.querySelectorAll('.app-nav-link').forEach(link => {
@@ -125,13 +144,14 @@ function switchTab(tabId) {
     view.classList.toggle('active', view.id === `view-${tabId}`);
   });
   const pageNames = {
-    'dashboard':'Tổng quan', 'food-log':'Nhật ký ăn uống',
-    'workout-log':'Luyện tập', 'suggestions':'Gợi ý món ăn',
-    'profile':'Hồ sơ', 'list':'Danh sách chi tiết', 'board':'Bảng cũ'
+    'dashboard':'Tổng quan', 'food':'Ăn uống (Food Hub)',
+    'workout':'Luyện tập', 'history':'Nhật ký chi tiết',
+    'profile':'Hồ sơ cá nhân'
   };
   const label = document.getElementById('currentPageLabel');
   if (label) label.textContent = pageNames[tabId] || 'Tổng quan';
   if (tabId === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+  if (tabId === 'history' && typeof renderActivityList === 'function') renderActivityList();
   if (location.hash !== `#${tabId}`) history.pushState(null, '', `#${tabId}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
 }

@@ -54,6 +54,7 @@
 .fd-breadcrumb {color:var(--fd-subtle);font-size:12px;font-weight:600}
 .fd-breadcrumb i{font-size:8px;margin:0 12px;opacity:.7}
 .fd-breadcrumb strong{color:var(--fd-ink);font-weight:800}
+.fd-top-left {display:flex;align-items:center;gap:10px}
 .fd-top-right {display:flex;align-items:center;gap:14px}
 .fd-today {font-size:12px;color:var(--fd-subtle);margin-right:6px}
 .fd-icon-button {width:35px;height:35px;border:1px solid var(--fd-border);border-radius:10px;background:var(--fd-surface);color:var(--fd-ink);display:grid;place-items:center;cursor:pointer;font-size:14px}
@@ -76,14 +77,100 @@
 .fd-app .toast-container{z-index:250}
 .fd-app .btn-jira-create {background:#25714a;color:#fff}
 .fd-app .btn-jira-create:hover{background:#205d3e}
+
+/* Hamburger & Mobile Sidebar Drawer */
+.fd-hamburger-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--fd-border);
+  border-radius: 9px;
+  background: var(--fd-surface);
+  color: var(--fd-ink);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.fd-hamburger-btn:hover {
+  background: var(--fd-green-soft);
+  color: var(--fd-green);
+}
+
+.fd-sidebar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fd-sidebar-close-btn {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--fd-border);
+  border-radius: 8px;
+  background: var(--fd-surface);
+  color: var(--fd-subtle);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  margin-bottom: 25px;
+}
+.fd-sidebar-close-btn:hover {
+  color: #ef4444;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.fd-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 180;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.fd-sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 @media(max-width:1120px){
  .fd-sidebar{width:218px;padding-left:12px;padding-right:12px}
  .fd-topbar{padding:0 26px}
  .fd-app .main-workspace{padding:30px 26px 50px}
 }
 @media(max-width:820px){
- .fd-sidebar {display:none}
- .fd-topbar{height:62px;padding:0 20px}
+ .fd-hamburger-btn {display: inline-flex !important}
+ .fd-sidebar-close-btn {display: inline-flex !important}
+ .fd-sidebar {
+   position: fixed;
+   top: 0;
+   left: 0;
+   bottom: 0;
+   width: 270px;
+   max-width: 82vw;
+   height: 100vh;
+   z-index: 200;
+   background: var(--fd-surface);
+   transform: translateX(-100%);
+   transition: transform 0.25s ease-in-out;
+   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+ }
+ .fd-sidebar.mobile-open {
+   transform: translateX(0);
+ }
+ .fd-topbar{height:62px;padding:0 18px}
  .fd-top-right {gap:8px}
  .fd-today{display:none}
  .fd-app .main-workspace{padding:24px 19px 110px}

@@ -1,0 +1,210 @@
+<!-- FlexiDiet modular page: Food Hub (Ăn uống & Dinh dưỡng) -->
+<section class="page-view" id="view-food">
+  <div class="view-inner-container">
+    <div class="jira-section-header">
+      <div>
+        <span class="section-tag"><i class="fa-solid fa-utensils"></i> Dinh Dưỡng &amp; Khẩu Phần (Food Hub)</span>
+        <h2>Ăn Uống &amp; Tùy Chỉnh Khẩu Phần Dinh Dưỡng</h2>
+      </div>
+      <div class="food-hub-tabs-nav" role="tablist">
+        <button class="fh-tab-btn active" id="btnFhScanner" role="tab" aria-selected="true" onclick="switchFoodSubtab('scanner')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>1. Quét ảnh AI</span>
+        </button>
+        <button class="fh-tab-btn" id="btnFhCatalog" role="tab" aria-selected="false" onclick="switchFoodSubtab('catalog')">
+          <i class="fa-solid fa-book-open"></i> <span>2. Danh mục 67 món &amp; Món của tôi</span>
+        </button>
+        <button class="fh-tab-btn" id="btnFhComposer" role="tab" aria-selected="false" onclick="switchFoodSubtab('composer')">
+          <i class="fa-solid fa-sliders"></i> <span>3. Tùy chỉnh &amp; Phối món</span>
+          <span class="fh-draft-badge" id="fhDraftBadge" style="display:none;">1</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUBTAB 1: AI SCANNER (UC04) -->
+    <div class="food-subtab-pane active" id="paneFhScanner">
+      <div class="ai-scanner-card">
+        <div class="scanner-left-zone">
+          <div class="scanner-drop-area" id="foodDropArea" onclick="document.getElementById('foodHubImageInput').click()">
+            <input accept="image/*" id="foodHubImageInput" onchange="handleFoodHubImageUpload(event)" style="display:none;" type="file"/>
+            <div class="drop-content" id="foodDropContent">
+              <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+              <h4>Kéo thả hoặc tải ảnh món ăn lên</h4>
+              <p>AI Vision quét món ăn, tải công thức chuẩn và tự động mở bảng tùy chỉnh nguyên liệu</p>
+              <span class="btn-select-file"><i class="fa-solid fa-camera"></i> Chọn Ảnh Chụp</span>
+            </div>
+            <div class="image-preview-wrap" id="foodPreviewWrap" style="display: none;">
+              <img alt="Ảnh món ăn" id="foodScannedPreview" src=""/>
+              <div class="laser-scanner" id="foodLaserScanner"></div>
+            </div>
+          </div>
+          <div class="demo-samples-row">
+            <span class="sample-lbl"><i class="fa-solid fa-bolt"></i> Thử nhanh với món mẫu:</span>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('pho_bo')">🍜 Phở Bò</button>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('com_tam')">🍖 Cơm Tấm</button>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('bun_cha')">🥗 Bún Chả</button>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('banh_mi')">🥖 Bánh Mì</button>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('salad_ga')">🥗 Salad Gà</button>
+            <button class="sample-btn" type="button" onclick="loadFoodHubPreset('goi_cuon')">🍤 Gỏi Cuốn</button>
+          </div>
+        </div>
+        <div class="scanner-right-zone">
+          <div class="prompt-box">
+            <label><i class="fa-solid fa-pen-to-square"></i> Hoặc mô tả bữa ăn tự nhiên:</label>
+            <div class="prompt-input-row">
+              <input id="foodHubPromptInput" placeholder="VD: 1 bát phở bò tái nạm ít bánh nhiều thịt..." type="text"/>
+              <button class="btn-ai-analyze" type="button" onclick="triggerFoodHubPromptAnalysis()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Phân Tích AI</span>
+              </button>
+            </div>
+          </div>
+          <div class="scanner-guide-card">
+            <div class="sgc-head">
+              <i class="fa-solid fa-circle-nodes text-green"></i>
+              <h4>Quy trình ghi món thông minh (UC04 &rarr; UC05)</h4>
+            </div>
+            <ul class="sgc-steps">
+              <li><strong>Bước 1:</strong> AI xác định loại món ăn và ước lượng định lượng cơ bản.</li>
+              <li><strong>Bước 2:</strong> Hệ thống tự động chuyển sang tab <strong>Tùy chỉnh &amp; Phối món</strong> với danh sách nguyên liệu gốc từ MySQL.</li>
+              <li><strong>Bước 3:</strong> Bạn tự do kéo thanh trượt 3 màu (Nhỏ / Vừa / Lớn) hoặc gõ gram để khớp bữa ăn thực tế.</li>
+              <li><strong>Bước 4:</strong> Xác nhận lưu vào nhật ký dạng snapshot hoặc lưu thành món cá nhân để tái sử dụng.</li>
+            </ul>
+            <div class="sgc-action">
+              <button class="btn-jira-tool" type="button" onclick="switchFoodSubtab('catalog')">
+                <i class="fa-solid fa-magnifying-glass"></i> Tra cứu danh mục 67 món trực tiếp &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTAB 2: CATALOG & MY SAVED DISHES (UC06, UC12, UC14) -->
+    <div class="food-subtab-pane" id="paneFhCatalog">
+      <div class="jira-card-box fh-catalog-box">
+        <div class="fh-catalog-header">
+          <div class="fh-cat-left">
+            <div class="fh-cat-search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input class="jira-input" id="foodHubCatalogSearch" placeholder="Tìm theo tên món (có dấu hoặc không dấu: phở bò, bún chả, cơm tấm...)" type="search"/>
+            </div>
+            <div class="fh-cat-filter-pills">
+              <button class="cat-pill active" id="catFilterAll" type="button" onclick="filterCatalogOrigin('all')">Tất Cả</button>
+              <button class="cat-pill" id="catFilterSystem" type="button" onclick="filterCatalogOrigin('system')">67 Món Chuẩn Việt Nam</button>
+              <button class="cat-pill" id="catFilterSaved" type="button" onclick="filterCatalogOrigin('saved')">Món Đã Lưu Của Tôi</button>
+            </div>
+          </div>
+          <div class="fh-cat-right">
+            <button class="btn-jira-create" type="button" onclick="startNewCustomDish()">
+              <i class="fa-solid fa-plus"></i> Tạo Món Mới Tự Chế
+            </button>
+          </div>
+        </div>
+        <div class="fh-dishes-grid" id="foodHubDishesGrid" role="region" aria-label="Danh sách món ăn">
+          <div class="fh-loading-dishes"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh mục món ăn...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTAB 3: DISH CUSTOMIZER & COMPOSER (UC05) -->
+    <div class="food-subtab-pane" id="paneFhComposer">
+      <div class="fh-composer-container">
+        <!-- Draft Header -->
+        <div class="jira-card-box fh-composer-head-card">
+          <div class="form-row fh-composer-meta-row">
+            <div class="form-group flex-2">
+              <label for="composerDishName"><i class="fa-solid fa-bowl-food"></i> Tên Món Ăn</label>
+              <input class="jira-input" id="composerDishName" placeholder="Tên món ăn..." type="text" value="Phở Bò Tái Nạm"/>
+            </div>
+            <div class="form-group">
+              <label for="composerMealType"><i class="fa-regular fa-clock"></i> Bữa Ăn</label>
+              <select class="jira-select" id="composerMealType">
+                <option value="breakfast" selected>Bữa Sáng</option>
+                <option value="lunch">Bữa Trưa</option>
+                <option value="dinner">Bữa Tối</option>
+                <option value="snack">Bữa Phụ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="composerServingLabel"><i class="fa-solid fa-tag"></i> Khẩu Phần</label>
+              <input class="jira-input" id="composerServingLabel" readonly type="text" value="1 tô vừa"/>
+            </div>
+          </div>
+          <!-- Live Recalculated Nutrition Summary Bar -->
+          <div class="fh-nutrition-summary-bar">
+            <div class="ns-item cal">
+              <span class="ns-label">Tổng Calo</span>
+              <strong class="ns-val" id="composerTotalCal">485</strong>
+              <small>kcal</small>
+            </div>
+            <div class="ns-divider"></div>
+            <div class="ns-item p">
+              <span class="ns-label">Protein</span>
+              <strong class="ns-val" id="composerTotalProt">32.5</strong>
+              <small>g</small>
+            </div>
+            <div class="ns-item c">
+              <span class="ns-label">Carbs</span>
+              <strong class="ns-val" id="composerTotalCarb">68.0</strong>
+              <small>g</small>
+            </div>
+            <div class="ns-item f">
+              <span class="ns-label">Fat</span>
+              <strong class="ns-val" id="composerTotalFat">11.2</strong>
+              <small>g</small>
+            </div>
+            <div class="ns-divider"></div>
+            <div class="ns-item w">
+              <span class="ns-label">Khối lượng</span>
+              <strong class="ns-val" id="composerTotalWeight">450</strong>
+              <small>g</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Customization List -->
+        <div class="jira-card-box fh-ingredients-box">
+          <div class="box-head fh-ing-box-head">
+            <div>
+              <h3><i class="fa-solid fa-list-check text-green"></i> Bóc Tách Nguyên Liệu &amp; Thanh Trượt 3 Dải Màu (S/M/L)</h3>
+              <p class="sub-muted">Thanh trượt chia 3 vùng màu: <span class="zone-tag green">Xanh (Nhỏ)</span>, <span class="zone-tag yellow">Vàng (Vừa)</span>, <span class="zone-tag red">Đỏ (Lớn)</span>. Đồng bộ 2 chiều với ô nhập gram.</p>
+            </div>
+            <button class="btn-jira-tool" type="button" onclick="toggleAddIngredientPanel()">
+              <i class="fa-solid fa-plus"></i> Thêm nguyên liệu / topping
+            </button>
+          </div>
+
+          <!-- Add Ingredient Accordion/Panel -->
+          <div class="fh-add-ing-panel" id="fhAddIngPanel" style="display:none;">
+            <div class="add-ing-search-row">
+              <div class="input-unit-wrap flex-1">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="jira-input" id="searchNewIngredientInput" placeholder="Tìm nguyên liệu để thêm vào món (VD: trứng gà, thịt bò nạc, hành lá...)" type="search"/>
+              </div>
+              <button class="btn-tbl-del" type="button" onclick="toggleAddIngredientPanel()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="fh-add-ing-results" id="fhAddIngResults"></div>
+          </div>
+
+          <!-- Dynamic Ingredients Table/Cards -->
+          <div class="fh-ingredients-list" id="composerIngredientsList">
+            <!-- Populated dynamically by food-hub.js -->
+          </div>
+        </div>
+
+        <!-- Composer Action Buttons -->
+        <div class="fh-composer-actions-bar">
+          <button class="btn-jira-create btn-lg" id="btnComposerSaveLog" type="button" onclick="submitComposerToMealLog()">
+            <i class="fa-solid fa-check"></i> Xác nhận ghi nhật ký (Lưu Snapshot)
+          </button>
+          <button class="btn-jira-tool btn-lg" id="btnComposerSaveMyDish" type="button" onclick="submitComposerAsMyDish()">
+            <i class="fa-solid fa-bookmark"></i> Lưu thành "Món của tôi"
+          </button>
+          <button class="btn-jira-outline btn-lg" type="button" onclick="switchFoodSubtab('catalog')">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại Danh mục
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

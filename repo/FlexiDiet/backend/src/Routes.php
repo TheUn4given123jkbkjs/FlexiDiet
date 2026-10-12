@@ -103,20 +103,118 @@ function deleteWorkout(PDO $pdo,int $uid,int $id): void {
         $pdo->commit();
     } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
 }
+function normalizeVietnamese(string $str): string {
+    $str = mb_strtolower(trim($str), 'UTF-8');
+    $trans = [
+        'à'=>'a','á'=>'a','ả'=>'a','ã'=>'a','ạ'=>'a','ă'=>'a','ằ'=>'a','ắ'=>'a','ẳ'=>'a','ẵ'=>'a','ặ'=>'a',
+        'â'=>'a','ầ'=>'a','ấ'=>'a','ẩ'=>'a','ẫ'=>'a','ậ'=>'a','đ'=>'d',
+        'è'=>'e','é'=>'e','ẻ'=>'e','ẽ'=>'e','ẹ'=>'e','ê'=>'e','ề'=>'e','ế'=>'e','ể'=>'e','ễ'=>'e','ệ'=>'e',
+        'ì'=>'i','í'=>'i','ỉ'=>'i','ĩ'=>'i','ị'=>'i',
+        'ò'=>'o','ó'=>'o','ỏ'=>'o','õ'=>'o','ọ'=>'o','ô'=>'o','ồ'=>'o','ố'=>'o','ổ'=>'o','ỗ'=>'o','ộ'=>'o',
+        'ơ'=>'o','ờ'=>'o','ớ'=>'o','ở'=>'o','ỡ'=>'o','ợ'=>'o',
+        'ù'=>'u','ú'=>'u','ủ'=>'u','ũ'=>'u','ụ'=>'u','ư'=>'u','ừ'=>'u','ứ'=>'u','ử'=>'u','ữ'=>'u','ự'=>'u',
+        'ỳ'=>'y','ý'=>'y','ỷ'=>'y','ỹ'=>'y','ỵ'=>'y'
+    ];
+    return strtr($str, $trans);
+}
+function dishRecipe(PDO $pdo, int $uid, int $dishId): array {
+    $dish = one($pdo, 'SELECT d.id, d.name, d.serving_label, d.dish_code, d.origin FROM dishes d WHERE d.id=? AND d.is_active=1 AND (d.owner_user_id IS NULL OR d.owner_user_id=?)', [$dishId, $uid]);
+    if (!$dish) fail(404, 'DISH_NOT_FOUND', 'Không tìm thấy món ăn.');
+    $ingredients = all($pdo, 'SELECT di.ingredient_id, i.name, di.grams, i.kcal_100g, i.protein_100g, i.carb_100g, i.fat_100g, i.source,
+        (SELECT pu.grams_per_unit FROM portion_units pu WHERE pu.ingredient_id=i.id AND pu.size_label="small" LIMIT 1) grams_small,
+        (SELECT pu.grams_per_unit FROM portion_units pu WHERE pu.ingredient_id=i.id AND pu.size_label="medium" LIMIT 1) grams_medium,
+        (SELECT pu.grams_per_unit FROM portion_units pu WHERE pu.ingredient_id=i.id AND pu.size_label="large" LIMIT 1) grams_large
+        FROM dish_ingredients di JOIN ingredients i ON i.id=di.ingredient_id
+        WHERE di.dish_id=? AND i.is_active=1 ORDER BY di.sort_order', [$dishId]);
+    return ['dish' => $dish, 'ingredients' => $ingredients];
+}
+function searchIngredients(PDO $pdo, int $uid, string $q): array {
+    $term = '%' . $q . '%';
+    return all($pdo, 'SELECT i.id, i.name, i.kcal_100g, i.protein_100g, i.carb_100g, i.fat_100g, i.state, i.source FROM ingredients i WHERE i.is_active=1 AND (i.owner_user_id IS NULL OR i.owner_user_id=?) AND (i.name LIKE ? OR i.name_norm LIKE ?) ORDER BY i.name LIMIT 30', [$uid, $term, $term]);
+}
+function createCustomDish(PDO $pdo, int $uid, array $p): array {
+    $name = requiredString($p, 'name');
+    $label = isset($p['serving_label']) ? requiredString($p, 'serving_label', 60) : '1 phần';
+    $items = $p['ingredients'] ?? [];
+    if (!is_array($items) || empty($items)) fail(422, 'EMPTY_INGREDIENTS', 'Món ăn phải có ít nhất một nguyên liệu.');
+    $norm = normalizeVietnamese($name);
+    $pdo->beginTransaction();
+    try {
+        $dup = one($pdo, 'SELECT id FROM dishes WHERE owner_user_id=? AND name_norm=? AND is_active=1', [$uid, $norm]);
+        if ($dup) fail(409, 'DISH_EXISTS', 'Bạn đã có món ăn với tên này trong danh mục cá nhân.');
+        execSql($pdo, 'INSERT INTO dishes (owner_user_id, name, name_norm, origin, serving_label, is_active) VALUES (?, ?, ?, "saved", ?, 1)', [$uid, $name, $norm, $label]);
+        $dishId = (int)$pdo->lastInsertId();
+        foreach ($items as $idx => $it) {
+            $ingId = (int)num($it, 'ingredient_id', 1, 999999999);
+            $grams = num($it, 'grams', 0.1, 2000);
+            $check = one($pdo, 'SELECT id FROM ingredients WHERE id=? AND is_active=1', [$ingId]);
+            if (!$check) fail(422, 'INVALID_INGREDIENT', 'Nguyên liệu không tồn tại.');
+            execSql($pdo, 'INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) VALUES (?, ?, ?, ?)', [$dishId, $ingId, $grams, $idx]);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
+    return ['id' => $dishId, 'name' => $name, 'serving_label' => $label, 'origin' => 'saved'];
+}
 function createMeal(PDO $pdo,int $uid,array $p): array {
     $day = dateValue($p['entry_date'] ?? today());
     $meal = choice($p, 'meal_type', ['breakfast','lunch','dinner','snack']);
     $dishId = isset($p['dish_id']) ? (int)num($p,'dish_id',1,999999999) : null;
+    $items = isset($p['items']) && is_array($p['items']) ? $p['items'] : null;
     $recipeItems = [];
-    if ($dishId) {
+    if ($items !== null) {
+        $name = requiredString($p, 'name');
+        if (empty($items)) fail(422, 'EMPTY_ITEMS', 'Món ăn phải có ít nhất một nguyên liệu.');
+        $totals = [0, 0, 0, 0];
+        foreach ($items as $idx => $it) {
+            $ingId = (int)num($it, 'ingredient_id', 1, 999999999);
+            $grams = num($it, 'grams', 0.1, 2000);
+            $ing = one($pdo, 'SELECT id, name, source, kcal_100g, protein_100g, carb_100g, fat_100g FROM ingredients WHERE id=? AND is_active=1', [$ingId]);
+            if (!$ing) fail(422, 'INVALID_INGREDIENT', "Nguyên liệu không tồn tại hoặc đã bị khóa.");
+            $ingKcal = round($grams / 100 * (float)$ing['kcal_100g'], 1);
+            $ingProt = round($grams / 100 * (float)$ing['protein_100g'], 1);
+            $ingCarb = round($grams / 100 * (float)$ing['carb_100g'], 1);
+            $ingFat = round($grams / 100 * (float)$ing['fat_100g'], 1);
+            $totals[0] += $ingKcal;
+            $totals[1] += $ingProt;
+            $totals[2] += $ingCarb;
+            $totals[3] += $ingFat;
+            $recipeItems[] = [
+                'ingredient_id' => $ingId,
+                'name' => $ing['name'],
+                'grams' => $grams,
+                'kcal' => $ingKcal,
+                'protein_g' => $ingProt,
+                'carb_g' => $ingCarb,
+                'fat_g' => $ingFat,
+                'source' => $ing['source']
+            ];
+        }
+        [$kcal, $protein, $carb, $fat] = array_map(fn($v) => round($v, 1), $totals);
+        $factor = null;
+    } elseif ($dishId) {
         $dish = one($pdo,'SELECT id,name FROM dishes WHERE id=? AND is_active=1 AND (owner_user_id IS NULL OR owner_user_id=?)',[$dishId,$uid]);
         if (!$dish) fail(404,'DISH_NOT_FOUND','Không tìm thấy món ăn.');
         $factor = num($p,'serving_factor',0.1,10,1);
-        $recipeItems = all($pdo, 'SELECT di.ingredient_id,i.name,i.source,di.grams,i.kcal_100g,i.protein_100g,i.carb_100g,i.fat_100g FROM dish_ingredients di JOIN ingredients i ON i.id=di.ingredient_id WHERE di.dish_id=? AND i.is_active=1 ORDER BY di.sort_order', [$dishId]);
-        if (!$recipeItems) fail(422,'DISH_WITHOUT_RECIPE','Món ăn chưa có công thức dinh dưỡng. Hãy ghi thủ công.');
+        $recipeItemsRaw = all($pdo, 'SELECT di.ingredient_id,i.name,i.source,di.grams,i.kcal_100g,i.protein_100g,i.carb_100g,i.fat_100g FROM dish_ingredients di JOIN ingredients i ON i.id=di.ingredient_id WHERE di.dish_id=? AND i.is_active=1 ORDER BY di.sort_order', [$dishId]);
+        if (!$recipeItemsRaw) fail(422,'DISH_WITHOUT_RECIPE','Món ăn chưa có công thức dinh dưỡng. Hãy ghi thủ công.');
         $name = $dish['name']; $totals = [0,0,0,0];
-        foreach ($recipeItems as $it) {
-            foreach (['kcal_100g','protein_100g','carb_100g','fat_100g'] as $i=>$field) $totals[$i] += (float)$it['grams']*$factor/100*(float)$it[$field];
+        foreach ($recipeItemsRaw as $it) {
+            $grams = round((float)$it['grams'] * $factor, 1);
+            $ingKcal = round($grams / 100 * (float)$it['kcal_100g'], 1);
+            $ingProt = round($grams / 100 * (float)$it['protein_100g'], 1);
+            $ingCarb = round($grams / 100 * (float)$it['carb_100g'], 1);
+            $ingFat = round($grams / 100 * (float)$it['fat_100g'], 1);
+            $totals[0] += $ingKcal; $totals[1] += $ingProt; $totals[2] += $ingCarb; $totals[3] += $ingFat;
+            $recipeItems[] = [
+                'ingredient_id' => $it['ingredient_id'],
+                'name' => $it['name'],
+                'grams' => $grams,
+                'kcal' => $ingKcal,
+                'protein_g' => $ingProt,
+                'carb_g' => $ingCarb,
+                'fat_g' => $ingFat,
+                'source' => $it['source']
+            ];
         }
         [$kcal,$protein,$carb,$fat] = array_map(fn($v)=>round($v,1),$totals);
     } else {
@@ -133,9 +231,7 @@ function createMeal(PDO $pdo,int $uid,array $p): array {
         execSql($pdo, 'INSERT INTO meal_entries (user_id,entry_date,meal_type,name,source_kind,source_dish_id,serving_factor,total_kcal,total_protein_g,total_carb_g,total_fat_g) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$uid,$day,$meal,$name,'manual',$dishId,$factor,$kcal,$protein,$carb,$fat]);
         $id=(int)$pdo->lastInsertId();
         foreach ($recipeItems as $i=>$it) {
-            $grams = round((float)$it['grams']*$factor,1);
-            if ($grams < 0.1 || $grams > 2000) fail(422,'INVALID_PORTION','Khối lượng nguyên liệu vượt giới hạn.');
-            execSql($pdo,'INSERT INTO meal_entry_items (entry_id,ingredient_id,ingredient_name,grams,kcal,protein_g,carb_g,fat_g,nutrition_source,line_origin,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?)',[$id,$it['ingredient_id'],$it['name'],$grams,round($grams/100*(float)$it['kcal_100g'],1),round($grams/100*(float)$it['protein_100g'],1),round($grams/100*(float)$it['carb_100g'],1),round($grams/100*(float)$it['fat_100g'],1),$it['source'],'recipe',$i]);
+            execSql($pdo,'INSERT INTO meal_entry_items (entry_id,ingredient_id,ingredient_name,grams,kcal,protein_g,carb_g,fat_g,nutrition_source,line_origin,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?)',[$id,$it['ingredient_id'],$it['name'],$it['grams'],$it['kcal'],$it['protein_g'],$it['carb_g'],$it['fat_g'],$it['source'],'recipe',$i]);
         }
         $pdo->commit();
     } catch (Throwable $e) {if ($pdo->inTransaction()) $pdo->rollBack(); throw $e;}
@@ -165,7 +261,18 @@ function executeRoute(string $route,string $method): never {
         $q = trim((string)($_GET['q'] ?? ''));
         if (mb_strlen($q)>100) fail(422,'INVALID_QUERY','Từ khóa quá dài.');
         $term = '%' . $q . '%';
-        response(all($pdo,'SELECT d.id,d.name,d.serving_label,d.dish_code,ROUND(SUM(di.grams*i.kcal_100g/100),1) kcal, ROUND(SUM(di.grams*i.protein_100g/100),1) protein_g, ROUND(SUM(di.grams*i.carb_100g/100),1) carb_g,ROUND(SUM(di.grams*i.fat_100g/100),1) fat_g FROM dishes d JOIN dish_ingredients di ON di.dish_id=d.id JOIN ingredients i ON i.id=di.ingredient_id WHERE d.is_active=1 AND i.is_active=1 AND (d.owner_user_id IS NULL OR d.owner_user_id=?) AND (d.name LIKE ? OR d.name_norm LIKE ?) GROUP BY d.id,d.name,d.serving_label,d.dish_code ORDER BY d.name LIMIT 30',[$uid,$term,$term]));
+        response(all($pdo,'SELECT d.id,d.name,d.serving_label,d.dish_code,d.origin,ROUND(SUM(di.grams*i.kcal_100g/100),1) kcal, ROUND(SUM(di.grams*i.protein_100g/100),1) protein_g, ROUND(SUM(di.grams*i.carb_100g/100),1) carb_g,ROUND(SUM(di.grams*i.fat_100g/100),1) fat_g FROM dishes d JOIN dish_ingredients di ON di.dish_id=d.id JOIN ingredients i ON i.id=di.ingredient_id WHERE d.is_active=1 AND i.is_active=1 AND (d.owner_user_id IS NULL OR d.owner_user_id=?) AND (d.name LIKE ? OR d.name_norm LIKE ?) GROUP BY d.id,d.name,d.serving_label,d.dish_code,d.origin ORDER BY d.origin DESC, d.name LIMIT 30',[$uid,$term,$term]));
+    }
+    if (preg_match('~^/foods/([1-9][0-9]*)/recipe$~D', $route, $m) && $method === 'GET') {
+        response(dishRecipe($pdo, $uid, (int)$m[1]));
+    }
+    if ($route === '/ingredients' && $method === 'GET') {
+        $q = trim((string)($_GET['q'] ?? ''));
+        if (mb_strlen($q) > 100) fail(422, 'INVALID_QUERY', 'Từ khóa quá dài.');
+        response(searchIngredients($pdo, $uid, $q));
+    }
+    if ($route === '/dishes' && $method === 'POST') {
+        response(createCustomDish($pdo, $uid, body()), 201);
     }
     if ($route === '/meals' && $method === 'GET') response(mealList($pdo,$uid,dateValue($_GET['date'] ?? today())));
     if ($route === '/meals' && $method === 'POST') response(createMeal($pdo,$uid,body()),201);

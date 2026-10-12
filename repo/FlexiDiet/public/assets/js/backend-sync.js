@@ -78,7 +78,7 @@ async function fdRefreshDashboard() {
       protein:b.protein_g,carbs:b.carb_g,fat:b.fat_g,
       targets:{protein:Math.round(b.target_kcal*0.3/4),carbs:Math.round(b.target_kcal*0.45/4),fat:Math.round(b.target_kcal*0.25/9)}
     };
-    const preview=document.querySelector('#view-workout-log .box-head p');
+    const preview=document.querySelector('#view-workout .box-head p, #view-workout-log .box-head p');
     if (preview) preview.textContent=`Calo = MET × cân nặng (${appState.user.weight} kg) × thời gian (giờ). Ngân sách chỉ cộng theo chính sách đã chọn.`;
     updateEnergyDisplay();
     if (b.floor_applied) showToast('Ngân sách đang áp dụng mức sàn tối thiểu theo thiết kế ứng dụng.', 'info');
@@ -201,22 +201,12 @@ deleteActivity = async function(type,index) {
     showToast('Đã xóa mục khỏi MySQL.', 'success');
   } catch (error) { fdAPIError(error); }
 };
-// Food scanning is NOT implemented yet. No fabricated AI predictions may be saved as AI.
-handleImageUpload = function() { showToast('AI nhận diện ảnh chưa được kết nối. Hãy thêm món thủ công.', 'warning'); };
-triggerAIAnalysis = function() { showToast('Phân tích mô tả AI chưa được kết nối backend.', 'warning'); };
-loadFoodSample = function(key) {
-  const sample=appState.foodPresets[key];
-  if (!sample) return;
-  currentScannedBase={...sample};
-  renderAIResult(currentScannedBase);
-  showToast('Đây là món dữ liệu mẫu; không phải kết quả AI thật.', 'info');
-};
+// Food scanning & customizer integration with FoodHub
+handleImageUpload = function(e) { if (window.FoodHub) FoodHub.handleImageUpload(e); };
+triggerAIAnalysis = function() { if (window.FoodHub) FoodHub.triggerPromptAnalysis(); };
+loadFoodSample = function(key) { if (window.FoodHub) FoodHub.loadPreset(key); };
 saveScannedFoodToLog = async function() {
-  if (!currentScannedBase) return showToast('Chọn món mẫu hoặc ghi món thủ công.', 'warning');
-  const factor=Number(document.getElementById('gramsSlider').value)/currentScannedBase.weight;
-  await fdSaveMeal({name:currentScannedBase.name,meal_type:document.getElementById('resMealType').value,
-    total_kcal:Math.round(currentScannedBase.cal*factor),total_protein_g:+(currentScannedBase.prot*factor).toFixed(1),
-    total_carb_g:+(currentScannedBase.carb*factor).toFixed(1),total_fat_g:+(currentScannedBase.fat*factor).toFixed(1)});
+  if (window.FoodHub) await FoodHub.submitComposerToMealLog();
 };
 // Search and save server-computed dishes, rather than trusting frontend nutrition numbers.
 let fdSearchSequence=0;
