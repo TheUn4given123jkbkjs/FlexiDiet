@@ -261,7 +261,7 @@ function executeRoute(string $route,string $method): never {
         $q = trim((string)($_GET['q'] ?? ''));
         if (mb_strlen($q)>100) fail(422,'INVALID_QUERY','Từ khóa quá dài.');
         $term = '%' . $q . '%';
-        response(all($pdo,'SELECT d.id,d.name,d.serving_label,d.dish_code,d.origin,ROUND(SUM(di.grams*i.kcal_100g/100),1) kcal, ROUND(SUM(di.grams*i.protein_100g/100),1) protein_g, ROUND(SUM(di.grams*i.carb_100g/100),1) carb_g,ROUND(SUM(di.grams*i.fat_100g/100),1) fat_g FROM dishes d JOIN dish_ingredients di ON di.dish_id=d.id JOIN ingredients i ON i.id=di.ingredient_id WHERE d.is_active=1 AND i.is_active=1 AND (d.owner_user_id IS NULL OR d.owner_user_id=?) AND (d.name LIKE ? OR d.name_norm LIKE ?) GROUP BY d.id,d.name,d.serving_label,d.dish_code,d.origin ORDER BY d.origin DESC, d.name LIMIT 30',[$uid,$term,$term]));
+        response(all($pdo,'SELECT d.id,d.name,d.name_norm,d.serving_label,d.dish_code,d.origin,ROUND(SUM(di.grams*i.kcal_100g/100),1) kcal, ROUND(SUM(di.grams*i.protein_100g/100),1) protein_g, ROUND(SUM(di.grams*i.carb_100g/100),1) carb_g,ROUND(SUM(di.grams*i.fat_100g/100),1) fat_g FROM dishes d JOIN dish_ingredients di ON di.dish_id=d.id JOIN ingredients i ON i.id=di.ingredient_id WHERE d.is_active=1 AND i.is_active=1 AND (d.owner_user_id IS NULL OR d.owner_user_id=?) AND (d.name LIKE ? OR d.name_norm LIKE ? OR d.dish_code LIKE ?) GROUP BY d.id,d.name,d.name_norm,d.serving_label,d.dish_code,d.origin ORDER BY d.origin DESC, d.name LIMIT 300',[$uid,$term,$term,$term]));
     }
     if (preg_match('~^/foods/([1-9][0-9]*)/recipe$~D', $route, $m) && $method === 'GET') {
         response(dishRecipe($pdo, $uid, (int)$m[1]));

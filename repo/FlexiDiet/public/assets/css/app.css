@@ -1945,6 +1945,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
 }
 .modal-backdrop.open {
   display: flex;
@@ -1957,6 +1958,8 @@ a:hover {
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
   padding: 24px;
   position: relative;
   animation: modalIn 0.2s ease-out;
@@ -2000,6 +2003,164 @@ a:hover {
   background: var(--jira-blue-dark);
   border-color: var(--jira-blue);
   color: #fff;
+}
+
+/* Quick Food Search & Log in Modal */
+.qf-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.qf-search-input-wrap input {
+  padding-right: 32px;
+}
+.qf-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+}
+.qf-search-clear-btn:hover {
+  color: #ef4444;
+}
+.qf-dish-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 250px;
+  overflow-y: auto;
+  background: var(--jira-bg-card, #ffffff);
+  border: 1px solid var(--line-strong, #cbd5e1);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+.qf-dd-item {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line, #f1f5f9);
+  transition: background 0.15s ease;
+}
+.qf-dd-item:last-child {
+  border-bottom: none;
+}
+.qf-dd-item:hover {
+  background: var(--bg-hover, #f8fafc);
+}
+:root[data-theme="dark"] .qf-dd-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.qf-dd-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qf-dd-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #ea580c;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.qf-dd-meta small {
+  color: var(--text-muted, #64748b);
+  font-weight: normal;
+}
+.qf-dd-empty {
+  padding: 18px 14px;
+  text-align: center;
+  color: var(--text-muted, #64748b);
+  font-size: 13px;
+}
+
+/* Selected Dish Preview in Modal */
+.qf-selected-card {
+  background: var(--bg-surface-secondary, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.qf-sc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.qf-sc-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qf-sc-title-wrap h4 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+}
+.qf-sc-serving {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+}
+.qf-sc-macros-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.qf-sc-macro-item {
+  background: var(--jira-bg-card, #ffffff);
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 8px;
+  padding: 6px 4px;
+}
+.qf-sc-macro-item .lbl {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-muted, #64748b);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.qf-sc-macro-item.cal strong { color: #ea580c; font-size: 14px; }
+.qf-sc-macro-item.p strong { color: #2563eb; font-size: 13px; }
+.qf-sc-macro-item.c strong { color: #10b981; font-size: 13px; }
+.qf-sc-macro-item.f strong { color: #f59e0b; font-size: 13px; }
+
+.qf-composer-redirect-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.qf-composer-redirect-row .btn-link {
+  background: none;
+  border: none;
+  color: var(--jira-blue, #2563eb);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
 }
 
 /* Toast Container */

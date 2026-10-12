@@ -131,13 +131,33 @@ async function fdSaveMeal(data) {
 }
 handleQuickFoodSubmit = async function(e) {
   e.preventDefault();
+  const dishId = Number(document.getElementById('qfSelectedDishId')?.value) || (typeof qfSelectedDish !== 'undefined' && qfSelectedDish ? qfSelectedDish.id : null);
+  const dishName = document.getElementById('qfSelectedDishName')?.value || document.getElementById('qfName')?.value?.trim() || '';
+  const mealType = document.getElementById('qfMeal')?.value || 'lunch';
+  const ratio = parseFloat(document.getElementById('qfPortionRatio')?.value) || 1.0;
+
+  if (dishId) {
+    const saved = await fdSaveMeal({
+      dish_id: dishId,
+      meal_type: mealType,
+      serving_factor: ratio
+    });
+    if (saved) closeCreateQuickModal();
+    return;
+  }
+
+  const baseKcal = Number(document.getElementById('qfBaseKcal')?.value || document.getElementById('qfCal')?.value || 0);
+  const baseProt = Number(document.getElementById('qfBaseProt')?.value || document.getElementById('qfProt')?.value || 0);
+  const baseCarb = Number(document.getElementById('qfBaseCarb')?.value || document.getElementById('qfCarb')?.value || 0);
+  const baseFat = Number(document.getElementById('qfBaseFat')?.value || document.getElementById('qfFat')?.value || 0);
+
   const data = {
-    name:document.getElementById('qfName').value.trim(),
-    meal_type:document.getElementById('qfMeal').value,
-    total_kcal:Number(document.getElementById('qfCal').value),
-    total_protein_g:Number(document.getElementById('qfProt').value),
-    total_carb_g:Number(document.getElementById('qfCarb').value),
-    total_fat_g:Number(document.getElementById('qfFat').value),
+    name: dishName,
+    meal_type: mealType,
+    total_kcal: Math.round(baseKcal * ratio),
+    total_protein_g: Math.round(baseProt * ratio * 10) / 10,
+    total_carb_g: Math.round(baseCarb * ratio * 10) / 10,
+    total_fat_g: Math.round(baseFat * ratio * 10) / 10,
   };
   const saved = await fdSaveMeal(data);
   if (saved) closeCreateQuickModal();

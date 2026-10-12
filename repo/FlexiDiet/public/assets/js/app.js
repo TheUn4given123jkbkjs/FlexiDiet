@@ -156,9 +156,117 @@ function switchTab(tabId) {
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
+function navigateToWorkoutLogging() {
+  switchTab('workout');
+  setTimeout(() => {
+    const form = document.getElementById('workoutForm');
+    if (form) {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('sportSelect')?.focus();
+    }
+  }, 120);
+}
+
 // ==============================================================================
 // 2. QUICK CREATE MODAL (+ CREATE BUTTON)
 // ==============================================================================
+// Quick Food Autocomplete State & Helpers
+let qfDishesCache = [];
+let qfSelectedDish = null;
+
+function removeVietnameseTones(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+    .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+    .replace(/[ìíịỉĩ]/g, 'i')
+    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+    .replace(/[ùúụủũưừứựửữ]/g, 'u')
+    .replace(/[ỳýỵỷỹ]/g, 'y')
+    .replace(/[đ]/g, 'd')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+const QUICK_FOOD_ALIASES = {
+  'pho': ['pho', 'phở', 'phở bò', 'pho bo', 'phở bò tái', 'pho bo tai', 'phở tái', 'pho tai', 'bánh phở', 'banh pho', 'phở gà', 'pho ga', 'phở tái nạm', 'pho tai nam'],
+  'banh_mi': ['bánh mì', 'banh mi', 'bánh mì thịt', 'banh mi thit', 'bánh mì patê', 'banh mi pate', 'bánh mì trứng', 'banh mi trung'],
+  'com': ['cơm', 'com', 'cơm trắng', 'com trang'],
+  'bun': ['bún', 'bun', 'bún tươi', 'bun tuoi'],
+  'cha': ['chả lụa', 'cha lua', 'giò lụa', 'gio lua'],
+  'cha_gio': ['nem rán', 'nem ran', 'chả giò', 'cha gio'],
+  'thit_kho': ['thịt kho tàu', 'thit kho tau', 'thịt kho hột vịt', 'thit kho hot vit'],
+  'dau_hu': ['đậu phụ', 'dau phu', 'đậu hũ', 'dau hu'],
+  'com_tam': ['cơm sườn', 'com suon', 'cơm tấm sườn', 'com tam suon']
+};
+
+function scoreQuickFoodMatch(dish, cleanQ, rawQ) {
+  if (!cleanQ) return 100;
+  const name = (dish.name || '').trim();
+  const rawLower = name.toLowerCase();
+  const cleanName = removeVietnameseTones(name);
+  const dishCode = (dish.dish_code || '').toLowerCase();
+  const nameNorm = (dish.name_norm || '').toLowerCase();
+
+  // 1. Exact match
+  if (rawLower === rawQ.toLowerCase() || cleanName === cleanQ) return 1000;
+  if (dishCode === cleanQ || nameNorm === cleanQ) return 950;
+
+  // 2. Starts with query
+  if (rawLower.startsWith(rawQ.toLowerCase()) || cleanName.startsWith(cleanQ)) return 850;
+  if (dishCode.startsWith(cleanQ) || nameNorm.startsWith(cleanQ)) return 800;
+
+  // 3. Contains query
+  if (rawLower.includes(rawQ.toLowerCase()) || cleanName.includes(cleanQ)) return 700;
+  if (dishCode.includes(cleanQ) || nameNorm.includes(cleanQ)) return 650;
+
+  // 4. Aliases
+  const aliases = QUICK_FOOD_ALIASES[dishCode] || [];
+  for (const alias of aliases) {
+    const cleanAlias = removeVietnameseTones(alias);
+    if (cleanAlias === cleanQ) return 920;
+    if (cleanAlias.startsWith(cleanQ)) return 780;
+    if (cleanAlias.includes(cleanQ) || cleanQ.includes(cleanAlias)) return 600;
+  }
+
+  // 5. Query contains dish name as standalone word
+  const escapedName = cleanName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wordBoundary = new RegExp('(?:^|\\s)' + escapedName + '(?:\\s|$)', 'i');
+  if (cleanName.length >= 3 && wordBoundary.test(cleanQ)) return 550;
+
+  // 6. Word-level token match
+  const queryWords = cleanQ.split(/\s+/).filter(w => w.length > 1);
+  if (queryWords.length > 1) {
+    const combinedTokens = cleanName + ' ' + aliases.join(' ') + ' ' + (dish.serving_label || '');
+    const cleanTokens = removeVietnameseTones(combinedTokens);
+    if (queryWords.every(w => cleanTokens.includes(w))) return 500;
+  }
+
+  return 0;
+}
+
+function escapeQuickHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadQuickFoodDishesCache() {
+  if (qfDishesCache.length > 0) return qfDishesCache;
+  try {
+    const list = await FlexiAPI.request('/foods');
+    if (Array.isArray(list)) {
+      qfDishesCache = list;
+    }
+  } catch (err) {
+    console.warn('Could not fetch /foods for quick log:', err);
+  }
+  return qfDishesCache;
+}
+
+window.refreshQuickFoodDishesCache = () => {
+  qfDishesCache = [];
+};
+
 function openCreateQuickModal(defaultMeal, type = 'food') {
   switchCreateTab(type);
   const modal = document.getElementById('createQuickModal');
@@ -168,6 +276,15 @@ function openCreateQuickModal(defaultMeal, type = 'food') {
       document.getElementById('qfMeal').value = defaultMeal;
     }
   }
+  if (type === 'food') {
+    loadQuickFoodDishesCache();
+    if (!qfSelectedDish) {
+      clearQuickFoodSelection();
+    }
+    setTimeout(() => {
+      document.getElementById('qfDishSearchInput')?.focus();
+    }, 150);
+  }
 }
 
 function closeCreateQuickModal() {
@@ -175,6 +292,8 @@ function closeCreateQuickModal() {
   if (modal) {
     modal.classList.remove('open');
   }
+  const dropdown = document.getElementById('qfDishDropdown');
+  if (dropdown) dropdown.style.display = 'none';
 }
 
 function handleCreateModalBackdrop(e) {
@@ -194,6 +313,7 @@ function switchCreateTab(type) {
     btnWorkout.classList.remove('active');
     formFood.style.display = 'block';
     formWorkout.style.display = 'none';
+    loadQuickFoodDishesCache();
   } else {
     btnWorkout.classList.add('active');
     btnFood.classList.remove('active');
@@ -202,19 +322,236 @@ function switchCreateTab(type) {
   }
 }
 
-function handleQuickFoodSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('qfName').value;
-  const meal = document.getElementById('qfMeal').value;
-  const cal = parseInt(document.getElementById('qfCal').value) || 0;
-  const prot = parseFloat(document.getElementById('qfProt').value) || 0;
-  const carb = parseFloat(document.getElementById('qfCarb').value) || 0;
-  const fat = parseFloat(document.getElementById('qfFat').value) || 0;
+async function handleQuickFoodSearch(e) {
+  const query = (e?.target?.value || '').trim();
+  const dropdown = document.getElementById('qfDishDropdown');
+  if (!dropdown) return;
 
-  addCardToKanban(name, meal, cal, prot, carb, fat);
+  const dishes = await loadQuickFoodDishesCache();
+  if (!dishes.length) {
+    dropdown.innerHTML = '<div class="qf-dd-empty"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách món ăn...</div>';
+    dropdown.style.display = 'block';
+    return;
+  }
+
+  let matches = dishes;
+  if (query) {
+    const cleanQ = removeVietnameseTones(query);
+    matches = dishes
+      .map(d => ({ dish: d, score: scoreQuickFoodMatch(d, cleanQ, query) }))
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.dish);
+  }
+
+  const displayList = matches.slice(0, 15);
+
+  if (!displayList.length) {
+    dropdown.innerHTML = `<div class="qf-dd-empty">
+      <i class="fa-solid fa-circle-info"></i> Không tìm thấy món "${escapeQuickHtml(query)}".
+      <br><small>Bạn có thể mở <strong>Ăn uống (Food Hub)</strong> để tạo món mới!</small>
+    </div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+
+  dropdown.replaceChildren();
+  for (const dish of displayList) {
+    const item = document.createElement('div');
+    item.className = 'qf-dd-item';
+    const isSaved = dish.origin === 'saved';
+    const badgeText = isSaved ? 'Món Của Tôi' : '67 Món Chuẩn';
+    const badgeClass = isSaved ? 'saved' : 'system';
+
+    item.innerHTML = `
+      <div class="qf-dd-title">
+        <span>${escapeQuickHtml(dish.name)}</span>
+        <span class="fh-dc-badge ${badgeClass}" style="font-size:10px; padding:1px 5px;">${badgeText}</span>
+      </div>
+      <div class="qf-dd-meta">
+        <span><i class="fa-solid fa-fire"></i> ${Math.round(dish.kcal)} kcal</span>
+        <small>(${escapeQuickHtml(dish.serving_label || '1 phần')})</small>
+      </div>
+    `;
+    item.addEventListener('click', () => selectQuickFoodDish(dish));
+    dropdown.appendChild(item);
+  }
+  dropdown.style.display = 'block';
+}
+
+function selectQuickFoodDish(dish) {
+  qfSelectedDish = dish;
+  const input = document.getElementById('qfDishSearchInput');
+  const dropdown = document.getElementById('qfDishDropdown');
+  const preview = document.getElementById('qfSelectedCard');
+  const clearBtn = document.getElementById('qfSearchClearBtn');
+  const redirectRow = document.getElementById('qfComposerRedirectRow');
+  const submitBtn = document.getElementById('btnSubmitQuickFood');
+
+  if (input) input.value = dish.name;
+  if (dropdown) dropdown.style.display = 'none';
+  if (clearBtn) clearBtn.style.display = 'block';
+
+  document.getElementById('qfSelectedDishId').value = dish.id;
+  document.getElementById('qfSelectedDishName').value = dish.name;
+  document.getElementById('qfBaseKcal').value = dish.kcal;
+  document.getElementById('qfBaseProt').value = dish.protein_g;
+  document.getElementById('qfBaseCarb').value = dish.carb_g;
+  document.getElementById('qfBaseFat').value = dish.fat_g;
+
+  const titleEl = document.getElementById('qfPreviewTitle');
+  const badgeEl = document.getElementById('qfPreviewBadge');
+  const servingEl = document.getElementById('qfPreviewServing');
+
+  if (titleEl) titleEl.textContent = dish.name;
+  if (badgeEl) {
+    const isSaved = dish.origin === 'saved';
+    badgeEl.textContent = isSaved ? 'Món Của Tôi' : '67 Món Chuẩn';
+    badgeEl.className = 'fh-dc-badge ' + (isSaved ? 'saved' : 'system');
+  }
+  if (servingEl) servingEl.innerHTML = `<i class="fa-solid fa-utensils"></i> Khẩu phần chuẩn: <strong>${escapeQuickHtml(dish.serving_label || '1 phần')}</strong>`;
+
+  updateQuickFoodPortion();
+
+  if (preview) preview.style.display = 'flex';
+  if (redirectRow) redirectRow.style.display = 'flex';
+  if (submitBtn) submitBtn.disabled = false;
+}
+
+function updateQuickFoodPortion() {
+  if (!qfSelectedDish) return;
+  const ratio = parseFloat(document.getElementById('qfPortionRatio')?.value) || 1.0;
+  const baseKcal = parseFloat(document.getElementById('qfBaseKcal')?.value) || qfSelectedDish.kcal;
+  const baseProt = parseFloat(document.getElementById('qfBaseProt')?.value) || qfSelectedDish.protein_g;
+  const baseCarb = parseFloat(document.getElementById('qfBaseCarb')?.value) || qfSelectedDish.carb_g;
+  const baseFat = parseFloat(document.getElementById('qfBaseFat')?.value) || qfSelectedDish.fat_g;
+
+  const kcalEl = document.getElementById('qfPreviewKcal');
+  const protEl = document.getElementById('qfPreviewProt');
+  const carbEl = document.getElementById('qfPreviewCarb');
+  const fatEl = document.getElementById('qfPreviewFat');
+
+  if (kcalEl) kcalEl.textContent = Math.round(baseKcal * ratio);
+  if (protEl) protEl.textContent = (baseProt * ratio).toFixed(1);
+  if (carbEl) carbEl.textContent = (baseCarb * ratio).toFixed(1);
+  if (fatEl) fatEl.textContent = (baseFat * ratio).toFixed(1);
+}
+
+function clearQuickFoodSelection() {
+  qfSelectedDish = null;
+  const input = document.getElementById('qfDishSearchInput');
+  const clearBtn = document.getElementById('qfSearchClearBtn');
+  const preview = document.getElementById('qfSelectedCard');
+  const redirectRow = document.getElementById('qfComposerRedirectRow');
+  const submitBtn = document.getElementById('btnSubmitQuickFood');
+
+  if (input) { input.value = ''; input.focus(); }
+  if (clearBtn) clearBtn.style.display = 'none';
+  if (preview) preview.style.display = 'none';
+  if (redirectRow) redirectRow.style.display = 'none';
+  if (submitBtn) submitBtn.disabled = true;
+
+  document.getElementById('qfSelectedDishId').value = '';
+  document.getElementById('qfSelectedDishName').value = '';
+}
+
+function openSelectedDishInComposer() {
+  const dishId = document.getElementById('qfSelectedDishId')?.value;
   closeCreateQuickModal();
-  showToast(`Đã thêm món "${name}" vào nhật ký!`, 'success');
-  switchTab('dashboard');
+  if (dishId && window.FoodHub) {
+    FoodHub.loadDishToComposer(Number(dishId));
+  } else {
+    switchTab('food');
+    switchFoodSubtab('composer');
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('qfDishDropdown');
+  const input = document.getElementById('qfDishSearchInput');
+  if (dd && input && !input.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+async function handleQuickFoodSubmit(e) {
+  e.preventDefault();
+  if (!qfSelectedDish) {
+    showToast('Vui lòng tìm và chọn món ăn từ danh sách!', 'warning');
+    return;
+  }
+
+  const meal = document.getElementById('qfMeal')?.value || 'lunch';
+  const ratio = parseFloat(document.getElementById('qfPortionRatio')?.value) || 1.0;
+  const dishId = Number(document.getElementById('qfSelectedDishId')?.value) || qfSelectedDish.id;
+  const name = qfSelectedDish.name;
+
+  const baseKcal = parseFloat(document.getElementById('qfBaseKcal')?.value) || qfSelectedDish.kcal;
+  const baseProt = parseFloat(document.getElementById('qfBaseProt')?.value) || qfSelectedDish.protein_g;
+  const baseCarb = parseFloat(document.getElementById('qfBaseCarb')?.value) || qfSelectedDish.carb_g;
+  const baseFat = parseFloat(document.getElementById('qfBaseFat')?.value) || qfSelectedDish.fat_g;
+
+  const finalCal = Math.round(baseKcal * ratio);
+  const finalProt = Math.round(baseProt * ratio * 10) / 10;
+  const finalCarb = Math.round(baseCarb * ratio * 10) / 10;
+  const finalFat = Math.round(baseFat * ratio * 10) / 10;
+
+  const submitBtn = document.getElementById('btnSubmitQuickFood');
+  if (submitBtn) submitBtn.disabled = true;
+
+  try {
+    await FlexiAPI.request('/meals', {
+      method: 'POST',
+      data: {
+        dish_id: dishId,
+        meal_type: meal,
+        serving_factor: ratio
+      }
+    });
+
+    appState.foodLog.unshift({
+      name,
+      meal,
+      cal: finalCal,
+      prot: finalProt,
+      carb: finalCarb,
+      fat: finalFat,
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      date: localDayKey()
+    });
+    appState.energy.consumed += finalCal;
+    appState.macros.protein += finalProt;
+    appState.macros.carbs += finalCarb;
+    appState.macros.fat += finalFat;
+
+    if (typeof renderDashboard === 'function') renderDashboard();
+    if (typeof updateEnergyDisplay === 'function') updateEnergyDisplay();
+    if (typeof fdRefreshDashboard === 'function') fdRefreshDashboard();
+
+    closeCreateQuickModal();
+    const mealLabel = (typeof fdLabels !== 'undefined' && fdLabels[meal]) ? fdLabels[meal] : meal;
+    showToast(`Đã ghi nhận món "${name}" (${finalCal} kcal) vào bữa ${mealLabel}!`, 'success');
+  } catch (err) {
+    console.warn('Backend /meals save warning:', err);
+    appState.foodLog.unshift({
+      name,
+      meal,
+      cal: finalCal,
+      prot: finalProt,
+      carb: finalCarb,
+      fat: finalFat,
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      date: localDayKey()
+    });
+    appState.energy.consumed += finalCal;
+    if (typeof renderDashboard === 'function') renderDashboard();
+    closeCreateQuickModal();
+    const mealLabel = (typeof fdLabels !== 'undefined' && fdLabels[meal]) ? fdLabels[meal] : meal;
+    showToast(`Đã thêm món "${name}" (${finalCal} kcal) vào bữa ${mealLabel}!`, 'success');
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
 }
 
 function handleQuickWorkoutSubmit(e) {

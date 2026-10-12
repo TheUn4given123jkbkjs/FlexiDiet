@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/app.css?v=1.2">
   <link rel="stylesheet" href="assets/css/shell.css?v=1.1">
   <link rel="stylesheet" href="assets/css/dashboard.css">
   <link rel="stylesheet" href="assets/css/workout-heatmap.css">
@@ -82,44 +82,86 @@
 <button class="ct-tab active" id="ctTabFood" onclick="switchCreateTab('food')"><i class="fa-solid fa-utensils"></i> Ghi Món Ăn</button>
 <button class="ct-tab" id="ctTabWorkout" onclick="switchCreateTab('workout')"><i class="fa-solid fa-person-running"></i> Ghi Bài Tập</button>
 </div>
-<!-- Food Form -->
+<!-- Food Form (Quick Food Search & Log) -->
 <form id="quickFoodForm" onsubmit="handleQuickFoodSubmit(event)">
-<div class="form-group">
-<label>Tên Món Ăn</label>
-<input class="jira-input" id="qfName" placeholder="VD: Bún Chả, Cơm Gà..." required="" type="text"/>
-</div>
-<div class="form-row">
-<div class="form-group">
-<label>Bữa Ăn</label>
-<select class="jira-select" id="qfMeal">
-<option value="breakfast">Bữa Sáng</option>
-<option selected="" value="lunch">Bữa Trưa</option>
-<option value="dinner">Bữa Tối</option>
-<option value="snack">Bữa Phụ</option>
-</select>
-</div>
-<div class="form-group">
-<label>Calories (kcal)</label>
-<input class="jira-input" id="qfCal" required="" type="number" value="450"/>
-</div>
-</div>
-<div class="form-row">
-<div class="form-group">
-<label>Protein (g)</label>
-<input class="jira-input" id="qfProt" type="number" value="25"/>
-</div>
-<div class="form-group">
-<label>Carb (g)</label>
-<input class="jira-input" id="qfCarb" type="number" value="50"/>
-</div>
-<div class="form-group">
-<label>Fat (g)</label>
-<input class="jira-input" id="qfFat" type="number" value="12"/>
-</div>
-</div>
-<button class="btn-jira-create btn-full" style="margin-top: 14px;" type="submit">
-<i class="fa-solid fa-plus"></i> Lưu vào nhật ký
-        </button>
+  <input type="hidden" id="qfSelectedDishId" value=""/>
+  <input type="hidden" id="qfSelectedDishName" value=""/>
+  <input type="hidden" id="qfBaseKcal" value="0"/>
+  <input type="hidden" id="qfBaseProt" value="0"/>
+  <input type="hidden" id="qfBaseCarb" value="0"/>
+  <input type="hidden" id="qfBaseFat" value="0"/>
+
+  <div class="form-group" style="position: relative;">
+    <label for="qfDishSearchInput"><i class="fa-solid fa-magnifying-glass"></i> Tìm &amp; Chọn Món Ăn</label>
+    <div class="qf-search-input-wrap">
+      <input class="jira-input" id="qfDishSearchInput" placeholder="Tìm trong 67 món chuẩn &amp; món của bạn..." autocomplete="off" oninput="handleQuickFoodSearch(event)" onfocus="handleQuickFoodSearch(event)" type="search"/>
+      <button class="qf-search-clear-btn" id="qfSearchClearBtn" type="button" onclick="clearQuickFoodSelection()" style="display:none;" title="Xóa chọn món"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <!-- Live Dropdown List of matching dishes -->
+    <div class="qf-dish-dropdown" id="qfDishDropdown" style="display:none;"></div>
+  </div>
+
+  <!-- Preview Card of Selected Dish -->
+  <div class="qf-selected-card" id="qfSelectedCard" style="display:none;">
+    <div class="qf-sc-header">
+      <div class="qf-sc-title-wrap">
+        <h4 id="qfPreviewTitle">Tên Món Ăn</h4>
+        <span class="fh-dc-badge system" id="qfPreviewBadge">Món Chuẩn</span>
+      </div>
+      <span class="qf-sc-serving" id="qfPreviewServing"><i class="fa-solid fa-utensils"></i> 1 phần</span>
+    </div>
+    <div class="qf-sc-macros-row">
+      <div class="qf-sc-macro-item cal">
+        <span class="lbl">Năng lượng</span>
+        <strong id="qfPreviewKcal">0</strong> <small>kcal</small>
+      </div>
+      <div class="qf-sc-macro-item p">
+        <span class="lbl">Protein</span>
+        <strong id="qfPreviewProt">0</strong> <small>g</small>
+      </div>
+      <div class="qf-sc-macro-item c">
+        <span class="lbl">Carb</span>
+        <strong id="qfPreviewCarb">0</strong> <small>g</small>
+      </div>
+      <div class="qf-sc-macro-item f">
+        <span class="lbl">Fat</span>
+        <strong id="qfPreviewFat">0</strong> <small>g</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="qfMeal"><i class="fa-regular fa-clock"></i> Bữa Ăn</label>
+      <select class="jira-select" id="qfMeal">
+        <option value="breakfast">Bữa Sáng</option>
+        <option selected="" value="lunch">Bữa Trưa</option>
+        <option value="dinner">Bữa Tối</option>
+        <option value="snack">Bữa Phụ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="qfPortionRatio"><i class="fa-solid fa-chart-pie"></i> Khẩu Phần Thực Tế</label>
+      <select class="jira-select" id="qfPortionRatio" onchange="updateQuickFoodPortion()">
+        <option value="0.5">0.5 phần (Ăn ít / nhẹ)</option>
+        <option value="0.75">0.75 phần</option>
+        <option value="1" selected="">1.0 phần (Chuẩn)</option>
+        <option value="1.25">1.25 phần</option>
+        <option value="1.5">1.5 phần (Tô lớn)</option>
+        <option value="2">2.0 phần (Gấp đôi)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="qf-composer-redirect-row" id="qfComposerRedirectRow" style="display:none;">
+    <i class="fa-solid fa-sliders text-blue"></i>
+    <span>Muốn gia giảm nguyên liệu chi tiết?</span>
+    <button type="button" class="btn-link" onclick="openSelectedDishInComposer()">Tùy chỉnh trong Food Hub &rarr;</button>
+  </div>
+
+  <button class="btn-jira-create btn-full" id="btnSubmitQuickFood" style="margin-top: 14px;" type="submit" disabled="">
+    <i class="fa-solid fa-plus"></i> Lưu vào nhật ký
+  </button>
 </form>
 <!-- Workout Form -->
 <form id="quickWorkoutForm" onsubmit="handleQuickWorkoutSubmit(event)" style="display:none;">
@@ -150,11 +192,11 @@
 </div>
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
   <script src="assets/js/api-client.js"></script>
-  <script src="assets/js/app.js?v=1.1"></script>
+  <script src="assets/js/app.js?v=1.4"></script>
   <script src="assets/js/dashboard.js"></script>
   <script src="assets/js/workout-heatmap.js"></script>
-  <script src="assets/js/food-hub.js?v=1.1"></script>
-  <script src="assets/js/backend-sync.js"></script>
+  <script src="assets/js/food-hub.js?v=1.2"></script>
+  <script src="assets/js/backend-sync.js?v=1.1"></script>
   <script src="assets/js/pages-loader.js"></script>
 </body>
 </html>

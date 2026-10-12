@@ -37,7 +37,8 @@ const FoodHub = (() => {
     const tabs = {
       scanner: { btn: 'btnFhScanner', pane: 'paneFhScanner' },
       catalog: { btn: 'btnFhCatalog', pane: 'paneFhCatalog' },
-      composer: { btn: 'btnFhComposer', pane: 'paneFhComposer' }
+      composer: { btn: 'btnFhComposer', pane: 'paneFhComposer' },
+      suggestions: { btn: 'btnFhSuggestions', pane: 'paneFhSuggestions' }
     };
 
     for (const [key, item] of Object.entries(tabs)) {
@@ -270,6 +271,7 @@ const FoodHub = (() => {
   }
 
   function startNewCustomDish() {
+    if (typeof switchTab === 'function') switchTab('food');
     state.composer.dishId = null;
     state.composer.name = 'Món Ăn Tự Phối Của Tôi';
     state.composer.servingLabel = '1 phần';
@@ -595,6 +597,7 @@ const FoodHub = (() => {
 
       const created = await FlexiAPI.request('/dishes', { method: 'POST', data: payload });
       showToast(`Đã lưu "${created.name}" vào Món Của Tôi (UC13)!`, 'success');
+      if (typeof window.refreshQuickFoodDishesCache === 'function') window.refreshQuickFoodDishesCache();
       await loadCatalog();
       switchSubtab('catalog');
     } catch (e) {
