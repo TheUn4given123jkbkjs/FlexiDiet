@@ -130,7 +130,25 @@ function dishRecipe(PDO $pdo, int $uid, int $dishId): array {
 }
 function searchIngredients(PDO $pdo, int $uid, string $q): array {
     $term = '%' . $q . '%';
-    return all($pdo, 'SELECT i.id, i.name, i.kcal_100g, i.protein_100g, i.carb_100g, i.fat_100g, i.state, i.source FROM ingredients i WHERE i.is_active=1 AND (i.owner_user_id IS NULL OR i.owner_user_id=?) AND (i.name LIKE ? OR i.name_norm LIKE ?) ORDER BY i.name LIMIT 30', [$uid, $term, $term]);
+    $normTerm = '%' . normalizeVietnamese($q) . '%';
+    return all($pdo, 'SELECT i.id, i.name, i.kcal_100g, i.protein_100g, i.carb_100g, i.fat_100g, i.state, i.source,
+        (SELECT ia.alias FROM ingredient_aliases ia WHERE ia.ingredient_id = i.id AND (ia.alias LIKE ? OR ia.alias_norm LIKE ?) LIMIT 1) AS matched_alias
+        FROM ingredients i 
+        WHERE i.is_active=1 
+          AND (i.owner_user_id IS NULL OR i.owner_user_id=?) 
+          AND (
+            i.name LIKE ? 
+            OR i.name_norm LIKE ? 
+            OR EXISTS (
+                SELECT 1 FROM ingredient_aliases ia 
+                WHERE ia.ingredient_id = i.id 
+                  AND (ia.alias LIKE ? OR ia.alias_norm LIKE ?)
+            )
+          ) 
+        ORDER BY (i.name LIKE ? OR i.name_norm LIKE ?) DESC, i.name 
+        LIMIT 30', 
+        [$term, $normTerm, $uid, $term, $normTerm, $term, $normTerm, $term, $normTerm]
+    );
 }
 function createCustomDish(PDO $pdo, int $uid, array $p): array {
     $name = requiredString($p, 'name');

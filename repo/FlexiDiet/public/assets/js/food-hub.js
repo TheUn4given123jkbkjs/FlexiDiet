@@ -484,9 +484,12 @@ const FoodHub = (() => {
       for (const item of items) {
         const div = document.createElement('div');
         div.className = 'fh-air-item';
+        const aliasBadge = item.matched_alias && item.matched_alias.toLowerCase() !== item.name.toLowerCase()
+          ? `<span style="font-size:11px; font-weight:normal; color:#0284c7; background:rgba(2,132,199,0.1); padding:1px 6px; border-radius:4px; margin-left:6px;"><i class="fa-solid fa-tags" style="font-size:9px;"></i> Khớp: ${escapeHtml(item.matched_alias)}</span>`
+          : '';
         div.innerHTML = `
           <div class="fh-air-info">
-            <strong>${escapeHtml(item.name)}</strong>
+            <strong>${escapeHtml(item.name)}${aliasBadge}</strong>
             <span>${Math.round(item.kcal_100g)} kcal / 100g · P: ${item.protein_100g}g · C: ${item.carb_100g}g · F: ${item.fat_100g}g</span>
           </div>
           <button class="btn-jira-tool" type="button" style="padding:4px 10px;font-size:12px;">
