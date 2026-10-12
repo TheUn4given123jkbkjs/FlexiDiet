@@ -84,6 +84,7 @@ Midterm/
 ---
 
 > 📖 **Xem thêm tài liệu chi tiết:**
+> * [Hướng dẫn khởi chạy Localhost (tutorial.md)](tutorial.md)
 > * [Đề cương chi tiết môn học](docs/00_concept/outline.md)
 > * [Tài liệu Pha 1: Business Modeling & Iteration Plan (v1.1)](docs/01_inception/01_business_modeling.md)
 > * [Hướng dẫn phương pháp luận Unified Process](skills/unified-process-se/SKILL.md)
