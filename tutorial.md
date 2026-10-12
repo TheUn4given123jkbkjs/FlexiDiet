@@ -50,8 +50,19 @@ Midterm/
 
 Bạn có thể chọn **Cách A (Terminal - Nhanh nhất)** hoặc **Cách B (Giao diện phpMyAdmin)**:
 
-#### 👉 Cách A: Dùng Terminal / Command Line (Khuyên dùng)
-Mở cửa sổ **Terminal** (PowerShell, Command Prompt hoặc Bash), di chuyển vào thư mục `database` của dự án và chạy các lệnh sau:
+#### 👉 Cách A: Dùng Terminal / PowerShell (Khuyên dùng)
+
+> 💡 **Khắc phục lỗi `'mysql' is not recognized`:**  
+> Mặc định Windows chưa nhận lệnh `mysql` và `php` của XAMPP. Bạn có 2 cách cực nhanh sau:
+> - **Cách A.1 (Tiện nhất):** Trên **XAMPP Control Panel**, nhấn nút **`Shell`** ở cột bên phải. Cửa sổ dòng lệnh mở ra đã được cấu hình sẵn cả `mysql` và `php`.
+> - **Cách A.2 (Trong PowerShell hiện tại):** Chạy lệnh sau để nạp nhanh biến môi trường cho cửa sổ PowerShell hiện tại:
+>   ```powershell
+>   $env:Path += ";<Đường_dẫn_XAMPP>\mysql\bin;<Đường_dẫn_XAMPP>\php"
+>   # Ví dụ máy bạn cài XAMPP ở ổ D:
+>   $env:Path += ";D:\xampp\mysql\bin;D:\xampp\php"
+>   ```
+
+Sau đó di chuyển vào thư mục `database` của dự án và chạy các lệnh:
 
 ```bash
 # 1. Di chuyển vào thư mục database của dự án
