@@ -103,24 +103,24 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 
 | ID | Yêu cầu | Ưu tiên |
 |---|---|---|
-| FR-03.1 | Member tải/chụp ảnh món ăn và nhập mô tả khẩu phần (ví dụ "1 bát cơm, 2 miếng gà chiên") rồi gửi phân tích | M |
+| FR-03.1 | Member tải/chụp ảnh món ăn để gửi phân tích thị giác máy tính (Computer Vision - YOLOv10m 67 lớp món Việt). *(Đã loại bỏ phần nhập mô tả tự nhiên để tập trung chuẩn hóa nhận diện ảnh món ăn).* | M |
 | FR-03.2 | PHP gọi dịch vụ AI qua HTTP; dịch vụ trả danh sách món dự đoán kèm độ tin cậy | M |
-| FR-03.3 | Nếu độ tin cậy top-1 ≥ ngưỡng (cấu hình được; giá trị chốt sau PoC, xem O1): lấy công thức chuẩn của món (đường nhận diện); bản nháp được dựng theo FR-03.17 | M |
-| FR-03.4 | Nếu độ tin cậy thấp, món tự chế hoặc mô tả theo nguyên liệu: tách nguyên liệu + gram từ mô tả, tra CSDL nguyên liệu (đường nguyên liệu) | M |
+| FR-03.3 | Nếu độ tin cậy top-1 ≥ ngưỡng (cấu hình được; giá trị chốt sau PoC, xem O1): lấy công thức chuẩn của món (đường nhận diện) và chuyển sang bộ phối món Composer | M |
+| FR-03.4 | Nếu độ tin cậy thấp hoặc món không nhận diện được: chuyển sang tìm kiếm trong danh mục hoặc phối nguyên liệu thủ công tại Food Hub Composer | M |
 | FR-03.5 | Hệ thống có lớp "không nhận ra"; khi đó chuyển sang tìm/nhập thủ công thay vì đoán | M |
 | FR-03.6 | Quy đổi khẩu phần Việt (bát, chén, dĩa, miếng...) sang gram; phân biệt khối lượng sống/chín | M |
 | FR-03.7 | Hiển thị kết quả gồm món, nguyên liệu, gram, kcal, protein/carb/fat; Member xác nhận hoặc chỉnh sửa trước khi lưu (**không được bỏ**). Gram mỗi nguyên liệu hợp lệ trong khoảng **0,1 – 2.000 g** | M |
-| FR-03.8 | Hỗ trợ tra cứu nguyên liệu theo từ đồng nghĩa / tên gọi địa phương 3 miền (`ingredient_aliases`) khi tìm kiếm tùy chỉnh món; tách mô tả lời (nếu có) bằng quy tắc regex ở v1, không dùng NLP/LLM phức tạp (D20) | M |
-| FR-03.9 | Tìm món thủ công trong danh mục hệ thống và danh mục cá nhân, chọn khẩu phần và ghi vào nhật ký | M |
+| FR-03.8 | Hỗ trợ tra cứu nguyên liệu theo từ đồng nghĩa / tên gọi địa phương 3 miền (`ingredient_aliases`) khi tìm kiếm tùy chỉnh món | M |
+| FR-03.9 | **Tìm món tức thì (Autocomplete):** Hỗ trợ tìm kiếm nhanh từ cả 67 món hệ thống và món cá nhân đã lưu trong pop-up ghi nhanh và Food Hub; chuẩn hóa dấu tiếng Việt toàn diện (khử dấu sừng/mũ, gõ có dấu hoặc không dấu, biến thể món); xem trước Kcal/P/C/F theo khẩu phần (0.5x, 1x, 1.5x, 2x) và ghi snapshot vào nhật ký | M |
 | FR-03.10 | Ghi bữa ăn vào nhật ký theo buổi (sáng / trưa / tối / phụ) dưới dạng **snapshot**; sửa dữ liệu nguồn không làm đổi lịch sử | M |
 | FR-03.11 | Member sửa hoặc xóa mục trong nhật ký | M |
 | FR-03.12 | Member tạo nguyên liệu/món tự chế; giá trị dinh dưỡng tự nhập gắn nhãn "tự nhập" với độ tin cậy thấp | M |
 | FR-03.13 | Member lưu món đã tính toán vào "Món đã lưu", lưu theo nguyên liệu + gram (nguồn: kết quả AI, tạo thủ công, từ nhật ký) | M |
-| FR-03.14 | Ghi nhanh từ "Món đã lưu" với hệ số khẩu phần (×0.5, ×1, ×1.5...) | M |
+| FR-03.14 | Ghi nhanh từ "Món đã lưu" và "67 món chuẩn" với hệ số khẩu phần (×0.5, ×1, ×1.5...) ngay tại Pop-up Dashboard | M |
 | FR-03.15 | Khi dịch vụ AI không phản hồi hoặc quá tải, hệ thống báo lỗi dễ hiểu và cho phép chuyển sang ghi thủ công | M |
 | FR-03.16 | Khi Member sửa kết quả AI và **đồng ý**, lưu cặp (món dự đoán, món đã sửa) để đánh giá/huấn luyện lại ngoại tuyến; không tự đưa vào CSDL chung | C |
-| FR-03.17 | **Ghép công thức chuẩn với mô tả (đường nhận diện):** bản nháp = công thức chuẩn của món AI đoán + điều chỉnh từ mô tả. Nguyên liệu trong mô tả khớp nguyên liệu của công thức thì dùng gram từ mô tả thay cho gram công thức; nguyên liệu của công thức không được nhắc thì giữ gram công thức nhân hệ số khẩu phần món (mặc định ×1); nguyên liệu trong mô tả mà công thức không có thì thêm thành dòng bổ sung gắn nhãn "từ mô tả". Phủ định như "không hành" chưa tách tự động ở v1, Member xóa dòng ở bước xác nhận | M |
-| FR-03.18 | **Xử lý ảnh tải lên:** ảnh chỉ dùng tạm để phân tích và bị xóa ngay khi trả bản nháp. Chỉ giữ lại khi Member chủ động chọn lúc tải lên "Lưu ảnh vào nhật ký" hoặc "Cho phép dùng ảnh để cải thiện mô hình" (mặc định tắt cả hai). Ảnh giữ tạm gắn với bản nháp và bị dọn khi quá hạn nếu Member không xác nhận | M |
+| FR-03.17 | Ghép công thức chuẩn của món AI đoán: bản nháp lấy từ công thức chuẩn trong CSDL, cho phép tinh chỉnh 3 thanh trượt Kcal/P/C/F và gam từng nguyên liệu tại Subtab Composer | M |
+| FR-03.18 | **Xử lý ảnh tải lên:** ảnh chỉ dùng tạm để phân tích và bị xóa ngay khi trả kết quả dự đoán. Chỉ giữ lại khi Member chủ động chọn lúc tải lên "Lưu ảnh vào nhật ký" | M |
 | FR-03.19 | **Sửa mục nhật ký đã ghi:** dòng nguyên liệu giữ nguyên nguyên liệu và gram thì **giữ giá trị dinh dưỡng đã lưu**; chỉ dòng bị sửa gram hoặc thêm mới dùng giá trị dinh dưỡng hiện hành; dòng bị gỡ thì xóa | M |
 | FR-03.20 | **Server luôn tự tính** calo và macro từ nguyên liệu + gram (hoặc món + hệ số khẩu phần) khi ghi và khi sửa. Trình duyệt chỉ gửi mã nguyên liệu/món, gram, buổi và (với dòng đã lưu) mã dòng; không nhận giá trị dinh dưỡng do trình duyệt gửi | M |
 
@@ -133,18 +133,18 @@ Trình duyệt (HTML/CSS/JS/Bootstrap) → PHP thuần + PDO + MySQL → dịch 
 | FR-04.3 | Mỗi bản ghi mang nhãn độ tin cậy theo nguồn (thiết bị: cao; MET: trung bình) | M |
 | FR-04.4 | Chính sách cộng calo tập vào ngân sách do Member chọn, thiết kế theo Strategy, áp **ở cấp ngày** lên tổng calo thô Σ của các buổi tập trong ngày: **cộng toàn bộ** = Σ; **cộng một phần** = 0,5 × Σ (**mặc định**); **có trần** = min(Σ, **500 kcal**). Chính sách và hệ số của ngày được lưu trên bản ghi ngân sách của ngày đó. Đổi chính sách chỉ áp cho hôm nay trở đi, các ngày đã qua không đổi. Hệ số và trần cấu hình được; đây là lựa chọn thiết kế để hạn chế ăn bù quá mức (R1), chưa có tài liệu tham khảo | M |
 | FR-04.5 | Bước chân/quãng đường không là nguồn riêng; dùng để chọn MET theo tốc độ cho buổi đi bộ/chạy | M |
-| FR-04.6 | Xem lịch sử buổi tập theo tuần/tháng; sửa, xóa buổi tập | M |
+| FR-04.6 | Xem lịch sử buổi tập theo tuần/tháng; sửa, xóa buổi tập; hiển thị Heatmap vận động cả năm | M |
 | FR-04.7 | Bản ghi buổi tập chỉ lưu **calo thô**, nguồn, MET, cân nặng đã dùng; **không lưu hệ số cộng**. Khi thêm, sửa, xóa buổi tập hoặc đổi chính sách, hệ thống tính lại calo tập được cộng của cả ngày | M |
 
 ### FR-05. Gợi ý món ăn (UC10)
 
 | ID | Yêu cầu | Ưu tiên |
 |---|---|---|
-| FR-05.1 | Hiển thị lượng calo và protein còn thiếu trong ngày | C |
-| FR-05.2 | Gợi ý danh sách món phù hợp lượng còn lại, lấy từ danh mục hệ thống và danh mục cá nhân | C |
-| FR-05.3 | Bộ lọc: nhiều protein, món Việt, dễ làm, dưới 400 kcal | C |
+| FR-05.1 | Tích hợp thành Subtab thứ 4 trong Ăn uống (Food Hub) và liên kết lối tắt từ Dashboard Quick Action Tile | C |
+| FR-05.2 | Hiển thị lượng calo và protein còn thiếu trong ngày | C |
+| FR-05.3 | Gợi ý danh sách món phù hợp lượng còn lại, lấy từ danh mục hệ thống và danh mục cá nhân; hỗ trợ bộ lọc (nhiều protein, món Việt, dễ làm, dưới 400 kcal) | C |
 
-*Chỉ làm nếu còn dư thời gian (11.3 trong 01).*
+*Giao diện Subtab 4 đã được xây dựng sẵn trong Food Hub và gắn lối tắt chuyển hướng.*
 
 ### FR-06. Dashboard và thống kê (UC09)
 

@@ -166,22 +166,17 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 | Rủi ro | R3, R4, R6, R8 |
 
 **Luồng chính**
-1. Member mở trang Nhật ký ăn uống, chọn buổi (sáng / trưa / tối / phụ).
-2. Member chụp hoặc tải ảnh, nhập mô tả khẩu phần (ví dụ "1 bát cơm, 1 đùi gà, 1 trứng ốp la") và bấm "Phân tích AI". Member có thể chọn (mặc định tắt) "Lưu ảnh vào nhật ký" hoặc "Cho phép dùng ảnh để cải thiện mô hình".
-3. Hệ thống kiểm tra ảnh (loại tệp, kích thước) và giới hạn tốc độ theo người dùng (mặc định 10 lần/phút).
-4. Hệ thống gửi ảnh tới dịch vụ AI.
-5. Dịch vụ AI trả danh sách món dự đoán kèm độ tin cậy.
-6. **Nếu độ tin cậy cao nhất ≥ ngưỡng (giá trị chốt sau PoC):** hệ thống lấy công thức chuẩn của món (đường nhận diện).
-7. Hệ thống tách mô tả thành các mục (số lượng + đơn vị + tên) và quy đổi sang gram (có xét sống/chín).
-8. Hệ thống **ghép** công thức với mô tả: mục khớp nguyên liệu của công thức thì dùng gram từ mô tả thay cho gram công thức; nguyên liệu của công thức không được nhắc thì giữ gram chuẩn nhân hệ số khẩu phần món (mặc định ×1); mục không khớp công thức (ví dụ trứng ốp la) thì thêm thành dòng bổ sung gắn nhãn "từ mô tả".
-9. Hệ thống trả bản nháp gồm món, nguyên liệu, gram, kcal, protein/carb/fat, nhãn nguồn, nhãn "từ mô tả" và độ tin cậy.
-10. Chuyển sang UC05.
+1. Member mở Food Hub (Ăn uống) ➔ Subtab 1: Quét ảnh món ăn AI (hoặc bấm thẻ hành động "Quét món ăn AI" trên Dashboard).
+2. Member chụp hoặc tải ảnh món ăn (hoặc bấm chọn các ảnh món mẫu như Phở bò, Cơm tấm, Bún chả...) và bấm "Phân tích AI".
+3. Hệ thống kiểm tra ảnh (loại tệp, kích thước) và gửi ảnh tới dịch vụ AI Vision (YOLOv10m 67 nhãn ẩm thực Việt).
+4. Dịch vụ AI trả danh sách món dự đoán kèm độ tin cậy.
+5. **Nếu độ tin cậy cao nhất ≥ ngưỡng:** hệ thống tự động tải công thức chuẩn của món từ CSDL sang Subtab 3: Tùy chỉnh & Phối món (Composer).
+6. Hệ thống hiển thị 3 thanh trượt Kcal/P/C/F và bảng nguyên liệu chi tiết cho phép Member gia giảm khối lượng trước khi lưu.
+7. Chuyển sang UC05.
 
 **Luồng thay thế**
-- A1 (bước 6): độ tin cậy < ngưỡng, hoặc mô tả liệt kê nguyên liệu → **đường nguyên liệu**: Member tìm kiếm và chọn nguyên liệu trực tiếp trên thanh tìm kiếm (hỗ trợ tên địa phương 3 miền qua bảng `ingredient_aliases`) hoặc bóc tách nhanh bằng quy tắc regex (D20), tra CSDL nguyên liệu, tổng hợp bản nháp.
-- A2 (bước 2): Member chỉ có mô tả, không có ảnh → bỏ bước 4 – 6, đi thẳng đường nguyên liệu.
-- A3 (bước 5): dịch vụ AI trả "không nhận ra" → gợi ý Member mô tả bằng nguyên liệu hoặc chuyển UC06.
-- A4 (sau bước 9): ảnh tạm bị xóa ngay, trừ khi Member đã chọn giữ ảnh ở bước 2. Ảnh được giữ gắn với bản nháp và bị dọn khi quá hạn nếu Member không xác nhận.
+- A1 (bước 4): độ tin cậy < ngưỡng hoặc món không nhận diện được ➔ hệ thống thông báo và đề xuất Member mở Subtab 2 (Danh mục món ăn) hoặc tự phối nguyên liệu thủ công tại Subtab 3 (UC06, UC12).
+- A2 (sau bước 7): ảnh tạm được xử lý trong bộ nhớ để nhận diện và không lưu trữ vĩnh viễn trên server nếu người dùng không yêu cầu.
 
 **Luồng ngoại lệ**
 - E1 (bước 3): tệp không hợp lệ → báo lỗi, không gọi AI.
@@ -233,27 +228,30 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 | Hậu điều kiện | Một mục nhật ký **dạng snapshot** được tạo; ngân sách còn lại cập nhật |
 | Yêu cầu liên quan | FR-03.6, FR-03.9 – FR-03.11, NFR-10, NFR-12 |
 
-**Luồng chính**
-1. Member mở trang Nhật ký ăn uống, chọn ngày (mặc định hôm nay) và buổi (sáng / trưa / tối / phụ).
-2. Member chọn "Tìm món" và nhập từ khóa.
-3. Hệ thống tìm trong danh mục hệ thống và danh mục cá nhân (kết hợp tra cứu từ đồng nghĩa / tên gọi địa phương 3 miền qua bảng `ingredient_aliases`), hiển thị kết quả kèm nhãn nguồn.
-4. Member chọn một món hoặc nguyên liệu.
-5. Hệ thống hiển thị khẩu phần mặc định; Member nhập số lượng và đơn vị (bát, chén, dĩa, miếng, gram...).
-6. Hệ thống quy đổi sang gram (có xét sống/chín) và tính calo, protein/carb/fat.
-7. Member có thể thêm món hoặc nguyên liệu khác vào cùng mục (lặp bước 2 – 6), rồi bấm Xác nhận.
-8. Hệ thống ghi mục nhật ký dạng snapshot trong một transaction, như UC05 bước 5, và hiển thị ngân sách còn lại mới (UC08).
+**Luồng chính (Hình thức 1: Ghi món nhanh qua Pop-up Modal tại Dashboard)**
+1. Member bấm thẻ hành động "Thêm bữa ăn" trên Dashboard hoặc nút "+ Thêm" trên thanh điều hướng.
+2. Pop-up Modal mở ra tại tab "Ghi Món Ăn", ô tìm kiếm tự động focus.
+3. Member nhập từ khóa món ăn (hỗ trợ cả gõ có dấu lẫn không dấu như `pho`, `phở`, `bun cha`, `com tam`... nhờ thuật toán chuẩn hóa Unicode tiếng Việt).
+4. Hệ thống tìm kiếm tức thì và hiển thị dropdown danh sách món ăn phù hợp từ cả **67 món chuẩn hệ thống** (gắn nhãn `67 Món Chuẩn`) và **danh mục cá nhân** (gắn nhãn `Món Của Tôi`).
+5. Member click chọn món ăn. Hệ thống hiển thị thẻ xem trước thông tin dinh dưỡng (Kcal, Protein, Carb, Fat) theo khẩu phần chuẩn.
+6. Member chọn buổi ăn (Sáng / Trưa / Tối / Phụ) và hệ số khẩu phần thực tế (0.5x, 1x, 1.5x, 2x...). Các chỉ số calo/macro tự động nhân theo tỷ lệ.
+7. Member bấm "Lưu vào nhật ký".
+8. Hệ thống gửi `dish_id`, `meal_type`, `serving_factor` lên API `/meals`, ghi mục nhật ký dạng snapshot trong MySQL và cập nhật ngay ngân sách năng lượng trên Dashboard (UC08).
+
+**Luồng chính (Hình thức 2: Tra cứu và Tùy chỉnh chi tiết tại Food Hub Catalog & Composer)**
+1. Member mở Food Hub ➔ Subtab 2: Danh mục món ăn (Catalog).
+2. Member lọc theo nguồn (`Tất cả`, `67 Món Chuẩn`, `Món Của Tôi`) và nhập từ khóa.
+3. Member bấm chọn món, hệ thống tải công thức đầy đủ của món sang Subtab 3 (Composer) để xem 3 thanh trượt Kcal/P/C/F và chỉnh sửa từng gam nguyên liệu.
+4. Member bấm "Xác nhận ghi nhật ký (Lưu Snapshot)" để lưu vào CSDL.
 
 **Luồng thay thế**
-- A1 (bước 3): không có kết quả → gợi ý tạo nguyên liệu hoặc món tự chế (UC12).
-- A2 (bước 2): Member chọn từ "Món đã lưu" → thực hiện UC14.
-- A3: UC06 được mở từ gợi ý của UC04 khi AI lỗi, quá tải hoặc không nhận ra; buổi và ngày đã chọn được giữ.
-- A4: **Sửa mục đã ghi.** Member chọn một mục trong nhật ký, đổi gram, thêm hoặc bớt nguyên liệu hoặc đổi buổi, rồi lưu → trình duyệt chỉ gửi mã dòng đã lưu, gram và nguyên liệu mới (nếu có); hệ thống tính lại trong một transaction theo quy tắc (FR-03.19, FR-03.20): dòng giữ nguyên nguyên liệu và gram thì **giữ giá trị dinh dưỡng đã lưu**; dòng bị sửa gram hoặc thêm mới thì dùng giá trị dinh dưỡng hiện hành; dòng bị gỡ thì xóa. Sau đó cập nhật ngân sách còn lại của ngày đó.
-- A5: **Xóa mục đã ghi.** Member bấm Xóa và xác nhận → hệ thống xóa mục cùng các dòng nguyên liệu của nó và cập nhật ngân sách còn lại của ngày đó.
+- A1 (bước 6 - Hình thức 1): Member muốn gia giảm từng nguyên liệu chi tiết (ví dụ: bớt bánh phở, thêm thịt bò) ➔ bấm link *"Tùy chỉnh trong Food Hub →"* để chuyển thẳng món sang Subtab Composer.
+- A2 (bước 3 - Hình thức 1): Không tìm thấy món phù hợp ➔ hệ thống hiển thị hướng dẫn mở Food Hub để tự tạo món mới từ nguyên liệu (UC12).
+- A3: **Sửa mục đã ghi.** Member chọn một mục trong nhật ký, đổi gram, thêm hoặc bớt nguyên liệu hoặc đổi buổi, rồi lưu → trình duyệt chỉ gửi mã dòng đã lưu, gram và nguyên liệu mới (nếu có); hệ thống tính lại trong một transaction theo quy tắc (FR-03.19, FR-03.20).
+- A4: **Xóa mục đã ghi.** Member bấm Xóa và xác nhận → hệ thống xóa mục cùng các dòng nguyên liệu snapshot và cập nhật lại ngân sách năng lượng của ngày.
 
 **Luồng ngoại lệ**
-- E1 (bước 5): đơn vị không có trong bảng quy đổi của món hoặc nguyên liệu → hỏi Member nhập gram trực tiếp.
-- E2 (bước 5): gram ngoài khoảng 0,1 – 2.000 g → báo lỗi tại trường.
-- E3 (bước 8): lỗi CSDL → transaction rollback, giữ nội dung trên màn hình để thử lại.
+- E1: Lỗi kết nối CSDL hoặc phiên đăng nhập hết hạn → hệ thống hiển thị thông báo lỗi thân thiện, rollback transaction và giữ trạng thái form để người dùng thử lại.
 
 ---
 
@@ -358,7 +356,7 @@ Cả 14 Use Case của 01 đều được đặc tả đầy đủ ở mục 3; 
 | Ưu tiên | Could: chỉ làm nếu còn dư thời gian |
 
 **Luồng chính**
-1. Member mở trang Gợi ý món.
+1. Member mở Food Hub ➔ Subtab 4: Gợi ý món ăn (hoặc bấm thẻ hành động "Gợi ý món ăn" trên Dashboard).
 2. Hệ thống tính phần còn lại: calo (UC08) và lượng protein còn thiếu trong ngày.
 3. Hệ thống hiển thị thanh "Bạn còn thiếu X kcal và Y g protein cho hôm nay".
 4. Hệ thống lấy các món đang hoạt động trong danh mục hệ thống và danh mục cá nhân có calo mỗi khẩu phần chuẩn không vượt phần còn lại, xếp theo mức gần với lượng còn thiếu.

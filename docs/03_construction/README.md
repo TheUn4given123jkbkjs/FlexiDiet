@@ -34,4 +34,4 @@ Theo chuẩn **Unified Process (Ian Sommerville, Chapter 2.4)**, pha Constructio
 | `03_iteration_plan.md` | Kế hoạch chi tiết theo từng Iteration (C1, C2, C3) và phân công nhóm | Chuẩn bị |
 | `03_api_implementation.md` | Tài liệu hướng dẫn sử dụng và kiểm thử toàn bộ REST API Endpoints | Chuẩn bị |
 | `03_test_cases.md` | Ma trận kiểm thử (Test Matrix), Unit Tests & Integration Test Cases | Chuẩn bị |
-| `03_dev_log.md` | Nhật ký ghi nhận tiến độ phát triển, bug fixes và technical decisions | Chuẩn bị |
+| `03_dev_log.md` | Nhật ký ghi nhận tiến độ phát triển, bug fixes và technical decisions | Hoàn thành (Cập nhật 12/10) |
