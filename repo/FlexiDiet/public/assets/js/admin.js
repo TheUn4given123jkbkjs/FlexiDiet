@@ -7,7 +7,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // Global Admin State
-let S = { scr: 'stats', per: '1w', kid: null, pid: null, pname: '', page: 1, q: '', fl: {}, data: null, demo: false, total: 0, perPage: 25 };
+let S = { scr: 'stats', per: '1w', obsPer: 'hour', kid: null, pid: null, pname: '', page: 1, q: '', fl: {}, data: null, demo: false, total: 0, perPage: 25 };
 
 // In-Memory Template Cache for admin-pages/*.html
 const templateCache = {};
@@ -68,10 +68,12 @@ async function load() {
     if (!d) {
       let r;
       if (S.scr === 'obs') {
+        const obsP = S.obsPer || 'hour';
         r = {
           m: await call('/admin/ai/metrics'),
           h: await call('/admin/ai/health').catch(() => null),
-          t: await call('/admin/ai/throughput').catch(() => [])
+          t: await call('/admin/ai/throughput?period=' + obsP).catch(() => []),
+          http: await call('/admin/ai/http-distribution?period=' + obsP).catch(() => ({ total: 0, items: [] }))
         };
       } else if (S.scr === 'stats') {
         r = await call('/admin/stats');
@@ -156,15 +158,23 @@ const disp = (f, r) => {
 
 const bars = (a, k, f = v => v) => {
   const mx = Math.max(1, ...a.map(x => x[k] || 0));
+  const isDense = a.length > 12;
+  const gap = isDense ? '2px' : '8px';
+  const fs = isDense ? '9px' : '10px';
+  const barW = isDense ? '10px' : '24px';
+  const maxBarPx = 105;
   return a.length ? `
-    <div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:10px 4px 0;">
-      ${a.map(x => `
-        <div title="${esc(x.label)}: ${f(x[k])}" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:pointer;">
-          <span style="font-size:10px;font-weight:700;color:var(--fd-ink);margin-bottom:4px;">${x[k] ? x[k] : ''}</span>
-          <i style="display:block;width:100%;max-width:24px;height:${Math.max(4, (x[k] / mx) * 100)}%;background:linear-gradient(180deg, #34d399, var(--fd-green));border-radius:6px 6px 0 0;transition:all 0.2s;"></i>
-          <small style="font-size:10px;color:var(--fd-subtle);margin-top:6px;white-space:nowrap;">${esc(x.label)}</small>
-        </div>
-      `).join('')}
+    <div style="display:flex;align-items:flex-end;gap:${gap};height:160px;padding:8px 2px 2px;width:100%;box-sizing:border-box;overflow:hidden;">
+      ${a.map((x, i) => {
+        const lbl = isDense ? (i % 2 === 0 ? esc(x.label) : '<span style="opacity:0.35;">·</span>') : esc(x.label);
+        const barH = Math.max(4, Math.round(((x[k] || 0) / mx) * maxBarPx));
+        return `
+        <div title="${esc(x.label)}: ${f(x[k])}" style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;">
+          <span style="font-size:8.5px;font-weight:700;color:var(--fd-ink);margin-bottom:3px;line-height:1;min-height:10px;">${x[k] ? x[k] : ''}</span>
+          <i style="display:block;width:100%;max-width:${barW};height:${barH}px;background:linear-gradient(180deg, #34d399, var(--fd-green));border-radius:4px 4px 0 0;transition:all 0.2s;"></i>
+          <small style="font-size:${fs};color:var(--fd-subtle);margin-top:6px;white-space:nowrap;line-height:1;">${lbl}</small>
+        </div>`;
+      }).join('')}
     </div>` : `<div class="empty"><i class="fa-solid fa-chart-simple"></i> Chưa có dữ liệu</div>`;
 };
 
@@ -300,13 +310,49 @@ async function renderObs(v) {
   $('#valRamUsage').textContent = h.ram != null ? h.ram + '%' : '—';
   $('#valAiModel').textContent = val(h.model);
 
-  const okRate = m.error_rate != null ? (100 - Number(m.error_rate)).toFixed(1) : '100';
-  const httpText = $('#valHttpStatusText');
-  if (httpText) {
-    httpText.textContent = `${okRate}% phản hồi HTTP 200 OK — Hệ thống AI đang vận hành ổn định.`;
+  const obsP = S.obsPer || 'hour';
+  document.querySelectorAll('#obsPeriodTabs [data-p]').forEach(b => {
+    b.classList.toggle('active', b.dataset.p === obsP);
+  });
+
+  const titleEl = $('#obsTrafficChartTitle');
+  if (titleEl) {
+    titleEl.textContent = obsP === 'hour'
+      ? 'Số request nhận diện (00h–23h hôm nay)'
+      : obsP === 'day'
+      ? 'Số request nhận diện (7 ngày qua)'
+      : 'Số request nhận diện (6 tháng qua)';
   }
 
   $('#chartThroughput').innerHTML = bars(d.t || [], 'count');
+
+  // Render HTTP Status Distribution Split & List
+  const httpData = d.http || { total: 0, items: [] };
+  const items = httpData.items || [];
+  const splitTrack = $('#obsHttpSplit');
+  if (splitTrack) {
+    if (items.length && httpData.total > 0) {
+      splitTrack.innerHTML = items.filter(x => x.count > 0).map(x => `<i style="width:${x.pct}%;background:${x.color};" title="${esc(x.label)}: ${x.count} req (${x.pct}%)"></i>`).join('');
+    } else {
+      splitTrack.innerHTML = '<i style="width:100%;background:var(--fd-green);" title="200 OK: 100%"></i>';
+    }
+  }
+
+  const listEl = $('#obsHttpList');
+  if (listEl) {
+    listEl.innerHTML = items.length ? items.map(x => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--fd-surface-card);border:1px solid var(--fd-line);border-radius:8px;font-size:12px;gap:8px;" title="${esc(x.desc)}">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${x.color};flex-shrink:0;"></span>
+          <b style="color:var(--fd-ink);font-family:monospace;font-size:12.5px;">${esc(x.label)}</b>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          <span style="font-weight:700;color:var(--fd-ink);">${x.count.toLocaleString()} req</span>
+          <b style="color:${x.color};min-width:44px;text-align:right;">${x.pct}%</b>
+        </div>
+      </div>
+    `).join('') : '<div class="empty"><i class="fa-solid fa-check-double"></i> Chưa có dữ liệu mã phản hồi</div>';
+  }
 }
 
 async function renderLearn(v) {
@@ -317,37 +363,77 @@ async function renderLearn(v) {
   const demoEl = $('#demoBanner');
   if (demoEl) demoEl.style.display = S.demo ? 'flex' : 'none';
 
-  const mx = Math.max(1, ...d.label_distribution.map(x => x.count)), t0 = d.top_dishes[0]?.count || 1;
+  const labels = d.label_distribution || [];
+  const mx = Math.max(1, ...labels.map(x => x.count || 0));
+  const topList = d.top_dishes || [];
+  const t0 = topList[0]?.count || 1;
 
   $('#valAcceptanceRate').textContent = d.acceptance_rate != null ? d.acceptance_rate + '%' : '—';
-  $('#valTotalClasses').textContent = d.label_distribution.length;
+  $('#valTotalClasses').textContent = d.total_classes ?? labels.length;
 
-  $('#topDishesList').innerHTML = d.top_dishes.map(x => `
-    <div class="mt">
-      <span>${esc(x.dish_code)}</span>
-      <div><i style="width:${(x.count / t0) * 100}%;"></i></div>
-      <b>${x.count} lượt</b>
-    </div>
-  `).join('');
+  // 1. Top món nhận diện nhiều nhất
+  const topEl = $('#topDishesList');
+  if (topEl) {
+    if (topList.length) {
+      topEl.innerHTML = topList.map(x => `
+        <div class="mt">
+          <span title="${esc(x.dish_name || x.dish_code)}">${esc(x.dish_name || x.dish_code)}</span>
+          <div><i style="width:${Math.max(4, Math.round((x.count / t0) * 100))}%;"></i></div>
+          <b>${x.count.toLocaleString()} lượt</b>
+        </div>
+      `).join('');
+    } else {
+      topEl.innerHTML = '<div class="empty"><i class="fa-solid fa-trophy"></i> Chưa có dữ liệu nhận diện món ăn</div>';
+    }
+  }
 
-  $('#labelDistributionMap').innerHTML = d.label_distribution.map(x => `
-    <i title="${esc(x.dish_code)}: ${x.count} lần" style="opacity:${(0.2 + (x.count / mx) * 0.8).toFixed(2)};"></i>
-  `).join('');
+  // 2. Heatmap phân bổ 67 nhãn món
+  const mapEl = $('#labelDistributionMap');
+  if (mapEl) {
+    if (labels.length) {
+      mapEl.innerHTML = labels.map(x => {
+        const titleText = `${esc(x.dish_name || x.dish_code)} (${esc(x.dish_code)}): ${x.count} lần`;
+        const op = x.count > 0 ? (0.28 + (x.count / mx) * 0.72).toFixed(2) : '0.12';
+        return `<i title="${titleText}" style="opacity:${op};"></i>`;
+      }).join('');
+    } else {
+      mapEl.innerHTML = '<div class="empty"><i class="fa-solid fa-tags"></i> Chưa có dữ liệu danh mục nhãn món</div>';
+    }
+  }
 
-  const renderTableData = (head, rows) => `
-    <table>
-      <tr>${head.map(x => `<th>${x}</th>`).join('')}</tr>
-      ${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}
-    </table>`;
+  const renderTableData = (head, rows, emptyMsg) => {
+    if (!rows || !rows.length) {
+      return `<div class="empty"><i class="fa-solid fa-circle-check" style="color:var(--fd-green);"></i> ${esc(emptyMsg)}</div>`;
+    }
+    return `
+      <table>
+        <tr>${head.map(x => `<th>${x}</th>`).join('')}</tr>
+        ${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}
+      </table>`;
+  };
 
+  // 3. Cặp món AI đoán nhầm
+  const confPairs = d.confusion_pairs || [];
   $('#confusionPairsContainer').innerHTML = renderTableData(
     ['AI dự đoán ban đầu', 'Người dùng sửa lại thành', 'Số lượt'],
-    d.confusion_pairs.map(x => [x.ai, x.user, x.count + ' lần'])
+    confPairs.map(x => [
+      x.ai_name && x.ai_name !== x.ai ? `${x.ai_name} (${x.ai})` : x.ai,
+      x.user_name && x.user_name !== x.user ? `${x.user_name} (${x.user})` : x.user,
+      x.count + ' lần'
+    ]),
+    'Chưa ghi nhận phản hồi nhầm lẫn nhãn nào từ người dùng'
   );
 
+  // 4. Cảnh báo độ tin cậy thấp (< 0.45)
+  const lowConf = d.low_confidence || [];
   $('#lowConfidenceContainer').innerHTML = renderTableData(
-    ['Mã món', 'Confidence trung bình', 'Số lượt'],
-    d.low_confidence.map(x => [x.dish_code, (x.avg_confidence * 100).toFixed(1) + '%', x.count])
+    ['Món ăn', 'Confidence trung bình', 'Số lượt'],
+    lowConf.map(x => [
+      x.dish_name && x.dish_name !== x.dish_code ? `${x.dish_name} (${x.dish_code})` : x.dish_code,
+      (x.avg_confidence * 100).toFixed(1) + '%',
+      x.count + ' lần'
+    ]),
+    'Tất cả lượt nhận diện đều đạt độ tin cậy an toàn (≥ 0.45)'
   );
 }
 
@@ -634,6 +720,7 @@ document.addEventListener('click', ev => {
   if (t === 'add') form();
   else if (t === 'edit') form(r);
   else if (t === 'per') { S.per = a.dataset.p; load(); }
+  else if (t === 'obs-per') { S.obsPer = a.dataset.p; load(); }
   else if (t === 'kid') { S = { ...S, kid: a.dataset.k, pid: id, pname: r ? (r.name || r.name_vi || 'Mục #' + id) : 'Chi tiết', page: 1, q: '', fl: {} }; load(); }
   else if (t === 'back') { S = { ...S, kid: null, pid: null, page: 1 }; load(); }
   else if (t === 'pg') { S.page += Number(a.dataset.d); load(); }

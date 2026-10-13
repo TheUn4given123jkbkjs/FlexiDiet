@@ -384,42 +384,135 @@ function adminMealLogTrend(PDO $pdo, string $period): array {
 }
 
 function adminAiRecognitionStats(PDO $pdo): array {
-    $totalAiLogs = (int)(one($pdo, 'SELECT COUNT(*) c FROM meal_entries WHERE source_kind="ai"')['c'] ?? 0);
-    $acceptanceRate = 92.4;
+    // 1. Acceptance Rate: Tỷ lệ người dùng đồng ý gợi ý đầu tiên của AI
+    $fbTotal = (int)(one($pdo, 'SELECT COUNT(*) c FROM ai_feedback')['c'] ?? 0);
+    if ($fbTotal > 0) {
+        $fbAccepted = (int)(one($pdo, 'SELECT COUNT(*) c FROM ai_feedback WHERE corrected_dish_code IS NULL OR corrected_dish_code = predicted_dish_code')['c'] ?? 0);
+        $acceptanceRate = round(($fbAccepted / $fbTotal) * 100, 1);
+    } else {
+        $aiMeals = (int)(one($pdo, 'SELECT COUNT(*) c FROM meal_entries WHERE source_kind="ai"')['c'] ?? 0);
+        $acceptanceRate = $aiMeals > 0 ? 100.0 : null;
+    }
 
-    // Distribution from seeded dishes
-    $dishRows = all($pdo, 'SELECT dish_code FROM dishes WHERE dish_code IS NOT NULL AND is_active=1 LIMIT 25');
+    // 2. Label Distribution: Toàn bộ danh mục 67 nhãn chuẩn từ bảng dishes và tần suất thực tế
+    $labelDistRows = all($pdo, '
+        SELECT 
+            d.dish_code, 
+            d.name AS dish_name,
+            (
+                (SELECT COUNT(*) FROM meal_entries m WHERE m.ai_dish_code = d.dish_code) +
+                (SELECT COUNT(*) FROM ai_feedback f WHERE f.predicted_dish_code = d.dish_code)
+            ) AS count
+        FROM dishes d
+        WHERE d.dish_code IS NOT NULL AND d.is_active = 1
+        ORDER BY d.id ASC
+    ');
     $labelDist = [];
-    foreach ($dishRows as $idx => $r) {
+    foreach ($labelDistRows as $r) {
         $labelDist[] = [
             'dish_code' => $r['dish_code'],
-            'count' => max(1, 45 - ($idx * 2) + rand(0, 5))
+            'dish_name' => $r['dish_name'],
+            'count' => (int)$r['count']
         ];
     }
 
-    $topDishes = [
-        ['dish_code' => 'pho_bo', 'count' => 68],
-        ['dish_code' => 'com_tam', 'count' => 54],
-        ['dish_code' => 'banh_mi', 'count' => 49],
-        ['dish_code' => 'bun_cha', 'count' => 41],
-        ['dish_code' => 'goi_cuon', 'count' => 36]
-    ];
+    // 3. Top Dishes: 5 món nhận diện nhiều nhất trên hệ thống
+    $topRows = all($pdo, '
+        SELECT 
+            COALESCE(d.name, x.dish_code) AS dish_name,
+            x.dish_code,
+            SUM(x.c) AS count
+        FROM (
+            SELECT ai_dish_code AS dish_code, COUNT(*) AS c 
+            FROM meal_entries 
+            WHERE ai_dish_code IS NOT NULL AND ai_dish_code != ""
+            GROUP BY ai_dish_code
+            UNION ALL
+            SELECT predicted_dish_code AS dish_code, COUNT(*) AS c 
+            FROM ai_feedback 
+            WHERE predicted_dish_code IS NOT NULL AND predicted_dish_code != ""
+            GROUP BY predicted_dish_code
+        ) x
+        LEFT JOIN dishes d ON d.dish_code = x.dish_code
+        GROUP BY x.dish_code, d.name
+        ORDER BY count DESC
+        LIMIT 5
+    ');
+    $topDishes = [];
+    foreach ($topRows as $r) {
+        $topDishes[] = [
+            'dish_code' => $r['dish_code'],
+            'dish_name' => $r['dish_name'],
+            'count' => (int)$r['count']
+        ];
+    }
 
-    $confusionPairs = [
-        ['ai' => 'bun_cha', 'user' => 'bun_thit_nuong', 'count' => 7],
-        ['ai' => 'pho_bo', 'user' => 'hu_tieu', 'count' => 5],
-        ['ai' => 'banh_canh', 'user' => 'bun_bo_hue', 'count' => 4],
-        ['ai' => 'cha_gio', 'user' => 'nem_ran', 'count' => 3]
-    ];
+    // 4. Confusion Pairs: Các cặp món AI đoán A nhưng người dùng sửa thành B
+    $confusionRows = all($pdo, '
+        SELECT 
+            f.predicted_dish_code AS ai,
+            da.name AS ai_name,
+            f.corrected_dish_code AS user,
+            du.name AS user_name,
+            COUNT(*) AS count
+        FROM ai_feedback f
+        LEFT JOIN dishes da ON da.dish_code = f.predicted_dish_code
+        LEFT JOIN dishes du ON du.dish_code = f.corrected_dish_code
+        WHERE f.predicted_dish_code IS NOT NULL 
+          AND f.corrected_dish_code IS NOT NULL 
+          AND f.predicted_dish_code != f.corrected_dish_code
+        GROUP BY f.predicted_dish_code, da.name, f.corrected_dish_code, du.name
+        ORDER BY count DESC
+        LIMIT 10
+    ');
+    $confusionPairs = [];
+    foreach ($confusionRows as $r) {
+        $confusionPairs[] = [
+            'ai' => $r['ai'],
+            'ai_name' => $r['ai_name'] ?? $r['ai'],
+            'user' => $r['user'],
+            'user_name' => $r['user_name'] ?? $r['user'],
+            'count' => (int)$r['count']
+        ];
+    }
 
-    $lowConfidence = [
-        ['dish_code' => 'banh_xeo', 'avg_confidence' => 0.44, 'count' => 12],
-        ['dish_code' => 'lau', 'avg_confidence' => 0.46, 'count' => 9],
-        ['dish_code' => 'bo_la_lot', 'avg_confidence' => 0.48, 'count' => 7]
-    ];
+    // 5. Low Confidence Warnings: Các món có confidence < 0.45
+    $lowConfRows = all($pdo, '
+        SELECT 
+            COALESCE(d.name, x.dish_code) AS dish_name,
+            x.dish_code,
+            ROUND(AVG(x.conf), 3) AS avg_confidence,
+            COUNT(*) AS count
+        FROM (
+            SELECT predicted_dish_code AS dish_code, predicted_confidence AS conf 
+            FROM ai_feedback 
+            WHERE predicted_confidence IS NOT NULL AND predicted_confidence < 0.45 AND predicted_dish_code IS NOT NULL
+            UNION ALL
+            SELECT ai_dish_code AS dish_code, ai_confidence AS conf 
+            FROM meal_entries 
+            WHERE ai_confidence IS NOT NULL AND ai_confidence < 0.45 AND ai_dish_code IS NOT NULL
+        ) x
+        LEFT JOIN dishes d ON d.dish_code = x.dish_code
+        GROUP BY x.dish_code, d.name
+        ORDER BY count DESC, avg_confidence ASC
+        LIMIT 10
+    ');
+    $lowConfidence = [];
+    foreach ($lowConfRows as $r) {
+        $lowConfidence[] = [
+            'dish_code' => $r['dish_code'],
+            'dish_name' => $r['dish_name'],
+            'avg_confidence' => (float)$r['avg_confidence'],
+            'count' => (int)$r['count']
+        ];
+    }
+
+    // 6. Total Classes
+    $totalClasses = (int)(one($pdo, 'SELECT COUNT(DISTINCT dish_code) c FROM dishes WHERE dish_code IS NOT NULL AND is_active = 1')['c'] ?? count($labelDist));
 
     return [
         'acceptance_rate' => $acceptanceRate,
+        'total_classes' => $totalClasses,
         'label_distribution' => $labelDist,
         'top_dishes' => $topDishes,
         'confusion_pairs' => $confusionPairs,
@@ -428,15 +521,18 @@ function adminAiRecognitionStats(PDO $pdo): array {
 }
 
 function adminAiFeedbackLogs(PDO $pdo): array {
-    $rows = all($pdo, 'SELECT id, image_path thumb_url, predicted_dish_code ai_label, corrected_dish_code user_label, ROUND(predicted_confidence, 2) confidence, created_at FROM ai_feedback ORDER BY id DESC LIMIT 50');
-    if (empty($rows)) {
-        return [
-            ['id' => 1, 'thumb_url' => 'pictures/brand.png', 'ai_label' => 'bun_cha', 'user_label' => 'bun_thit_nuong', 'confidence' => '0.52', 'created_at' => '2026-10-12 14:20'],
-            ['id' => 2, 'thumb_url' => 'pictures/brand.png', 'ai_label' => 'pho_bo', 'user_label' => 'hu_tieu', 'confidence' => '0.48', 'created_at' => '2026-10-12 18:45'],
-            ['id' => 3, 'thumb_url' => 'pictures/brand.png', 'ai_label' => 'banh_mi', 'user_label' => 'banh_mi_op_la', 'confidence' => '0.51', 'created_at' => '2026-10-13 07:30']
-        ];
-    }
-    return $rows;
+    return all($pdo, '
+        SELECT 
+            f.id, 
+            COALESCE(f.image_path, "pictures/brand.png") thumb_url, 
+            f.predicted_dish_code ai_label, 
+            f.corrected_dish_code user_label, 
+            ROUND(f.predicted_confidence, 2) confidence, 
+            f.created_at 
+        FROM ai_feedback f 
+        ORDER BY f.id DESC 
+        LIMIT 50
+    ');
 }
 
 // -------------------------------------------------------------------------

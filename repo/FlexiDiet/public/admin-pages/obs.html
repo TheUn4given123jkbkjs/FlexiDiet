@@ -79,22 +79,50 @@
   </div>
 </div>
 
-<p class="note">
-  <i class="fa-solid fa-info-circle"></i>
-  Các chỉ số “—” sẽ hiển thị đầy đủ khi dịch vụ Python AI Microservice (ai_service/app.py) kết nối.
-</p>
+
+<!-- Thanh lọc thời gian Giờ / Ngày / Tháng cho Hiệu năng AI -->
+<div class="trend-bar" style="margin-top:16px;">
+  <div class="trend-title">
+    <i class="fa-solid fa-chart-line" style="color:var(--fd-green);"></i>
+    <span>Phân tích lưu lượng & độ tin cậy AI</span>
+  </div>
+  <div class="trend-segmented" id="obsPeriodTabs">
+    <button class="trend-tab active" data-a="obs-per" data-p="hour">
+      <i class="fa-regular fa-clock"></i> Theo giờ (00h–23h)
+    </button>
+    <button class="trend-tab" data-a="obs-per" data-p="day">
+      <i class="fa-regular fa-calendar-check"></i> Theo ngày (7 ngày)
+    </button>
+    <button class="trend-tab" data-a="obs-per" data-p="month">
+      <i class="fa-regular fa-calendar-days"></i> Theo tháng (6 tháng)
+    </button>
+  </div>
+</div>
 
 <!-- Lưới 2 biểu đồ phân phối request AI & HTTP Status -->
 <div class="admin-cols">
+  <!-- Biểu đồ 1: Số request nhận diện AI -->
   <div class="cd">
-    <h3><i class="fa-solid fa-chart-column"></i> Số request nhận diện theo khung giờ (24 giờ qua)</h3>
-    <div id="chartThroughput"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;"><i class="fa-solid fa-chart-column" style="color:var(--fd-green);"></i> <span id="obsTrafficChartTitle">Số request nhận diện (00h–23h hôm nay)</span></h3>
+      <span class="tag" style="font-size:11px;padding:2px 8px;"><i class="fa-solid fa-server"></i> Lưu lượng</span>
+    </div>
+    <div id="chartThroughput" style="overflow:hidden;"></div>
   </div>
+
+  <!-- Biểu đồ 2: Phân bổ mã phản hồi HTTP -->
   <div class="cd">
-    <h3><i class="fa-solid fa-shield-virus"></i> Phân bổ mã phản hồi HTTP</h3>
-    <div class="empty">
-      <i class="fa-solid fa-check-double" id="valHttpStatusIcon"></i>
-      <span id="valHttpStatusText">100% phản hồi HTTP 200 OK — Hệ thống AI đang vận hành ổn định.</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;"><i class="fa-solid fa-shield-virus" style="color:#2563eb;"></i> Phân bổ mã phản hồi HTTP</h3>
+      <span class="tag" style="background:#eff6ff;color:#2563eb;font-size:11px;padding:2px 8px;"><i class="fa-solid fa-shield-halved"></i> Audit Status</span>
+    </div>
+    <!-- Thanh tỷ lệ phân bổ Split Bar -->
+    <div class="split" id="obsHttpSplit" style="height:12px;border-radius:6px;margin-bottom:14px;">
+      <!-- Dynamic split bars -->
+    </div>
+    <!-- Danh sách các mã phản hồi chi tiết -->
+    <div id="obsHttpList" style="display:flex;flex-direction:column;gap:8px;">
+      <!-- Dynamic list rows -->
     </div>
   </div>
 </div>

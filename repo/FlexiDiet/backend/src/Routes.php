@@ -566,21 +566,120 @@ function executeRoute(string $route,string $method): never {
             response($items);
         }
         if ($route === '/admin/ai/throughput' && $method === 'GET') {
-            $h = (int)date('G');
-            $rows = all($pdo, 'SELECT DATE_FORMAT(hit_at, "%H") hr, COUNT(*) c 
-                FROM rate_limit_hits 
-                WHERE bucket = "analyze" AND hit_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) 
-                GROUP BY DATE_FORMAT(hit_at, "%H")');
-            $countsByHour = [];
-            foreach ($rows as $r) {
-                $countsByHour[(int)$r['hr']] = (int)$r['c'];
-            }
+            $period = (string)($_GET['period'] ?? 'hour');
             $bars = [];
-            for ($i = 0; $i < 24; $i++) {
-                $hr = ($h - 23 + $i + 24) % 24;
-                $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => $countsByHour[$hr] ?? 0];
+
+            if ($period === 'month') {
+                $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh'));
+                for ($i = 5; $i >= 0; $i--) {
+                    $m = $now->sub(new DateInterval("P{$i}M"));
+                    $ym = $m->format('Y-m');
+                    $c = (int)(one($pdo, 'SELECT COUNT(*) c FROM rate_limit_hits WHERE bucket="analyze" AND DATE_FORMAT(hit_at, "%Y-%m")=?', [$ym])['c'] ?? 0);
+                    $bars[] = ['label' => 'T' . $m->format('n'), 'count' => $c];
+                }
+            } elseif ($period === 'day') {
+                $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh'));
+                $daysVi = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+                $rows = all($pdo, 'SELECT DATE(hit_at) dt, COUNT(*) c 
+                    FROM rate_limit_hits 
+                    WHERE bucket="analyze" AND hit_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+                    GROUP BY DATE(hit_at)');
+                $map = [];
+                foreach ($rows as $r) $map[$r['dt']] = (int)$r['c'];
+
+                for ($i = 6; $i >= 0; $i--) {
+                    $d = $now->sub(new DateInterval("P{$i}D"));
+                    $dt = $d->format('Y-m-d');
+                    $idx = ((int)$d->format('N')) - 1;
+                    $bars[] = ['label' => $daysVi[$idx] ?? $d->format('d/m'), 'count' => $map[$dt] ?? 0];
+                }
+            } else { // 'hour' (default): 00h to 23h today
+                $rows = all($pdo, 'SELECT DATE_FORMAT(hit_at, "%H") hr, COUNT(*) c 
+                    FROM rate_limit_hits 
+                    WHERE bucket="analyze" AND DATE(hit_at) = CURDATE() 
+                    GROUP BY DATE_FORMAT(hit_at, "%H")');
+                $countsByHour = [];
+                foreach ($rows as $r) {
+                    $countsByHour[(int)$r['hr']] = (int)$r['c'];
+                }
+                for ($hr = 0; $hr < 24; $hr++) {
+                    $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => $countsByHour[$hr] ?? 0];
+                }
             }
             response($bars);
+        }
+        if ($route === '/admin/ai/http-distribution' && $method === 'GET') {
+            $period = (string)($_GET['period'] ?? 'hour');
+            $timeSql = match($period) {
+                'month' => 'hit_at >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)',
+                'day' => 'hit_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)',
+                default => 'DATE(hit_at) = CURDATE()'
+            };
+
+            $rows = all($pdo, "SELECT bucket, COUNT(*) c FROM rate_limit_hits WHERE bucket LIKE 'analyze:%' AND $timeSql GROUP BY bucket");
+            $bMap = [];
+            foreach ($rows as $r) {
+                $code = substr($r['bucket'], strlen('analyze:'));
+                $bMap[$code] = (int)$r['c'];
+            }
+
+            // Also check runtime metrics if database has no detailed hits yet
+            $m = proxyAiGet('/v1/metrics') ?: [];
+            $pyTotal = (int)($m['volume_today'] ?? 0);
+            $pyUnknown = (int)($m['unknown_detections'] ?? 0);
+            $pyErr = (int)round(($pyTotal * (float)($m['error_rate'] ?? 0)) / 100);
+            $pySuccess = max(0, $pyTotal - $pyUnknown - $pyErr);
+
+            $c200 = max($bMap['200'] ?? 0, $pySuccess);
+            $c422 = max($bMap['422'] ?? 0, $pyUnknown);
+            $c500 = max($bMap['500'] ?? ($bMap['503'] ?? 0), $pyErr);
+            $c429 = (int)($bMap['429'] ?? 0);
+            $total = $c200 + $c422 + $c500 + $c429;
+
+            $items = [
+                [
+                    'code' => '200',
+                    'label' => '200 OK',
+                    'badge' => 'Thành công',
+                    'desc' => 'Ảnh phân tích & nhận diện hợp lệ',
+                    'count' => $c200,
+                    'pct' => $total > 0 ? round(($c200 / $total) * 100, 1) : 100.0,
+                    'color' => 'var(--fd-green)'
+                ],
+                [
+                    'code' => '422',
+                    'label' => '422 Unprocessable',
+                    'badge' => 'Không rõ món',
+                    'desc' => 'Chưa có trong 67 nhãn hoặc ảnh mờ',
+                    'count' => $c422,
+                    'pct' => $total > 0 ? round(($c422 / $total) * 100, 1) : 0.0,
+                    'color' => '#f59e0b'
+                ],
+                [
+                    'code' => '500',
+                    'label' => '500 / 503 Server Error',
+                    'badge' => 'Lỗi máy chủ',
+                    'desc' => 'Lỗi kết nối mô hình hoặc timeout',
+                    'count' => $c500,
+                    'pct' => $total > 0 ? round(($c500 / $total) * 100, 1) : 0.0,
+                    'color' => '#ef4444'
+                ],
+                [
+                    'code' => '429',
+                    'label' => '429 Too Many Requests',
+                    'badge' => 'Vượt giới hạn',
+                    'desc' => 'Yêu cầu vượt ngưỡng tần suất',
+                    'count' => $c429,
+                    'pct' => $total > 0 ? round(($c429 / $total) * 100, 1) : 0.0,
+                    'color' => '#3b82f6'
+                ]
+            ];
+
+            response([
+                'period' => $period,
+                'total' => $total,
+                'items' => $items
+            ]);
         }
         if (handleAdminRoute($pdo, $uid, $route, $method)) exit;
     }

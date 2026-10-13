@@ -413,6 +413,12 @@ td.ac {
 }
 
 /* Charts & Visuals */
+#chartThroughput,
+#chartMealLogs {
+  overflow: hidden !important;
+  width: 100%;
+}
+
 .split {
   display: flex;
   height: 12px;
