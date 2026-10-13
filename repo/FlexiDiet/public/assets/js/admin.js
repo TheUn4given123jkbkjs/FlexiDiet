@@ -300,6 +300,12 @@ async function renderObs(v) {
   $('#valRamUsage').textContent = h.ram != null ? h.ram + '%' : '—';
   $('#valAiModel').textContent = val(h.model);
 
+  const okRate = m.error_rate != null ? (100 - Number(m.error_rate)).toFixed(1) : '100';
+  const httpText = $('#valHttpStatusText');
+  if (httpText) {
+    httpText.textContent = `${okRate}% phản hồi HTTP 200 OK — Hệ thống AI đang vận hành ổn định.`;
+  }
+
   $('#chartThroughput').innerHTML = bars(d.t || [], 'count');
 }
 

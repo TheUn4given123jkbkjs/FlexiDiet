@@ -307,6 +307,10 @@ function recognizeFood(PDO $pdo, int $uid): array {
         fail(422, 'INVALID_FILE_TYPE', 'Tệp tải lên phải là hình ảnh (JPEG, PNG, WebP).');
     }
 
+    try {
+        execSql($pdo, 'INSERT INTO rate_limit_hits (user_id, bucket, hit_at) VALUES (?, "analyze", NOW(3))', [$uid]);
+    } catch (Throwable) {}
+
     $ch = curl_init('http://127.0.0.1:8001/v1/recognize');
     $cfile = new CURLFile($tmpPath, $mime, $file['name'] ?? 'image.jpg');
     curl_setopt_array($ch, [
@@ -458,6 +462,16 @@ function executeRoute(string $route,string $method): never {
                 'volume_today' => 0, 'volume_week' => 0, 'volume_month' => 0,
                 'in_flight' => 0, 'error_rate' => 0, 'p50_ms' => 180, 'p95_ms' => 340, 'unknown_detections' => 0
             ];
+            $dbVol = one($pdo, 'SELECT 
+                COUNT(CASE WHEN hit_at >= CURDATE() THEN 1 END) AS vol_today,
+                COUNT(CASE WHEN hit_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END) AS vol_week,
+                COUNT(CASE WHEN hit_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 END) AS vol_month
+                FROM rate_limit_hits WHERE bucket = "analyze"');
+            if ($dbVol) {
+                $m['volume_today'] = max((int)$dbVol['vol_today'], (int)($m['volume_today'] ?? 0));
+                $m['volume_week'] = max((int)$dbVol['vol_week'], (int)($m['volume_week'] ?? 0));
+                $m['volume_month'] = max((int)$dbVol['vol_month'], (int)($m['volume_month'] ?? 0));
+            }
             response($m);
         }
         if ($route === '/admin/ai/labels' && $method === 'GET') {
@@ -480,10 +494,18 @@ function executeRoute(string $route,string $method): never {
         }
         if ($route === '/admin/ai/throughput' && $method === 'GET') {
             $h = (int)date('G');
+            $rows = all($pdo, 'SELECT DATE_FORMAT(hit_at, "%H") hr, COUNT(*) c 
+                FROM rate_limit_hits 
+                WHERE bucket = "analyze" AND hit_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) 
+                GROUP BY DATE_FORMAT(hit_at, "%H")');
+            $countsByHour = [];
+            foreach ($rows as $r) {
+                $countsByHour[(int)$r['hr']] = (int)$r['c'];
+            }
             $bars = [];
             for ($i = 0; $i < 24; $i++) {
                 $hr = ($h - 23 + $i + 24) % 24;
-                $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => rand(15, 85)];
+                $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => $countsByHour[$hr] ?? 0];
             }
             response($bars);
         }
