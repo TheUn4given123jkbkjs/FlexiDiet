@@ -43,8 +43,21 @@ function showForgotPane() {
   document.getElementById('fp-email').focus();
 }
 
-// Chuyển trang chỉ sau khi server xác thực thành công.
-function goToApp() { location.href = APP_URL; }
+// Chuyển trang sau khi xác thực thành công theo đúng vai trò người dùng.
+function goToApp(role) {
+  let userRole = role;
+  if (!userRole) {
+    try {
+      const u = JSON.parse(localStorage.getItem('flexidiet-user'));
+      userRole = u?.role;
+    } catch (e) {}
+  }
+  if (userRole === 'admin') {
+    location.href = 'admin.html';
+  } else {
+    location.href = APP_URL;
+  }
+}
 function showAuthError(error) { alert(error.message || 'Có lỗi xảy ra.'); }
 
 document.getElementById('open-signup').addEventListener('click', showSignup);
@@ -74,6 +87,7 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
       email:document.getElementById('si-email').value.trim(),
       password:document.getElementById('si-pass').value
     }});
+    const userRole = res?.user?.role || 'member';
     if (res?.user) {
       localStorage.setItem('flexidiet-user', JSON.stringify({
         id: res.user.id,
@@ -82,7 +96,7 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
         role: res.user.role
       }));
     }
-    goToApp();
+    goToApp(userRole);
   } catch (error) {
     const em = document.getElementById('si-email').value.trim();
     const pw = document.getElementById('si-pass').value;
@@ -90,14 +104,14 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
       localStorage.setItem('flexidiet-user', JSON.stringify({
         id: 1, name: 'System Admin', email: 'admin@flexidiet.vn', role: 'admin'
       }));
-      goToApp();
+      goToApp('admin');
       return;
     }
     if (em === 'demo@flexidiet.vn' || em === 'minhanh@gmail.com') {
       localStorage.setItem('flexidiet-user', JSON.stringify({
         id: 2, name: 'Nguyễn Văn Demo', email: 'demo@flexidiet.vn', role: 'member'
       }));
-      goToApp();
+      goToApp('member');
       return;
     }
     showAuthError(error);

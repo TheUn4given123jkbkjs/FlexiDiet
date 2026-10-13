@@ -1,0 +1,65 @@
+<!-- FlexiDiet Admin Studio - Chẩn đoán & Retraining AI (admin-pages/learn.html) -->
+<div class="banner" id="demoBanner" style="display:none;">
+  <i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i>
+  <div>
+    <strong>Chế độ Xem Thử & Mô Phỏng (Interactive Studio):</strong>
+    Dữ liệu mẫu đầy đủ được nạp sẵn. Các thao tác thêm, sửa, ngưng dùng, khóa/mở người dùng sẽ được mô phỏng trực tiếp trên bộ nhớ để bạn trải nghiệm trọn vẹn giao diện.
+  </div>
+</div>
+
+<!-- Lưới 2 thẻ chỉ số chẩn đoán AI -->
+<div class="admin-stats">
+  <div class="cd">
+    <div class="cd-header">
+      <span>Độ chính xác Top-1 (Acceptance)</span>
+      <div class="cd-icon green"><i class="fa-solid fa-circle-check"></i></div>
+    </div>
+    <b id="valAcceptanceRate">—</b>
+    <small>Người dùng đồng ý gợi ý đầu tiên</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Tổng số nhãn lớp (Classes)</span>
+      <div class="cd-icon blue"><i class="fa-solid fa-tags"></i></div>
+    </div>
+    <b id="valTotalClasses">—</b>
+    <small>Tập dữ liệu 67 món ăn Việt</small>
+  </div>
+</div>
+
+<!-- Lưới Top món & Heatmap phân bổ tần suất -->
+<div class="admin-cols">
+  <div class="cd">
+    <h3><i class="fa-solid fa-trophy text-orange"></i> Top món được nhận diện nhiều nhất</h3>
+    <div id="topDishesList"></div>
+  </div>
+  <div class="cd">
+    <h3><i class="fa-solid fa-fire text-green"></i> Phân bổ tần suất nhãn món</h3>
+    <div class="hm" id="labelDistributionMap"></div>
+    <small class="note" style="margin-top:12px;display:block;">
+      <i class="fa-solid fa-hand-pointer"></i> Màu càng đậm thể hiện món xuất hiện càng nhiều. Rê chuột lên từng ô để xem tên nhãn món.
+    </small>
+  </div>
+</div>
+
+<!-- Lưới Cặp nhầm lẫn & Cảnh báo độ tin cậy thấp -->
+<div class="admin-cols">
+  <div>
+    <h3 style="margin-bottom:12px;font-size:15px;color:var(--fd-ink);">
+      <i class="fa-solid fa-shuffle text-orange"></i> Cặp món AI thường phân vân / đoán nhầm
+    </h3>
+    <div class="tw" id="confusionPairsContainer"></div>
+  </div>
+  <div>
+    <h3 style="margin-bottom:12px;font-size:15px;color:var(--fd-ink);">
+      <i class="fa-solid fa-triangle-exclamation text-blue"></i> Cảnh báo độ tin cậy thấp (&lt; 0.45)
+    </h3>
+    <div class="tw" id="lowConfidenceContainer"></div>
+  </div>
+</div>
+
+<div class="admin-bar" style="margin-top:10px;">
+  <button class="btn ghost" data-a="export">
+    <i class="fa-solid fa-file-zipper"></i> Trích xuất Dataset YOLOv10 (Retraining)
+  </button>
+</div>

@@ -1,0 +1,130 @@
+<!-- FlexiDiet Admin Studio - Tổng quan hệ thống (admin-pages/stats.html) -->
+<div class="banner" id="demoBanner" style="display:none;">
+  <i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i>
+  <div>
+    <strong>Chế độ Xem Thử & Mô Phỏng (Interactive Studio):</strong>
+    Dữ liệu mẫu đầy đủ được nạp sẵn. Các thao tác thêm, sửa, ngưng dùng, khóa/mở người dùng sẽ được mô phỏng trực tiếp trên bộ nhớ để bạn trải nghiệm trọn vẹn giao diện.
+  </div>
+</div>
+
+<!-- Lưới 5 thẻ chỉ số KPI tổng quan -->
+<div class="admin-stats" id="statsGrid">
+  <div class="cd">
+    <div class="cd-header">
+      <span>Hoạt động hàng ngày (DAU)</span>
+      <div class="cd-icon green"><i class="fa-solid fa-user-check"></i></div>
+    </div>
+    <b id="valDau">—</b>
+    <small>Người dùng tương tác hôm nay</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Hoạt động tuần (WAU)</span>
+      <div class="cd-icon blue"><i class="fa-solid fa-users"></i></div>
+    </div>
+    <b id="valWau">—</b>
+    <small>Người dùng trong 7 ngày qua</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Món ăn hệ thống</span>
+      <div class="cd-icon orange"><i class="fa-solid fa-bowl-food"></i></div>
+    </div>
+    <b id="valDishes">—</b>
+    <small>Món chuẩn đã kiểm định</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Nguyên liệu chuẩn</span>
+      <div class="cd-icon purple"><i class="fa-solid fa-carrot"></i></div>
+    </div>
+    <b id="valIngredients">—</b>
+    <small>Cơ sở dữ liệu dinh dưỡng</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Nhật ký bữa ăn</span>
+      <div class="cd-icon"><i class="fa-solid fa-receipt"></i></div>
+    </div>
+    <b id="valMeals">—</b>
+    <small>Lượt ghi nhận toàn hệ thống</small>
+  </div>
+</div>
+
+<!-- Thẻ tỷ lệ calo cộng đồng -->
+<div class="cd" style="margin-bottom:22px;">
+  <div class="cd-header">
+    <span><i class="fa-solid fa-bullseye"></i> Tỷ lệ đạt mục tiêu calo của cộng đồng</span>
+    <span class="tag"><i class="fa-solid fa-trophy"></i> Thành tích</span>
+  </div>
+  <div class="split" id="goalSplitTrack">
+    <!-- Rendered dynamically -->
+  </div>
+  <div style="display:flex;gap:18px;margin-top:8px;font-size:12px;color:var(--fd-subtle);flex-wrap:wrap;">
+    <span><i class="fa-solid fa-circle" style="color:var(--fd-green);font-size:9px;"></i> Trong ngưỡng an toàn: <b id="valGoalWithin">0%</b></span>
+    <span><i class="fa-solid fa-circle" style="color:#f97316;font-size:9px;"></i> Vượt calo: <b id="valGoalOver">0%</b></span>
+    <span><i class="fa-solid fa-circle" style="color:#3b82f6;font-size:9px;"></i> Dưới calo: <b id="valGoalUnder">0%</b></span>
+  </div>
+</div>
+
+<!-- Thanh phân tích xu hướng 1 tuần / 1 tháng / 6 tháng -->
+<div class="trend-bar">
+  <div class="trend-title">
+    <i class="fa-solid fa-chart-line" style="color:var(--fd-green);"></i>
+    <span>Phân tích xu hướng</span>
+  </div>
+  <div class="trend-segmented" id="trendPeriodTabs">
+    <button class="trend-tab active" data-a="per" data-p="1w">
+      <i class="fa-regular fa-calendar-check"></i> 1 tuần
+    </button>
+    <button class="trend-tab" data-a="per" data-p="1m">
+      <i class="fa-regular fa-calendar"></i> 1 tháng
+    </button>
+    <button class="trend-tab" data-a="per" data-p="6m">
+      <i class="fa-regular fa-calendar-days"></i> 6 tháng
+    </button>
+  </div>
+</div>
+
+<!-- Lưới 4 Biểu đồ phân tích -->
+<div class="admin-cols" id="chartsGrid">
+  <!-- Biểu đồ 1: Người dùng mới & Hiện tại (Biểu đồ 2 đường kết hợp) -->
+  <div class="cd">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;"><i class="fa-solid fa-users text-green"></i> Người dùng mới & Hiện tại</h3>
+      <div style="display:flex;gap:14px;font-size:11.5px;font-weight:600;">
+        <span style="color:var(--fd-green);display:inline-flex;align-items:center;gap:5px;">
+          <i class="fa-solid fa-circle" style="font-size:8px;"></i> Đăng ký mới
+        </span>
+        <span style="color:#3b82f6;display:inline-flex;align-items:center;gap:5px;">
+          <i class="fa-solid fa-circle" style="font-size:8px;"></i> Đang hoạt động
+        </span>
+      </div>
+    </div>
+    <div id="chartUserTrend"></div>
+  </div>
+
+  <!-- Biểu đồ 2: Số bữa ăn ghi nhận (Biểu đồ cột) -->
+  <div class="cd">
+    <h3><i class="fa-solid fa-utensils text-orange"></i> Số bữa ăn ghi nhận</h3>
+    <div id="chartMealLogs"></div>
+  </div>
+
+  <!-- Biểu đồ 3: Kcal nạp trung bình 4 mục tiêu (Biểu đồ thanh ngang) -->
+  <div class="cd">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3 style="margin:0;"><i class="fa-solid fa-fire-flame-curved text-orange"></i> Kcal nạp trung bình 4 mục tiêu</h3>
+      <span class="tag" style="font-size:10.5px;padding:2px 8px;"><i class="fa-solid fa-bowl-food"></i> Nạp vào</span>
+    </div>
+    <div id="chartGoalIntake"></div>
+  </div>
+
+  <!-- Biểu đồ 4: Kcal tập luyện tiêu hao 4 mục tiêu (Biểu đồ thanh ngang) -->
+  <div class="cd">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3 style="margin:0;"><i class="fa-solid fa-person-running text-blue"></i> Kcal tập luyện tiêu hao 4 mục tiêu</h3>
+      <span class="tag" style="background:#eff6ff;color:#2563eb;font-size:10.5px;padding:2px 8px;"><i class="fa-solid fa-dumbbell"></i> Đốt cháy</span>
+    </div>
+    <div id="chartGoalBurned"></div>
+  </div>
+</div>

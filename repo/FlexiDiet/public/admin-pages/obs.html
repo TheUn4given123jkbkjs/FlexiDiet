@@ -1,0 +1,106 @@
+<!-- FlexiDiet Admin Studio - Giám sát AI & YOLO Server (admin-pages/obs.html) -->
+<div class="banner" id="demoBanner" style="display:none;">
+  <i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i>
+  <div>
+    <strong>Chế độ Xem Thử & Mô Phỏng (Interactive Studio):</strong>
+    Dữ liệu mẫu đầy đủ được nạp sẵn. Các thao tác thêm, sửa, ngưng dùng, khóa/mở người dùng sẽ được mô phỏng trực tiếp trên bộ nhớ để bạn trải nghiệm trọn vẹn giao diện.
+  </div>
+</div>
+
+<!-- Lưới 4 chỉ số lưu lượng AI -->
+<div class="admin-stats" id="aiTrafficGrid">
+  <div class="cd">
+    <div class="cd-header">
+      <span>Request AI hôm nay</span>
+      <div class="cd-icon green"><i class="fa-solid fa-microchip"></i></div>
+    </div>
+    <b id="valVolumeToday">—</b>
+    <small id="valVolumeSub">Tuần: — · Tháng: —</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Hàng đợi xử lý</span>
+      <div class="cd-icon orange"><i class="fa-solid fa-clock-rotate-left"></i></div>
+    </div>
+    <b id="valInFlight">—</b>
+    <small>Request đang được thực thi</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Tỷ lệ lỗi xử lý</span>
+      <div class="cd-icon blue"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    </div>
+    <b id="valErrorRate">—</b>
+    <small>Tỷ lệ dưới ngưỡng cảnh báo 2%</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Độ trễ p50 / p95</span>
+      <div class="cd-icon purple"><i class="fa-solid fa-bolt"></i></div>
+    </div>
+    <b id="valLatency">—</b>
+    <small>Thời gian phản hồi YOLO</small>
+  </div>
+</div>
+
+<!-- Lưới 4 chỉ số phần cứng YOLO Server -->
+<div class="admin-stats" id="aiHardwareGrid">
+  <div class="cd">
+    <div class="cd-header">
+      <span>Dịch vụ YOLO Server</span>
+      <div class="cd-icon green"><i class="fa-solid fa-heart-pulse"></i></div>
+    </div>
+    <b id="valServerStatus">—</b>
+    <small id="valServerUptime">Uptime: —</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>CPU Usage</span>
+      <div class="cd-icon blue"><i class="fa-solid fa-server"></i></div>
+    </div>
+    <b id="valCpuUsage">—</b>
+    <small>Tải vi xử lý AI</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>RAM Usage</span>
+      <div class="cd-icon orange"><i class="fa-solid fa-memory"></i></div>
+    </div>
+    <b id="valRamUsage">—</b>
+    <small>Bộ nhớ nạp weights</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Mô hình nhận diện</span>
+      <div class="cd-icon purple"><i class="fa-solid fa-brain"></i></div>
+    </div>
+    <b id="valAiModel">—</b>
+    <small>Phiên bản YOLOv10m</small>
+  </div>
+</div>
+
+<p class="note">
+  <i class="fa-solid fa-info-circle"></i>
+  Các chỉ số “—” sẽ hiển thị đầy đủ khi dịch vụ Python AI Microservice (ai_service/app.py) kết nối.
+</p>
+
+<!-- Lưới 2 biểu đồ phân phối request AI & HTTP Status -->
+<div class="admin-cols">
+  <div class="cd">
+    <h3><i class="fa-solid fa-chart-column"></i> Số request nhận diện theo khung giờ (24 giờ qua)</h3>
+    <div id="chartThroughput"></div>
+  </div>
+  <div class="cd">
+    <h3><i class="fa-solid fa-shield-virus"></i> Phân bổ mã phản hồi HTTP</h3>
+    <div class="empty">
+      <i class="fa-solid fa-check-double"></i>
+      99.1% phản hồi HTTP 200 OK — Hệ thống AI đang vận hành ổn định.
+    </div>
+  </div>
+</div>
+
+<div class="admin-bar" style="margin-top:10px;">
+  <button class="btn ghost" data-a="export">
+    <i class="fa-solid fa-file-zipper"></i> Trích xuất Dataset YOLOv10 (Retraining)
+  </button>
+</div>

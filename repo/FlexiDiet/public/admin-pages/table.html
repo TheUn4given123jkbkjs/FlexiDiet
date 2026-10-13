@@ -1,0 +1,84 @@
+<!-- FlexiDiet Admin Studio - Bảng quản lý dữ liệu chuẩn (admin-pages/table.html) -->
+<div class="banner" id="demoBanner" style="display:none;">
+  <i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i>
+  <div>
+    <strong>Chế độ Xem Thử & Mô Phỏng (Interactive Studio):</strong>
+    Dữ liệu mẫu đầy đủ được nạp sẵn. Các thao tác thêm, sửa, ngưng dùng, khóa/mở người dùng sẽ được mô phỏng trực tiếp trên bộ nhớ để bạn trải nghiệm trọn vẹn giao diện.
+  </div>
+</div>
+
+<!-- Thanh điều hướng khi ở mục con (sub-resource) -->
+<div class="admin-bar" id="subResourceBar" style="display:none;">
+  <button class="btn ghost" data-a="back">
+    <i class="fa-solid fa-arrow-left"></i> Quay lại
+  </button>
+  <span style="font-size:14px;font-weight:700;color:var(--fd-ink);" id="subResourceTitle">
+    <i class="fa-solid fa-folder-open"></i> Chi tiết
+  </span>
+</div>
+
+<!-- Ghi chú giải thích nghiệp vụ -->
+<p class="note" id="tableNote" style="display:none;">
+  <i class="fa-solid fa-circle-info"></i> <span id="tableNoteText"></span>
+</p>
+
+<!-- Chỉ số duy trì thói quen & nguy cơ rời bỏ (cho danh mục Người dùng) -->
+<div class="admin-stats" id="retentionBar" style="display:none;">
+  <div class="cd">
+    <div class="cd-header">
+      <span>Duy trì thói quen (Retention)</span>
+      <div class="cd-icon green"><i class="fa-solid fa-seedling"></i></div>
+    </div>
+    <b id="valRetentionPct">—%</b>
+    <small>Tỷ lệ người dùng giữ chuỗi ghi chép</small>
+  </div>
+  <div class="cd">
+    <div class="cd-header">
+      <span>Nguy cơ rời bỏ (Churn Risk)</span>
+      <div class="cd-icon orange"><i class="fa-solid fa-user-slash"></i></div>
+    </div>
+    <b id="valChurnRiskPct">—%</b>
+    <small>Offline trên 7 ngày</small>
+  </div>
+</div>
+
+<!-- Thanh công cụ tìm kiếm, lọc & thao tác -->
+<div class="admin-bar" id="tableToolbar">
+  <div class="search-box-wrap" id="searchBoxWrap">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input class="inp" id="q" placeholder="Tìm kiếm...">
+  </div>
+  <div id="filterContainer" style="display:flex;gap:8px;align-items:center;"></div>
+  <span class="sp"></span>
+  <button class="btn ghost" data-a="re" id="btnReEngage" style="display:none;">
+    <i class="fa-solid fa-paper-plane"></i> Gửi email nhắc nhở
+  </button>
+  <button class="btn" data-a="add" id="btnAddRecord" style="display:none;">
+    <i class="fa-solid fa-plus"></i> Thêm mới
+  </button>
+</div>
+
+<!-- Bảng dữ liệu chính -->
+<div class="tw">
+  <table id="dataTable" style="display:none;">
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty" id="tableEmpty" style="display:none;">
+    <i class="fa-solid fa-inbox"></i>
+    <p>Không tìm thấy bản ghi nào phù hợp với bộ lọc.</p>
+  </div>
+</div>
+
+<!-- Thanh phân trang -->
+<div class="admin-bar" id="paginationBar" style="justify-content:center;margin-top:16px;display:none;">
+  <button class="btn ghost sm" data-a="pg" data-d="-1" id="btnPrevPage">
+    <i class="fa-solid fa-chevron-left"></i> Trang trước
+  </button>
+  <span style="font-size:12.5px;font-weight:600;color:var(--fd-ink);padding:0 12px;" id="pageInfoText">
+    Trang 1 / 1
+  </span>
+  <button class="btn ghost sm" data-a="pg" data-d="1" id="btnNextPage">
+    Trang sau <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</div>
