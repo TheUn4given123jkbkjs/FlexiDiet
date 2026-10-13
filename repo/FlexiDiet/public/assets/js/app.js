@@ -8,13 +8,18 @@ function localDayKey(date = new Date()) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+// Khởi tạo thông tin người dùng từ phiên đăng nhập
+let initialUser = null;
+try { initialUser = JSON.parse(localStorage.getItem('flexidiet-user')); } catch (e) {}
+
 // Application State
 const appState = {
   activeTab: 'dashboard',
   currentStep: 1,
   user: {
-    name: 'Nguyễn Minh Anh',
-    email: 'minhanh@gmail.com',
+    name: (initialUser && initialUser.name) || 'Nguyễn Minh Anh',
+    email: (initialUser && initialUser.email) || 'minhanh@gmail.com',
+    role: (initialUser && initialUser.role) || 'member',
     gender: 'male',
     age: 24,
     height: 172,
@@ -927,11 +932,31 @@ function applyCurrentUser() {
   document.querySelectorAll('[title*="Minh Anh"]').forEach(el => {
     el.title = el.title.replace(/(Nguyễn )?Minh Anh/, () => user.name);
   });
+
+  const isAdmin = (user && user.role === 'admin');
+  const adminSec = document.getElementById('adminSidebarSection');
+  const roleBadge = document.getElementById('profileRoleBadge');
+
+  if (adminSec) adminSec.style.display = isAdmin ? 'block' : 'none';
+  if (roleBadge) {
+    if (isAdmin) {
+      roleBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Quản trị viên hệ thống';
+      roleBadge.style.background = '#fef3c7';
+      roleBadge.style.color = '#b45309';
+    } else {
+      roleBadge.innerHTML = '<i class="fa-solid fa-user-check"></i> Thành viên FlexiDiet';
+      roleBadge.style.background = '';
+      roleBadge.style.color = '';
+    }
+  }
 }
 
 function logout() {
-  try { localStorage.removeItem('flexidiet-user'); } catch (e) {}
-  location.href = 'index.html';
+  try {
+    localStorage.removeItem('flexidiet-user');
+    sessionStorage.clear();
+  } catch (e) {}
+  window.location.replace('index.html');
 }
 
 // Listen to Hash Change for SPA navigation

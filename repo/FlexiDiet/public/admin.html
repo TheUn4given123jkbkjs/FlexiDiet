@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FlexiDiet Admin Studio - Bảng điều khiển quản trị dữ liệu, AI và người dùng">
+  <title>FlexiDiet | Quản trị hệ thống</title>
+  <link rel="icon" type="image/png" href="pictures/brand.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css?v=2.1">
+  <link rel="stylesheet" href="assets/css/app.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/shell.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/brand.css?v=1.0">
+  <link rel="stylesheet" href="assets/css/responsive-fix.css?v=2.0">
+  <script src="assets/js/theme.js"></script>
+  <style>
+    /* Admin Studio Custom Styling - Đồng bộ hệ thống nhận diện FlexiDiet */
+    :root {
+      --fd-font-vi: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif;
+    }
+    body, button, input, textarea, select {
+      font-family: var(--fd-font-vi);
+    }
+    .fd-brand-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .fd-top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--fd-green-soft);
+      color: var(--fd-green);
+      border: 1px solid color-mix(in srgb, var(--fd-green) 20%, transparent);
+    }
+    .fd-top-badge i.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+    #theme-toggle .fa-sun { display: none; }
+    :root[data-theme="dark"] #theme-toggle .fa-moon { display: none; }
+    :root[data-theme="dark"] #theme-toggle .fa-sun { display: inline-block; }
+
+    /* Admin Action Toolbar */
+    .admin-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .admin-bar .sp { flex: 1; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--fd-green);
+      color: #fff;
+      font-family: var(--fd-font-vi);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 9px 15px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(36, 104, 68, 0.15);
+      text-decoration: none;
+    }
+    .btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(36, 104, 68, 0.25);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    :root[data-theme="dark"] .btn {
+      color: #0f2419;
+      background: var(--fd-green);
+    }
+    .btn.ghost {
+      background: var(--fd-surface);
+      color: var(--fd-ink);
+      border: 1px solid var(--fd-border);
+      box-shadow: none;
+    }
+    .btn.ghost:hover {
+      background: var(--fd-green-soft);
+      color: var(--fd-green);
+      border-color: color-mix(in srgb, var(--fd-green) 30%, transparent);
+    }
+    .btn.danger {
+      background: #ef4444;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+    }
+    .btn.danger:hover {
+      background: #dc2626;
+    }
+    .btn.sm {
+      padding: 6px 11px;
+      font-size: 11.5px;
+      border-radius: 8px;
+    }
+    .inp {
+      font-family: var(--fd-font-vi);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--fd-border);
+      background: var(--fd-surface);
+      color: var(--fd-ink);
+      border-radius: 10px;
+      padding: 9px 13px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .inp:focus {
+      border-color: var(--fd-green);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--fd-green) 18%, transparent);
+    }
+    .admin-bar .inp {
+      min-width: 170px;
+    }
+    .search-box-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .search-box-wrap i {
+      position: absolute;
+      left: 12px;
+      color: var(--fd-subtle);
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .search-box-wrap .inp {
+      padding-left: 34px;
+      min-width: 220px;
+    }
+
+    /* Cards & Stats Grid */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .cd {
+      background: var(--fd-surface);
+      border: 1px solid var(--fd-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--fd-shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cd:hover {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+    .cd-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cd span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fd-subtle);
+    }
+    .cd b {
+      display: block;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--fd-ink);
+      margin: 4px 0;
+    }
+    .cd small {
+      font-size: 11.5px;
+      color: var(--fd-subtle);
+      line-height: 1.4;
+      display: block;
+    }
+    .cd-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: var(--fd-green-soft);
+      color: var(--fd-green);
+    }
+    .cd-icon.orange { background: #fff3e8; color: #ea580c; }
+    .cd-icon.blue { background: #eff6ff; color: #2563eb; }
+    .cd-icon.purple { background: #faf5ff; color: #9333ea; }
+    :root[data-theme="dark"] .cd-icon.orange { background: #3c2415; color: #fb923c; }
+    :root[data-theme="dark"] .cd-icon.blue { background: #172554; color: #60a5fa; }
+    :root[data-theme="dark"] .cd-icon.purple { background: #2e1065; color: #c084fc; }
+
+    /* Columns layout */
+    .admin-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .admin-cols h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fd-ink);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Data Table */
+    .tw {
+      overflow-x: auto;
+      background: var(--fd-surface);
+      border: 1px solid var(--fd-border);
+      border-radius: 16px;
+      box-shadow: var(--fd-shadow);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    th {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--fd-subtle);
+      padding: 14px 18px;
+      background: color-mix(in srgb, var(--fd-surface) 95%, var(--fd-ink));
+      border-bottom: 1px solid var(--fd-border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--fd-border);
+      color: var(--fd-ink);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    tr:hover td {
+      background: color-mix(in srgb, var(--fd-green-soft) 40%, transparent);
+    }
+    td.ac {
+      white-space: nowrap;
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: var(--fd-green-soft);
+      color: var(--fd-green);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tag.off {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    :root[data-theme="dark"] .tag.off {
+      background: #451a1a;
+      color: #fca5a5;
+    }
+    .tag.role-admin {
+      background: #fef3c7;
+      color: #b45309;
+    }
+    :root[data-theme="dark"] .tag.role-admin {
+      background: #3c2f10;
+      color: #fcd34d;
+    }
+    .tag.role-member {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    :root[data-theme="dark"] .tag.role-member {
+      background: #172554;
+      color: #93c5fd;
+    }
+    .th-img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 9px;
+      background: var(--fd-green-soft);
+      border: 1px solid var(--fd-border);
+    }
+    .empty {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--fd-subtle);
+      font-size: 13.5px;
+    }
+    .empty i {
+      font-size: 32px;
+      margin-bottom: 12px;
+      display: block;
+      opacity: 0.5;
+    }
+
+    /* Notice Banner */
+    .banner {
+      padding: 13px 18px;
+      border-radius: 13px;
+      background: #fff8e8;
+      border: 1px solid #edd8a9;
+      color: #8b6522;
+      font-size: 12.5px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .banner i {
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    :root[data-theme="dark"] .banner {
+      background: #372f1c;
+      color: #fde68a;
+      border-color: #635028;
+    }
+    .note {
+      font-size: 12px;
+      color: var(--fd-subtle);
+      margin: -6px 0 16px;
+      line-height: 1.6;
+    }
+
+    /* Charts & Visuals */
+    .split {
+      display: flex;
+      height: 12px;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 10px 0 6px;
+      background: var(--fd-green-soft);
+    }
+    .split i {
+      transition: width 0.3s ease;
+    }
+    .mt {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 12.5px;
+    }
+    .mt span {
+      width: 130px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mt div {
+      flex: 1;
+      height: 9px;
+      background: var(--fd-green-soft);
+      border-radius: 9px;
+      overflow: hidden;
+    }
+    .mt i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--fd-green), #34d399);
+      border-radius: 9px;
+    }
+    .mt b {
+      min-width: 36px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--fd-ink);
+    }
+    .hm {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .hm i {
+      height: 26px;
+      border-radius: 6px;
+      background: var(--fd-green);
+      transition: transform 0.15s, opacity 0.15s;
+      cursor: pointer;
+    }
+    .hm i:hover {
+      transform: scale(1.15);
+      z-index: 2;
+    }
+
+    /* Modal Dialog */
+    .md {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      z-index: 300;
+      padding: 16px;
+      animation: mdFadeIn 0.2s ease-out;
+    }
+    @keyframes mdFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .md form {
+      width: min(480px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--fd-surface);
+      border: 1px solid var(--fd-border);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: mdSlideUp 0.25s ease-out;
+    }
+    @keyframes mdSlideUp {
+      from { transform: translateY(12px) scale(0.98); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .md h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--fd-ink);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .md label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--fd-ink);
+      margin: 14px 0 6px;
+    }
+    .md label small {
+      font-weight: 500;
+      color: var(--fd-subtle);
+    }
+    .md .err {
+      color: #ef4444;
+      font-size: 12px;
+      margin-top: 14px;
+      min-height: 18px;
+      font-weight: 600;
+      padding: 6px 10px;
+      background: #fef2f2;
+      border-radius: 8px;
+      display: none;
+    }
+    .md .err:not(:empty) {
+      display: block;
+    }
+    :root[data-theme="dark"] .md .err {
+      background: #451a1a;
+      color: #fca5a5;
+    }
+    .md .acts {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--fd-border);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--fd-ink);
+      color: var(--fd-surface);
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      z-index: 500;
+      display: none;
+      max-width: 90vw;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    #toast.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Mobile bottom navigation scroll & active */
+    .fd-mobile-nav {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .fd-mobile-nav::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="fd-app">
+<div class="fd-layout">
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="fd-sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="fd-sidebar" id="appSidebar" aria-label="Thanh điều hướng quản trị">
+    <div class="fd-sidebar-top-row">
+      <a class="fd-brand" href="admin.html" style="padding-bottom:20px;">
+        <span class="fd-brand-mark"><i class="fa-solid fa-leaf" aria-hidden="true"></i>FlexiDiet</span>
+        <span class="fd-brand-badge"><i class="fa-solid fa-shield-halved"></i>ADMIN</span>
+      </a>
+      <button class="fd-sidebar-close-btn" type="button" onclick="closeMobileSidebar()" aria-label="Đóng menu"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="fd-side-main">
+      <nav class="fd-side-nav" id="nav"></nav>
+    </div>
+    <div class="fd-sidebar-footer">
+      <div class="fd-tip-box">
+        <i class="fa-solid fa-shield-halved"></i>
+        <strong>Khu vực Quản trị viên</strong>
+        <span>Chỉ tài khoản quyền Admin truy cập. Thay đổi danh mục ảnh hưởng đến các lần tính toán tiếp theo.</span>
+      </div>
+      <span class="fd-demo-tag"><i class="fa-solid fa-circle"></i> FlexiDiet Admin Studio</span>
+    </div>
+  </aside>
+
+  <!-- Main Wrap -->
+  <div class="fd-main-wrap">
+    <header class="fd-topbar">
+      <div class="fd-top-left">
+        <button class="fd-hamburger-btn" id="sidebarToggle" type="button" aria-controls="appSidebar" aria-expanded="false" aria-label="Mở menu điều hướng" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <span class="fd-breadcrumb">Quản trị <i class="fa-solid fa-chevron-right"></i> <strong id="crumb">Tổng quan hệ thống</strong></span>
+      </div>
+      <div class="fd-top-right">
+        <span class="fd-top-badge" id="systemLiveBadge"><i class="dot"></i> Trực tuyến</span>
+        <span class="fd-today" id="todayHeader"></span>
+        <button class="fd-icon-button" id="theme-toggle" type="button" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">
+          <i class="fa-solid fa-moon"></i>
+          <i class="fa-solid fa-sun"></i>
+        </button>
+        <a class="btn ghost sm" href="app.html" title="Chuyển sang ứng dụng người dùng"><i class="fa-solid fa-arrow-right-from-bracket"></i> Về Ứng dụng</a>
+        <button class="btn ghost sm danger" onclick="logoutAdmin()" title="Đăng xuất khỏi tài khoản Quản trị"><i class="fa-solid fa-power-off"></i> Đăng xuất</button>
+        <div class="fd-top-avatar" title="Admin Root"><i class="fa-solid fa-user-shield"></i></div>
+      </div>
+    </header>
+
+    <main class="main-workspace" id="view"></main>
+  </div>
+</div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="fd-mobile-nav" id="mnav" aria-label="Điều hướng nhanh điện thoại"></nav>
+
+<!-- Floating Toast -->
+<div id="toast" role="status"></div>
+
+<script src="assets/js/api-client.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Navigation Structure: Category, Label, Icon
+const SC = {
+  stats: ['Giám sát AI', 'Tổng quan hệ thống', 'gauge'],
+  obs: ['Giám sát AI', 'Hiệu năng AI', 'heart-pulse'],
+  learn: ['Giám sát AI', 'Phân tích nhận diện', 'brain'],
+  feedback: ['Giám sát AI', 'Nhật ký phản hồi AI', 'camera-retro'],
+  dishes: ['Danh mục chuẩn', 'Món ăn', 'bowl-food'],
+  ingredients: ['Danh mục chuẩn', 'Nguyên liệu', 'carrot'],
+  exercise: ['Danh mục chuẩn', 'Bài tập & MET', 'dumbbell'],
+  users: ['Người dùng', 'Vòng đời & giữ chân', 'users'],
+  reengage: ['Người dùng', 'Lịch sử nhắc nhở', 'envelope']
+};
+
+const N = (l, min, max) => [l, 'number', { min, max }];
+const YN = [[1, 'Có'], [0, 'Không']];
+const ACT = [['active', 'Đang dùng'], ['inactive', 'Ngưng dùng'], ['', 'Tất cả']];
+const macro = v => (v.carb_g + v.protein_g + v.fat_g > 100) ? 'Protein + Carb + Fat không được vượt quá 100g/100g nguyên liệu.' : '';
+
+// Resources schema & endpoints
+const R = {
+  dishes: {
+    t: 'Món ăn', p: '/admin/dishes', ops: 'aet', fl: [['status', ACT]], kids: [['dish_ingredients', 'Công thức']],
+    f: [['name', 'Tên món'], ['dish_code', 'Nhãn AI (dish_code)', 'label'], ['serving_label', 'Khẩu phần mặc định']],
+    seed: [
+      { id: 1, name: 'Phở bò', dish_code: 'pho_bo', serving_label: '1 tô (vừa)', is_active: 1 },
+      { id: 2, name: 'Cơm tấm sườn', dish_code: 'com_tam_suon', serving_label: '1 đĩa', is_active: 1 },
+      { id: 3, name: 'Bún bò Huế', dish_code: 'bun_bo_hue', serving_label: '1 tô', is_active: 1 },
+      { id: 4, name: 'Bánh mì thịt', dish_code: 'banh_mi', serving_label: '1 ổ', is_active: 1 },
+      { id: 5, name: 'Gỏi cuốn tôm thịt', dish_code: 'goi_cuon', serving_label: '3 cuốn', is_active: 1 }
+    ],
+    note: 'Nhãn AI chọn từ labels.json của mô hình YOLOv10 (67 nhãn món ăn Việt Nam). Mỗi nhãn chỉ gán cho một món để AI nhận diện chuẩn xác.'
+  },
+  ingredients: {
+    t: 'Nguyên liệu', p: '/admin/ingredients', ops: 'aet', fl: [['status', ACT]], kids: [['aliases', 'Bí danh'], ['portions', 'Khẩu phần']], check: macro,
+    f: [
+      ['name', 'Tên nguyên liệu'],
+      ['kcal_100g', ...N('Kcal /100g', 0, 900)],
+      ['protein_g', ...N('Protein (g)', 0, 100)],
+      ['carb_g', ...N('Carb (g)', 0, 100)],
+      ['fat_g', ...N('Fat (g)', 0, 100)],
+      ['state', 'Trạng thái', 'select', [['raw', 'Sống'], ['cooked', 'Chín'], ['na', 'Không áp dụng']]]
+    ],
+    seed: [
+      { id: 1, name: 'Thịt bò phi lê', kcal_100g: 140, protein_g: 21, carb_g: 0, fat_g: 6, state: 'raw', is_active: 1 },
+      { id: 2, name: 'Bánh phở tươi', kcal_100g: 110, protein_g: 1.8, carb_g: 25, fat_g: 0.2, state: 'cooked', is_active: 1 },
+      { id: 3, name: 'Gạo tẻ trắng', kcal_100g: 130, protein_g: 2.7, carb_g: 28, fat_g: 0.3, state: 'cooked', is_active: 1 },
+      { id: 4, name: 'Ức gà nạc', kcal_100g: 165, protein_g: 31, carb_g: 0, fat_g: 3.6, state: 'raw', is_active: 1 },
+      { id: 5, name: 'Trứng gà', kcal_100g: 155, protein_g: 13, carb_g: 1.1, fat_g: 11, state: 'raw', is_active: 1 }
+    ],
+    note: 'Sửa nguyên liệu chỉ áp dụng cho lần tính toán sau; nhật ký bữa ăn cũ đã chốt số calo không bị đổi (FR-07.2). Khuyến nghị không xóa cứng, hãy ngưng dùng.'
+  },
+  exercise: {
+    t: 'Bài tập & MET', p: '/admin/exercise-types', ops: 'aet', fl: [['status', ACT]],
+    f: [
+      ['code', 'Mã bài tập', 'text', { re: /^[a-z0-9_]+$/, h: 'chữ thường, số, _' }],
+      ['name_vi', 'Tên bài tập'],
+      ['uses_distance', 'Tính theo quãng đường', 'select', YN],
+      ['met', 'MET mặc định', 'number', { min: 1, max: 30 }]
+    ],
+    seed: [
+      { id: 1, code: 'running', name_vi: 'Chạy bộ', uses_distance: 1, met: 8.3, is_active: 1 },
+      { id: 2, code: 'cycling', name_vi: 'Đạp xe', uses_distance: 1, met: 7.5, is_active: 1 },
+      { id: 3, code: 'gym', name_vi: 'Tập Gym / Thể hình', uses_distance: 0, met: 5.0, is_active: 1 },
+      { id: 4, code: 'yoga', name_vi: 'Yoga thư giãn', uses_distance: 0, met: 2.5, is_active: 1 },
+      { id: 5, code: 'badminton', name_vi: 'Đánh cầu lông', uses_distance: 0, met: 6.0, is_active: 1 }
+    ],
+    note: 'Công thức năng lượng: Calo đốt cháy = MET × Cân nặng (kg) × Thời gian (giờ).'
+  },
+  dish_ingredients: {
+    t: 'Công thức món', p: '/admin/dishes/:pid/ingredients', ops: 'aed',
+    f: [['ingredient_id', 'Nguyên liệu', 'ref', 'ingredients'], ['grams', ...N('Định lượng (g)', 0.1, 2000)], ['sort_order', ...N('Thứ tự', 0, 99)]],
+    seed: [
+      { id: 1, pid: 1, ingredient_id: 2, ingredient_name: 'Bánh phở tươi', grams: 150, sort_order: 1 },
+      { id: 2, pid: 1, ingredient_id: 1, ingredient_name: 'Thịt bò phi lê', grams: 70, sort_order: 2 }
+    ]
+  },
+  aliases: {
+    t: 'Bí danh tìm kiếm', p: '/admin/ingredients/:pid/aliases', item: id => '/admin/aliases/' + id, ops: 'ad',
+    f: [['alias', 'Từ đồng nghĩa / Bí danh']],
+    seed: [{ id: 1, pid: 1, alias: 'bò nạc' }, { id: 2, pid: 1, alias: 'beef' }]
+  },
+  portions: {
+    t: 'Quy đổi khẩu phần', p: '/admin/ingredients/:pid/portions', item: id => '/admin/portions/' + id, ops: 'aed',
+    f: [
+      ['unit_name', 'Tên đơn vị (bát, miếng, lát...)'],
+      ['size_label', 'Kích cỡ', 'select', [['small', 'Nhỏ (S)'], ['medium', 'Vừa (M)'], ['large', 'Lớn (L)']]],
+      ['grams_per_unit', ...N('Gram quy đổi', 0.1, 5000)],
+      ['note', 'Ghi chú', 'text', { opt: 1 }]
+    ],
+    seed: [
+      { id: 1, pid: 1, unit_name: 'miếng', size_label: 'medium', grams_per_unit: 35, note: '1 miếng bò lát tiêu chuẩn' },
+      { id: 2, pid: 2, unit_name: 'vắt', size_label: 'medium', grams_per_unit: 100, note: '1 vắt phở tươi' }
+    ]
+  },
+  feedback: {
+    t: 'Nhật ký phản hồi AI', p: '/admin/ai/feedback-logs', ops: '', qk: 'dish_code', ph: 'Lọc theo dish_code...', fl: [],
+    f: [['thumb_url', 'Ảnh nhận diện', 'img'], ['ai_label', 'AI dự đoán'], ['user_label', 'Người dùng chọn'], ['confidence', 'Độ tin cậy (Confidence)']],
+    seed: [
+      { id: 1, thumb_url: 'pictures/brand.png', ai_label: 'bun_cha', user_label: 'bun_thit_nuong', confidence: '0.52' },
+      { id: 2, thumb_url: 'pictures/brand.png', ai_label: 'pho_bo', user_label: 'hu_tieu', confidence: '0.48' }
+    ],
+    note: 'Lưu vết các trường hợp người dùng sửa kết quả AI để trích xuất tập dữ liệu gán nhãn cho đợt huấn luyện kế tiếp.'
+  },
+  reengage: {
+    t: 'Lịch sử nhắc nhở người dùng', p: '/admin/users/re-engage-logs', ops: '',
+    fl: [['status', [['', 'Mọi trạng thái'], ['queued', 'Đang chờ gửi'], ['sent', 'Đã gửi'], ['failed', 'Thất bại']]]],
+    f: [['display_name', 'Người nhận'], ['email', 'Email'], ['inactive_days', 'Offline (ngày)'], ['message', 'Nội dung nhắc'], ['status', 'Trạng thái'], ['created_at', 'Thời gian gửi']],
+    seed: [
+      { id: 1, display_name: 'Lê Văn Cường', email: 'cuong@gmail.com', inactive_days: 9, message: 'Bạn ơi, hôm nay hãy ghi lại bữa ăn để không gián đoạn mục tiêu nhé!', status: 'sent', created_at: '2026-10-12 09:30' },
+      { id: 2, display_name: 'Hoàng Anh', email: 'anh.h@gmail.com', inactive_days: 14, message: 'FlexiDiet vẫn ở đây đồng hành cùng bạn!', status: 'queued', created_at: '2026-10-13 08:00' }
+    ],
+    note: 'Nhật ký các thông báo tự động và chiến dịch gửi email kích hoạt lại người dùng có dấu hiệu rời bỏ.'
+  },
+  users: {
+    t: 'Quản lý người dùng', p: '/admin/users', ops: 'sr', re: 1,
+    fl: [
+      ['status', [['', 'Mọi trạng thái'], ['active', 'Đang hoạt động'], ['banned', 'Đã bị khóa'], ['dormant', 'Nguy cơ rời bỏ']]],
+      ['inactive_days', [['', 'Mọi thời gian offline'], ['7', 'Offline ≥ 7 ngày'], ['14', 'Offline ≥ 14 ngày'], ['30', 'Offline ≥ 30 ngày']]]
+    ],
+    f: [['display_name', 'Họ tên'], ['email', 'Email'], ['role', 'Vai trò'], ['status', 'Trạng thái'], ['inactive_days', 'Offline (ngày)']],
+    seed: [
+      { id: 1, display_name: 'System Admin', email: 'admin@flexidiet.vn', role: 'admin', status: 'active', inactive_days: 0 },
+      { id: 2, display_name: 'Nguyễn Minh Anh', email: 'minhanh@gmail.com', role: 'member', status: 'active', inactive_days: 2 },
+      { id: 3, display_name: 'Lê Văn Cường', email: 'cuong@gmail.com', role: 'member', status: 'dormant', inactive_days: 9 },
+      { id: 4, display_name: 'Phạm Quỳnh Như', email: 'quynhnhu@gmail.com', role: 'member', status: 'banned', inactive_days: 35 }
+    ],
+    note: 'Chỉ hiển thị thông tin tài khoản và số ngày hoạt động. Quyền riêng tư: Quản trị viên không đọc nhật ký ăn uống cá nhân của thành viên.'
+  }
+};
+
+// Rich Interactive Mock Data for Studio / Demo mode
+const DEMO = {
+  stats: {
+    growth: [
+      { label: '01/09', count: 3 }, { label: '08/09', count: 5 }, { label: '15/09', count: 4 },
+      { label: '22/09', count: 8 }, { label: '29/09', count: 6 }, { label: '06/10', count: 11 }, { label: '13/10', count: 15 }
+    ],
+    meals: [
+      { label: '01/09', meals: 420, kcal: 218400 }, { label: '08/09', meals: 510, kcal: 265200 },
+      { label: '15/09', meals: 480, kcal: 249600 }, { label: '22/09', meals: 650, kcal: 338000 },
+      { label: '29/09', meals: 700, kcal: 364000 }, { label: '06/10', meals: 720, kcal: 374400 },
+      { label: '13/10', meals: 840, kcal: 436800 }
+    ],
+    dau: 142, wau: 685, total_dishes: 67, total_ingredients: 446, total_meals: 5680,
+    goal_rate: { within: 62, over: 24, under: 14 }
+  },
+  obs: {
+    t: [
+      { label: '00h', count: 0 }, { label: '02h', count: 0 }, { label: '04h', count: 0 },
+      { label: '06h', count: 5 }, { label: '07h', count: 12 }, { label: '08h', count: 18 },
+      { label: '09h', count: 8 }, { label: '11h', count: 14 }, { label: '12h', count: 28 },
+      { label: '13h', count: 19 }, { label: '15h', count: 9 }, { label: '17h', count: 16 },
+      { label: '18h', count: 32 }, { label: '19h', count: 27 }, { label: '20h', count: 15 },
+      { label: '22h', count: 4 }
+    ],
+    m: { volume_today: 1450, volume_week: 9280, volume_month: 38400, in_flight: 2, error_rate: 1.2, p50_ms: 280, p95_ms: 840 },
+    h: { status: 'Sẵn sàng (Healthy)', uptime: '5 ngày 14 giờ', cpu: 32, ram: 58, model: 'YOLOv10m (67 món Việt)' }
+  },
+  learn: {
+    top_dishes: [
+      { dish_code: 'pho_bo', count: 320 }, { dish_code: 'com_tam_suon', count: 260 },
+      { dish_code: 'bun_bo_hue', count: 185 }, { dish_code: 'banh_mi', count: 140 },
+      { dish_code: 'goi_cuon', count: 98 }
+    ],
+    label_distribution: Array.from({ length: 67 }, (_, i) => ({
+      dish_code: (i === 0 ? 'pho_bo' : i === 1 ? 'com_tam_suon' : i === 2 ? 'bun_bo_hue' : 'mon_' + (i + 1)),
+      count: 10 + ((i * 37) % 120)
+    })),
+    acceptance_rate: 86.8,
+    confusion_pairs: [
+      { ai: 'bun_cha', user: 'bun_thit_nuong', count: 42 },
+      { ai: 'pho_bo', user: 'hu_tieu', count: 28 },
+      { ai: 'banh_cuon', user: 'banh_uot', count: 19 }
+    ],
+    low_confidence: [
+      { dish_code: 'banh_bot_loc', avg_confidence: 0.35, count: 64 },
+      { dish_code: 'bun_mam', avg_confidence: 0.41, count: 38 },
+      { dish_code: 'canh_chua_ca', avg_confidence: 0.44, count: 29 }
+    ]
+  }
+};
+
+let S = { scr: 'stats', per: 'week', kid: null, pid: null, pname: '', page: 1, q: '', fl: {}, data: null, demo: false, total: 0, perPage: 25 };
+
+function toast(m) {
+  const t = $('#toast');
+  t.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> <span>${esc(m)}</span>`;
+  t.classList.add('show');
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+const call = (p, o) => FlexiAPI.request(p, o);
+const key = () => S.kid || S.scr;
+const def = () => R[key()];
+const base = () => def().p.replace(':pid', S.pid);
+const item = id => def().item ? def().item(id) : base() + '/' + id;
+
+// Responsive Drawer Logic
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const isOpen = sidebar.classList.toggle('mobile-open');
+  backdrop.classList.toggle('show', isOpen);
+  document.getElementById('sidebarToggle')?.setAttribute('aria-expanded', String(isOpen));
+}
+function closeMobileSidebar() {
+  document.getElementById('appSidebar')?.classList.remove('mobile-open');
+  document.getElementById('sidebarBackdrop')?.classList.remove('show');
+  document.getElementById('sidebarToggle')?.setAttribute('aria-expanded', 'false');
+}
+window.addEventListener('resize', () => { if (window.innerWidth > 820) closeMobileSidebar(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeMobileSidebar();
+    document.querySelector('.md')?.remove();
+  }
+});
+
+async function load() {
+  const k = key(), d = R[k];
+  $('#crumb').textContent = SC[S.scr][1] + (S.kid ? ' › ' + S.pname + ' › ' + d.t : '');
+  document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('active', b.dataset.s === S.scr));
+
+  try {
+    if (!d) {
+      let r;
+      if (S.scr === 'obs') {
+        r = {
+          m: await call('/admin/ai/metrics'),
+          h: await call('/admin/ai/health').catch(() => null),
+          t: await call('/admin/ai/throughput').catch(() => [])
+        };
+      } else if (S.scr === 'stats') {
+        r = await call('/admin/stats');
+        r.growth = await call('/admin/stats/user-growth?period=' + S.per).catch(() => []);
+        r.meals = await call('/admin/stats/meals?period=' + S.per).catch(() => []);
+      } else {
+        r = await call('/admin/ai/recognition-stats');
+      }
+      S.data = r;
+      S.demo = false;
+    } else {
+      const p = new URLSearchParams();
+      if (!S.kid) {
+        p.set('page', S.page);
+        if (S.q) p.set(d.qk || 'q', S.q);
+        const f2 = { ...(d.ops.includes('t') ? { status: 'active' } : {}), ...S.fl };
+        for (const x in f2) if (f2[x]) p.set(x, f2[x]);
+      }
+      const r = await call(base() + (p.toString() ? '?' + p : ''));
+      S.data = Array.isArray(r) ? r : (r.items || []);
+      S.total = r.total ?? S.data.length;
+      S.perPage = r.per_page || 25;
+      S.demo = false;
+      if (k === 'users') {
+        try { S.rs = await call('/admin/users/retention-stats'); } catch (e) { S.rs = null; }
+      }
+    }
+  } catch (e) {
+    S.demo = true;
+    if (d) {
+      const allRows = d.seed ? d.seed.filter(r => !S.kid || r.pid == S.pid) : [];
+      let filtered = allRows;
+      if (S.q) {
+        const ql = S.q.toLowerCase();
+        filtered = filtered.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(ql)));
+      }
+      if (S.fl.status) {
+        filtered = filtered.filter(r => (S.fl.status === 'active' ? r.is_active === 1 || r.status === 'active' : S.fl.status === 'inactive' ? r.is_active === 0 : r.status === S.fl.status));
+      }
+      S.data = filtered;
+      S.total = filtered.length;
+    } else {
+      S.data = DEMO[S.scr];
+      S.total = 0;
+    }
+  }
+  render();
+}
+
+const card = (l, v, s = '', icon = 'fa-chart-pie', color = '') => `
+  <div class="cd">
+    <div class="cd-header">
+      <span>${l}</span>
+      <div class="cd-icon ${color}"><i class="fa-solid ${icon}"></i></div>
+    </div>
+    <b>${esc(v)}</b>
+    ${s ? `<small>${esc(s)}</small>` : ''}
+  </div>`;
+
+const split = a => `<div class="split">${a.map(([v, c]) => `<i style="width:${v}%;background:${c};"></i>`).join('')}</div>`;
+
+const disp = (f, r) => {
+  const [k, , t, o] = f;
+  if (t === 'select') {
+    const x = o.find(y => String(y[0]) === String(r[k]));
+    return x ? x[1] : (r[k] ?? '—');
+  }
+  if (t === 'ref') return r[k.replace('_id', '_name')] ?? r[k] ?? '—';
+  if (t === 'img') return r[k] ? `<img class="th-img" src="${esc(r[k])}" alt="thumb">` : '—';
+  if (k === 'role') {
+    const isAdm = r[k] === 'admin';
+    return `<span class="tag ${isAdm ? 'role-admin' : 'role-member'}"><i class="fa-solid fa-${isAdm ? 'shield-halved' : 'user'}"></i> ${isAdm ? 'Quản trị viên' : 'Thành viên'}</span>`;
+  }
+  if (k === 'status' && !t) {
+    const isAct = r[k] === 'active';
+    const isBan = r[k] === 'banned';
+    return `<span class="tag ${isAct ? '' : 'off'}">${isAct ? 'Hoạt động' : isBan ? 'Bị khóa' : 'Rời bỏ'}</span>`;
+  }
+  return esc(r[k] ?? '—');
+};
+
+const bars = (a, k, f = v => v) => {
+  const mx = Math.max(1, ...a.map(x => x[k] || 0));
+  return a.length ? `
+    <div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:10px 4px 0;">
+      ${a.map(x => `
+        <div title="${esc(x.label)}: ${f(x[k])}" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:pointer;">
+          <span style="font-size:10px;font-weight:700;color:var(--fd-ink);margin-bottom:4px;">${x[k] ? x[k] : ''}</span>
+          <i style="display:block;width:100%;max-width:24px;height:${Math.max(4, (x[k] / mx) * 100)}%;background:linear-gradient(180deg, #34d399, var(--fd-green));border-radius:6px 6px 0 0;transition:all 0.2s;"></i>
+          <small style="font-size:10px;color:var(--fd-subtle);margin-top:6px;white-space:nowrap;">${esc(x.label)}</small>
+        </div>
+      `).join('')}
+    </div>` : `<div class="empty"><i class="fa-solid fa-chart-simple"></i> Chưa có dữ liệu</div>`;
+};
+
+const line = a => {
+  if (a.length < 2) return '<div class="empty"><i class="fa-solid fa-chart-line"></i> Chưa đủ dữ liệu biểu đồ</div>';
+  const mx = Math.max(1, ...a.map(x => x.count)), W = 620, H = 160;
+  const q = a.map((x, i) => [16 + i * (W - 32) / (a.length - 1), H - 24 - (x.count / mx) * (H - 50)]);
+  const dPath = `M ${q[0][0]} ${H - 20} L ${q.map(z => z.join(' ')).join(' L ')} L ${q[q.length - 1][0]} ${H - 20} Z`;
+  return `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible;">
+      <defs>
+        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <path d="${dPath}" fill="url(#lineGrad)" />
+      <polyline fill="none" stroke="var(--fd-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${q.map(z => z.join(',')).join(' ')}"/>
+      ${q.map((z, i) => `
+        <circle cx="${z[0]}" cy="${z[1]}" r="4.5" fill="#fff" stroke="var(--fd-green)" stroke-width="2.5">
+          <title>${esc(a[i].label)}: ${a[i].count} người dùng</title>
+        </circle>
+        <text x="${z[0]}" y="${z[1] - 8}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--fd-ink)">${a[i].count}</text>
+      `).join('')}
+      <text x="16" y="${H - 5}" font-size="11" font-weight="600" fill="var(--fd-subtle)">${esc(a[0].label)}</text>
+      <text x="${W - 16}" y="${H - 5}" text-anchor="end" font-size="11" font-weight="600" fill="var(--fd-subtle)">${esc(a[a.length - 1].label)}</text>
+    </svg>`;
+};
+
+const perBar = () => `
+  <div class="admin-bar" style="margin-top:20px;">
+    <strong><i class="fa-solid fa-chart-line"></i> Phân tích xu hướng:</strong>
+    <button class="btn sm ${S.per === 'week' ? '' : 'ghost'}" data-a="per" data-p="week"><i class="fa-regular fa-calendar-check"></i> 12 tuần gần nhất</button>
+    <button class="btn sm ${S.per === 'month' ? '' : 'ghost'}" data-a="per" data-p="month"><i class="fa-regular fa-calendar-days"></i> 12 tháng qua</button>
+  </div>`;
+
+function cards() {
+  const d = S.data;
+  if (S.scr === 'stats') {
+    const g = d.goal_rate || {};
+    return `
+      <div class="admin-stats">
+        ${card('Hoạt động hàng ngày (DAU)', d.dau, 'Người dùng tương tác hôm nay', 'fa-user-check', 'green')}
+        ${card('Hoạt động tuần (WAU)', d.wau, 'Người dùng trong 7 ngày qua', 'fa-users', 'blue')}
+        ${card('Món ăn hệ thống', d.total_dishes, 'Món chuẩn đã kiểm định', 'fa-bowl-food', 'orange')}
+        ${card('Nguyên liệu chuẩn', d.total_ingredients, 'Cơ sở dữ liệu dinh dưỡng', 'fa-carrot', 'purple')}
+        ${card('Nhật ký bữa ăn', d.total_meals, 'Lượt ghi nhận toàn hệ thống', 'fa-receipt', '')}
+      </div>
+      <div class="cd" style="margin-bottom:22px;">
+        <div class="cd-header">
+          <span><i class="fa-solid fa-bullseye"></i> Tỷ lệ đạt mục tiêu calo của cộng đồng</span>
+          <span class="tag"><i class="fa-solid fa-trophy"></i> Thành tích</span>
+        </div>
+        ${split([[g.within, 'var(--fd-green)'], [g.over, '#f97316'], [g.under, '#3b82f6']])}
+        <div style="display:flex;gap:18px;margin-top:8px;font-size:12px;color:var(--fd-subtle);flex-wrap:wrap;">
+          <span><i class="fa-solid fa-circle" style="color:var(--fd-green);font-size:9px;"></i> Trong ngưỡng an toàn: <b>${g.within}%</b></span>
+          <span><i class="fa-solid fa-circle" style="color:#f97316;font-size:9px;"></i> Vượt calo: <b>${g.over}%</b></span>
+          <span><i class="fa-solid fa-circle" style="color:#3b82f6;font-size:9px;"></i> Dưới calo: <b>${g.under}%</b></span>
+        </div>
+      </div>
+      ${perBar()}
+      <div class="admin-cols">
+        <div class="cd">
+          <h3><i class="fa-solid fa-user-plus text-green"></i> Người dùng đăng ký mới</h3>
+          ${line(d.growth || [])}
+        </div>
+        <div class="cd">
+          <h3><i class="fa-solid fa-utensils text-orange"></i> Số bữa ăn ghi nhận</h3>
+          ${bars(d.meals || [], 'meals')}
+        </div>
+        <div class="cd">
+          <h3><i class="fa-solid fa-fire-flame-curved text-blue"></i> Tổng năng lượng nạp (kcal)</h3>
+          ${bars(d.meals || [], 'kcal', v => Number(v).toLocaleString() + ' kcal')}
+        </div>
+      </div>`;
+  }
+
+  if (S.scr === 'obs') {
+    const m = d.m, h = d.h || {}, v = x => x ?? '—';
+    return `
+      <div class="admin-stats">
+        ${card('Request AI hôm nay', v(m.volume_today), `Tuần: ${v(m.volume_week)} · Tháng: ${v(m.volume_month)}`, 'fa-microchip', 'green')}
+        ${card('Hàng đợi xử lý', v(m.in_flight), 'Request đang được thực thi', 'fa-clock-rotate-left', 'orange')}
+        ${card('Tỷ lệ lỗi xử lý', m.error_rate == null ? '—' : m.error_rate + '%', 'Tỷ lệ dưới ngưỡng cảnh báo 2%', 'fa-triangle-exclamation', 'blue')}
+        ${card('Độ trễ p50 / p95', m.p50_ms == null ? '—' : m.p50_ms + ' / ' + m.p95_ms + ' ms', 'Thời gian phản hồi YOLO', 'fa-bolt', 'purple')}
+      </div>
+      <div class="admin-stats">
+        ${card('Dịch vụ YOLO Server', v(h.status), 'Uptime: ' + v(h.uptime), 'fa-heart-pulse', 'green')}
+        ${card('CPU Usage', h.cpu == null ? '—' : h.cpu + '%', 'Tải vi xử lý AI', 'fa-server', 'blue')}
+        ${card('RAM Usage', h.ram == null ? '—' : h.ram + '%', 'Bộ nhớ nạp weights', 'fa-memory', 'orange')}
+        ${card('Mô hình nhận diện', v(h.model), 'Phiên bản YOLOv10m', 'fa-brain', 'purple')}
+      </div>
+      <p class="note"><i class="fa-solid fa-info-circle"></i> Các chỉ số “—” sẽ hiển thị đầy đủ khi dịch vụ Python AI Microservice (ai_service/app.py) kết nối.</p>
+      <div class="admin-cols">
+        <div class="cd">
+          <h3><i class="fa-solid fa-chart-column"></i> Số request nhận diện theo khung giờ (24 giờ qua)</h3>
+          ${bars(d.t || [], 'count')}
+        </div>
+        <div class="cd">
+          <h3><i class="fa-solid fa-shield-virus"></i> Phân bổ mã phản hồi HTTP</h3>
+          <div class="empty"><i class="fa-solid fa-check-double"></i> 99.1% phản hồi HTTP 200 OK — Hệ thống AI đang vận hành ổn định.</div>
+        </div>
+      </div>`;
+  }
+
+  // S.scr === 'learn'
+  const mx = Math.max(1, ...d.label_distribution.map(x => x.count)), t0 = d.top_dishes[0]?.count || 1;
+  const tb = (head, rows) => `
+    <div class="tw">
+      <table>
+        <tr>${head.map(x => `<th>${x}</th>`).join('')}</tr>
+        ${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>`;
+  return `
+    <div class="admin-stats">
+      ${card('Độ chính xác Top-1 (Acceptance)', d.acceptance_rate == null ? '—' : d.acceptance_rate + '%', 'Người dùng đồng ý gợi ý đầu tiên', 'fa-circle-check', 'green')}
+      ${card('Tổng số nhãn lớp (Classes)', d.label_distribution.length, 'Tập dữ liệu 67 món ăn Việt', 'fa-tags', 'blue')}
+    </div>
+    <div class="admin-cols">
+      <div class="cd">
+        <h3><i class="fa-solid fa-trophy text-orange"></i> Top món được nhận diện nhiều nhất</h3>
+        ${d.top_dishes.map(x => `
+          <div class="mt">
+            <span>${esc(x.dish_code)}</span>
+            <div><i style="width:${(x.count / t0) * 100}%;"></i></div>
+            <b>${x.count} lượt</b>
+          </div>
+        `).join('')}
+      </div>
+      <div class="cd">
+        <h3><i class="fa-solid fa-fire text-green"></i> Phân bổ tần suất ${d.label_distribution.length} nhãn món</h3>
+        <div class="hm">
+          ${d.label_distribution.map(x => `
+            <i title="${esc(x.dish_code)}: ${x.count} lần" style="opacity:${(0.2 + (x.count / mx) * 0.8).toFixed(2)};"></i>
+          `).join('')}
+        </div>
+        <small class="note" style="margin-top:12px;display:block;"><i class="fa-solid fa-hand-pointer"></i> Màu càng đậm thể hiện món xuất hiện càng nhiều. Rê chuột lên từng ô để xem tên nhãn món.</small>
+      </div>
+    </div>
+    <div class="admin-cols">
+      <div>
+        <h3 style="margin-bottom:12px;font-size:15px;color:var(--fd-ink);"><i class="fa-solid fa-shuffle text-orange"></i> Cặp món AI thường phân vân / đoán nhầm</h3>
+        ${tb(['AI dự đoán ban đầu', 'Người dùng sửa lại thành', 'Số lượt'], d.confusion_pairs.map(x => [x.ai, x.user, x.count + ' lần']))}
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px;font-size:15px;color:var(--fd-ink);"><i class="fa-solid fa-triangle-exclamation text-blue"></i> Cảnh báo độ tin cậy thấp (&lt; 0.45)</h3>
+        ${tb(['Mã món', 'Confidence trung bình', 'Số lượt'], d.low_confidence.map(x => [x.dish_code, (x.avg_confidence * 100).toFixed(1) + '%', x.count]))}
+      </div>
+    </div>
+    <div class="admin-bar" style="margin-top:10px;">
+      <button class="btn ghost" data-a="export"><i class="fa-solid fa-file-zipper"></i> Trích xuất Dataset YOLOv10 (Retraining)</button>
+    </div>`;
+}
+
+function render() {
+  const d = def(), v = $('#view');
+  const ban = S.demo ? `
+    <div class="banner">
+      <i class="fa-solid fa-circle-info" style="color:#f59e0b;"></i>
+      <div>
+        <strong>Chế độ Xem Thử & Mô Phỏng (Interactive Studio):</strong>
+        Dữ liệu mẫu đầy đủ được nạp sẵn. Các thao tác thêm, sửa, ngưng dùng, khóa/mở người dùng sẽ được mô phỏng trực tiếp trên bộ nhớ để bạn trải nghiệm trọn vẹn giao diện.
+      </div>
+    </div>` : '';
+
+  if (!d) {
+    v.innerHTML = ban + cards();
+    return;
+  }
+
+  const o = d.ops, rows = S.data || [], pages = Math.max(1, Math.ceil(S.total / S.perPage));
+  const rs = d.re && S.rs ? `
+    <div class="admin-stats">
+      ${card('Duy trì thói quen (Retention)', (S.rs.retained_pct ?? '—') + '%', 'Tỷ lệ người dùng giữ chuỗi ghi chép', 'fa-seedling', 'green')}
+      ${card('Nguy cơ rời bỏ (Churn Risk)', (S.rs.churn_risk_pct ?? '—') + '%', 'Offline trên 7 ngày', 'fa-user-slash', 'orange')}
+    </div>` : '';
+
+  v.innerHTML = ban +
+    (S.kid ? `
+      <div class="admin-bar">
+        <button class="btn ghost" data-a="back"><i class="fa-solid fa-arrow-left"></i> Quay lại ${SC[S.scr][1]}</button>
+        <span style="font-size:14px;font-weight:700;color:var(--fd-ink);"><i class="fa-solid fa-folder-open"></i> ${esc(S.pname)} › ${d.t}</span>
+      </div>` : '') +
+    (d.note && !S.kid ? `<p class="note"><i class="fa-solid fa-circle-info"></i> ${d.note}</p>` : '') +
+    rs +
+    `<div class="admin-bar">
+      ${S.kid ? '' : `
+        <div class="search-box-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="inp" id="q" placeholder="${d.ph || 'Tìm kiếm tên, mã...'}" value="${esc(S.q)}">
+        </div>`}
+      ${(S.kid ? [] : d.fl || []).map(([n, opts]) => `
+        <select class="inp" data-f="${n}">
+          ${opts.map(x => `<option value="${x[0]}" ${String(S.fl[n] ?? (n === 'status' && d.ops.includes('t') ? 'active' : '')) === String(x[0]) ? 'selected' : ''}>${x[1]}</option>`).join('')}
+        </select>
+      `).join('')}
+      <span class="sp"></span>
+      ${d.re ? '<button class="btn ghost" data-a="re"><i class="fa-solid fa-paper-plane"></i> Gửi email nhắc nhở</button>' : ''}
+      ${o.includes('a') ? '<button class="btn" data-a="add"><i class="fa-solid fa-plus"></i> Thêm mới</button>' : ''}
+    </div>
+    <div class="tw">
+      ${rows.length ? `
+        <table>
+          <thead>
+            <tr>
+              ${d.f.map(f => `<th>${f[1]}</th>`).join('')}
+              ${o.includes('t') ? '<th>Trạng thái</th>' : ''}
+              <th style="text-align:right;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr>
+                ${d.f.map(f => `<td>${disp(f, r)}</td>`).join('')}
+                ${o.includes('t') ? `<td><span class="tag ${r.is_active ? '' : 'off'}"><i class="fa-solid fa-${r.is_active ? 'circle-check' : 'circle-xmark'}"></i> ${r.is_active ? 'Đang dùng' : 'Ngưng dùng'}</span></td>` : ''}
+                <td class="ac">
+                  ${(d.kids || []).map(([k, l]) => `<button class="btn ghost sm" data-a="kid" data-k="${k}" data-id="${r.id}"><i class="fa-solid fa-layer-group"></i> ${l}</button>`).join('')}
+                  ${o.includes('e') ? `<button class="btn ghost sm" data-a="edit" data-id="${r.id}" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>` : ''}
+                  ${o.includes('t') ? `<button class="btn ghost sm" data-a="tog" data-id="${r.id}" title="Chuyển trạng thái">${r.is_active ? '<i class="fa-solid fa-pause"></i> Tắt' : '<i class="fa-solid fa-play"></i> Bật'}</button>` : ''}
+                  ${o.includes('d') ? `<button class="btn ghost sm danger" data-a="del" data-id="${r.id}" title="Xóa"><i class="fa-solid fa-trash"></i></button>` : ''}
+                  ${o.includes('s') ? `<button class="btn ghost sm" data-a="lock" data-id="${r.id}">${r.status === 'banned' ? '<i class="fa-solid fa-lock-open"></i> Mở khóa' : '<i class="fa-solid fa-lock"></i> Khóa'}</button>` : ''}
+                  ${o.includes('r') ? `<button class="btn ghost sm" data-a="role" data-id="${r.id}">${r.role === 'admin' ? '<i class="fa-solid fa-user-minus"></i> Về Member' : '<i class="fa-solid fa-user-shield"></i> Lên Admin'}</button>` : ''}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>` : `
+        <div class="empty">
+          <i class="fa-solid fa-inbox"></i>
+          <p>Không tìm thấy bản ghi nào phù hợp với bộ lọc.</p>
+        </div>`}
+    </div>
+    ${!S.kid && pages > 1 ? `
+      <div class="admin-bar" style="justify-content:center;margin-top:16px;">
+        <button class="btn ghost sm" data-a="pg" data-d="-1" ${S.page <= 1 ? 'disabled style="opacity:0.5;pointer-events:none;"' : ''}><i class="fa-solid fa-chevron-left"></i> Trang trước</button>
+        <span style="font-size:12.5px;font-weight:600;color:var(--fd-ink);padding:0 12px;">Trang ${S.page} / ${pages} (${S.total} kết quả)</span>
+        <button class="btn ghost sm" data-a="pg" data-d="1" ${S.page >= pages ? 'disabled style="opacity:0.5;pointer-events:none;"' : ''}>Trang sau <i class="fa-solid fa-chevron-right"></i></button>
+      </div>` : ''}`;
+
+  const q = $('#q');
+  if (q) {
+    q.oninput = () => {
+      clearTimeout(q.t);
+      q.t = setTimeout(() => {
+        S.q = q.value.trim();
+        S.page = 1;
+        load();
+      }, 300);
+    };
+  }
+  document.querySelectorAll('[data-f]').forEach(s => {
+    s.onchange = () => {
+      S.fl[s.dataset.f] = s.value;
+      S.page = 1;
+      load();
+    };
+  });
+}
+
+// In-Memory Mutation Simulator for Demo Mode + Real API Handlers
+async function mut(m, p, data, msg, id) {
+  if (S.demo) {
+    const k = key(), d = R[k];
+    if (m === 'POST') {
+      const newId = Date.now();
+      const newItem = { id: newId, is_active: 1, ...data };
+      if (S.kid && S.pid) newItem.pid = S.pid;
+      if (d && d.seed) d.seed.unshift(newItem);
+      if (Array.isArray(S.data)) S.data.unshift(newItem);
+    } else if (m === 'PUT') {
+      const targetId = id || (data && data.id);
+      const row = Array.isArray(S.data) ? S.data.find(x => x.id == targetId) : null;
+      if (row) Object.assign(row, data);
+    } else if (m === 'PATCH') {
+      const row = Array.isArray(S.data) ? S.data.find(x => x.id == id) : null;
+      if (row) Object.assign(row, data);
+    } else if (m === 'DELETE') {
+      if (Array.isArray(S.data)) S.data = S.data.filter(x => x.id != id);
+      if (d && d.seed) d.seed = d.seed.filter(x => x.id != id);
+    }
+    toast(msg);
+    render();
+    return;
+  }
+
+  try {
+    await call(p, { method: m, data });
+    toast(msg);
+    load();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+async function refOpts(src) {
+  try {
+    const r = await call('/admin/' + src + '?status=active&per_page=500');
+    return (Array.isArray(r) ? r : r.items).map(x => [x.id, x.name]);
+  } catch (e) {
+    return (R[src]?.seed || []).map(x => [x.id, x.name]);
+  }
+}
+
+async function labelOpts(cur) {
+  let l;
+  try {
+    l = await call('/admin/ai/labels');
+  } catch (e) {
+    l = [
+      { dish_code: 'pho_bo', name_full: 'Phở bò', used: 1 },
+      { dish_code: 'com_tam_suon', name_full: 'Cơm tấm sườn', used: 1 },
+      { dish_code: 'bun_bo_hue', name_full: 'Bún bò Huế', used: 1 },
+      { dish_code: 'banh_mi', name_full: 'Bánh mì thịt', used: 1 },
+      { dish_code: 'goi_cuon', name_full: 'Gỏi cuốn tôm thịt', used: 1 },
+      { dish_code: 'cha_gio', name_full: 'Chả giò chiên', used: 0 },
+      { dish_code: 'mi_quang', name_full: 'Mì Quảng', used: 0 },
+      { dish_code: 'hu_tieu', name_full: 'Hủ tiếu Nam Vang', used: 0 }
+    ];
+  }
+  return [['', '(Không gán nhãn AI)'], ...l.filter(x => !x.used || x.dish_code === cur).map(x => [x.dish_code, x.dish_code + ' — ' + (x.name_full || x.name || x.dish_code)])];
+}
+
+async function form(r) {
+  const d = def(), m = document.createElement('div');
+  m.className = 'md';
+  const fs = await Promise.all(d.f.map(async f => {
+    if (f[2] === 'label') return [f[0], f[1], 'select', await labelOpts(r && r.dish_code)];
+    if (f[2] === 'ref') return [f[0], f[1], 'select', await refOpts(f[3])];
+    return f;
+  }));
+
+  m.innerHTML = `
+    <form>
+      <h3><i class="fa-solid fa-${r ? 'pen-to-square' : 'plus-circle'} text-green"></i> ${r ? 'Chỉnh sửa' : 'Thêm mới'}: ${d.t}</h3>
+      ${fs.map(([k, l, t, o]) => `
+        <label>${l}${o && o.h ? ` <small>(${o.h})</small>` : ''}</label>
+        ${t === 'select' ? `
+          <select class="inp" name="${k}" style="width:100%;">
+            ${o.map(x => `<option value="${esc(x[0])}" ${r && String(r[k]) === String(x[0]) ? 'selected' : ''}>${esc(x[1])}</option>`).join('')}
+          </select>` : `
+          <input class="inp" name="${k}" type="${t === 'number' ? 'number' : 'text'}" step="any" ${o && o.opt ? '' : 'required'} value="${esc(r ? r[k] : '')}" style="width:100%;">`}
+      `).join('')}
+      <div class="err"></div>
+      <div class="acts">
+        <button type="button" class="btn ghost"><i class="fa-solid fa-xmark"></i> Hủy</button>
+        <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Lưu dữ liệu</button>
+      </div>
+    </form>`;
+
+  document.body.appendChild(m);
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  m.querySelector('.ghost').onclick = () => m.remove();
+
+  m.querySelector('form').onsubmit = ev => {
+    ev.preventDefault();
+    const v = {}, er = m.querySelector('.err');
+    for (const [k, l, t, o] of fs) {
+      let x = ev.target[k].value.trim();
+      if (t === 'number') {
+        x = Number(x);
+        if (x < o.min || x > o.max) return (er.textContent = `${l} phải nằm trong khoảng ${o.min} – ${o.max}.`);
+      } else if (t === 'select') {
+        const found = o.find(y => String(y[0]) === x);
+        x = found ? found[0] : x;
+      } else if (o && o.re && !o.re.test(x)) {
+        return (er.textContent = `${l} chỉ gồm ${o.h}.`);
+      }
+      v[k] = x;
+    }
+    const c = d.check && d.check(v);
+    if (c) return (er.textContent = c);
+    m.remove();
+    r ? mut('PUT', item(r.id), v, 'Đã cập nhật thành công.', r.id) : mut('POST', base(), v, 'Đã thêm mới thành công.');
+  };
+}
+
+document.addEventListener('click', ev => {
+  const s = ev.target.closest('[data-s]');
+  if (s) {
+    S = { ...S, scr: s.dataset.s, kid: null, page: 1, q: '', fl: {}, rs: null };
+    closeMobileSidebar();
+    load();
+    return;
+  }
+  const a = ev.target.closest('[data-a]');
+  if (!a) return;
+  const t = a.dataset.a, id = a.dataset.id, r = Array.isArray(S.data) ? S.data.find(x => x.id == id) : null;
+
+  if (t === 'add') form();
+  else if (t === 'edit') form(r);
+  else if (t === 'per') { S.per = a.dataset.p; load(); }
+  else if (t === 'kid') { S = { ...S, kid: a.dataset.k, pid: id, pname: r ? (r.name || r.name_vi || 'Mục #' + id) : 'Chi tiết', page: 1, q: '', fl: {} }; load(); }
+  else if (t === 'back') { S = { ...S, kid: null, pid: null, page: 1 }; load(); }
+  else if (t === 'pg') { S.page += Number(a.dataset.d); load(); }
+  else if (t === 'tog') { mut('PATCH', item(id), { is_active: r.is_active ? 0 : 1 }, r.is_active ? 'Đã ngưng sử dụng.' : 'Đã kích hoạt lại.', id); }
+  else if (t === 'del') { if (confirm('Bạn chắc chắn muốn xóa bản ghi này?')) mut('DELETE', item(id), null, 'Đã xóa bản ghi.', id); }
+  else if (t === 'lock') {
+    const nextSt = r.status === 'banned' ? 'active' : 'banned';
+    if (confirm(r.status === 'banned' ? 'Mở khóa cho tài khoản này?' : 'Khóa truy cập của tài khoản này?')) {
+      mut('PATCH', '/admin/users/' + id + '/status', { status: nextSt }, 'Đã cập nhật trạng thái người dùng.', id);
+    }
+  }
+  else if (t === 'role') {
+    const nextRole = r.role === 'admin' ? 'member' : 'admin';
+    if (confirm('Thay đổi vai trò của ' + r.display_name + ' thành ' + (nextRole === 'admin' ? 'Quản trị viên' : 'Thành viên') + '?')) {
+      mut('PATCH', '/admin/users/' + id + '/status', { role: nextRole }, 'Đã cập nhật vai trò tài khoản.', id);
+    }
+  }
+  else if (t === 're') {
+    const n = S.fl.inactive_days || 7;
+    if (confirm('Tạo chiến dịch gửi email nhắc nhở cho tất cả người dùng offline ≥ ' + n + ' ngày?')) {
+      mut('POST', '/admin/users/re-engage', { inactive_days: Number(n) }, 'Đã tạo chiến dịch gửi email nhắc nhở.');
+    }
+  }
+  else if (t === 'export') {
+    mut('POST', '/admin/ai/export-retrain-dataset', {}, 'Đã gửi yêu cầu nén và xuất tập dữ liệu.');
+  }
+});
+
+// Render Sidebar Navigation
+(function nav() {
+  let g = '', h = '';
+  for (const k in SC) {
+    if (SC[k][0] !== g) {
+      g = SC[k][0];
+      h += `<div class="fd-nav-caption">${g.toUpperCase()}</div>`;
+    }
+    h += `<button class="app-nav-link" data-s="${k}"><i class="fa-solid fa-${SC[k][2]}"></i><span>${SC[k][1]}</span></button>`;
+  }
+  $('#nav').innerHTML = h;
+
+  // Mobile Bottom Navigation
+  const mTabs = [
+    ['stats', 'Tổng quan', 'gauge'],
+    ['obs', 'AI Metric', 'heart-pulse'],
+    ['dishes', 'Món ăn', 'bowl-food'],
+    ['ingredients', 'Nguyên liệu', 'carrot'],
+    ['users', 'Người dùng', 'users']
+  ];
+  $('#mnav').innerHTML = mTabs.map(([k, l, ico]) => `
+    <button class="app-nav-link" data-s="${k}"><i class="fa-solid fa-${ico}"></i><span>${l}</span></button>
+  `).join('') + `<button class="app-nav-link" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i><span>Tất cả</span></button>`;
+})();
+
+// Set Date in Topbar
+(function initDate() {
+  const d = new Date();
+  const el = $('#todayHeader');
+  if (el) el.textContent = d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+})();
+
+// Logout Admin Function
+async function logoutAdmin() {
+  if (confirm('Bạn chắc chắn muốn đăng xuất khỏi phiên Quản trị viên?')) {
+    try {
+      localStorage.removeItem('flexidiet-user');
+      sessionStorage.clear();
+      await FlexiAPI.request('/auth/logout', { method: 'POST' });
+    } catch (e) {}
+    location.replace('index.html');
+  }
+}
+
+// Smart Admin Auth Guard: Chỉ tài khoản Admin mới được vào
+(async () => {
+  const isHttp = location.protocol.startsWith('http');
+  if (isHttp) {
+    try {
+      const me = await call('/auth/me');
+      const role = me.role || (me.user && me.user.role);
+      if (role !== 'admin') {
+        alert('Bạn không có quyền truy cập trang Quản trị! (Chỉ dành cho tài khoản Admin).');
+        return location.replace('app.html');
+      }
+      // Xác thực thành công trên máy chủ PHP
+      load();
+      return;
+    } catch (e) {
+      let savedUser = null;
+      try { savedUser = JSON.parse(localStorage.getItem('flexidiet-user')); } catch (err) {}
+      if (savedUser && savedUser.role === 'admin') {
+        load();
+        return;
+      }
+      if (e && e.status === 401) {
+        alert('Vui lòng đăng nhập bằng tài khoản Quản trị viên (admin@flexidiet.vn) để truy cập trang này.');
+        return location.replace('index.html');
+      }
+    }
+  }
+
+  // Khi mở trực tiếp bằng file:/// hoặc xem thử offline:
+  let savedUser = null;
+  try { savedUser = JSON.parse(localStorage.getItem('flexidiet-user')); } catch (err) {}
+  if (savedUser && savedUser.role && savedUser.role !== 'admin') {
+    alert('Tài khoản hiện tại là Member, không có quyền truy cập trang Quản trị.');
+    return location.replace('app.html');
+  }
+  try {
+    localStorage.setItem('flexidiet-user', JSON.stringify({
+      id: 1, name: 'System Admin', email: 'admin@flexidiet.vn', role: 'admin'
+    }));
+  } catch(e) {}
+  load();
+})();
+</script>
+</body>
+</html>

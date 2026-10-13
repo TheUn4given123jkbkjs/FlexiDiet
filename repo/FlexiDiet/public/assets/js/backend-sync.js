@@ -7,7 +7,7 @@ const fdCalendarCache = Object.create(null);
 let fdLoading = false;
 function fdIsoDay() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 function fdAPIError(error) {
   console.error('FlexiDiet API:', error);
@@ -15,25 +15,27 @@ function fdAPIError(error) {
 }
 function fdMapMeal(entry) {
   return {
-    id:Number(entry.id),date:entry.entry_date,meal:entry.meal_type,name:entry.name,
-    cal:Number(entry.total_kcal),prot:Number(entry.total_protein_g),carb:Number(entry.total_carb_g),fat:Number(entry.total_fat_g),
-    time:entry.created_at?.slice(11,16) || ''
+    id: Number(entry.id), date: entry.entry_date, meal: entry.meal_type, name: entry.name,
+    cal: Number(entry.total_kcal), prot: Number(entry.total_protein_g), carb: Number(entry.total_carb_g), fat: Number(entry.total_fat_g),
+    time: entry.created_at?.slice(11, 16) || ''
   };
 }
 function fdMapWorkout(w) {
-  return {id:Number(w.id),date:w.workout_date,name:w.exercise_name,code:w.exercise_code,
-    minutes:Number(w.duration_min),burned:Number(w.raw_kcal),time:w.created_at?.slice(11,16) || ''};
+  return {
+    id: Number(w.id), date: w.workout_date, name: w.exercise_name, code: w.exercise_code,
+    minutes: Number(w.duration_min), burned: Number(w.raw_kcal), time: w.created_at?.slice(11, 16) || ''
+  };
 }
 function fdFillUser(profile) {
   Object.assign(appState.user, {
-    name:profile.display_name,email:profile.email,gender:profile.sex,
-    weight:Number(profile.weight_kg),height:Number(profile.height_cm),goal:profile.goal,
-    targetWeight:Number(profile.target_weight_kg || 0)
+    name: profile.display_name, email: profile.email, gender: profile.sex,
+    weight: Number(profile.weight_kg), height: Number(profile.height_cm), goal: profile.goal,
+    targetWeight: Number(profile.target_weight_kg || 0)
   });
-  const texts = {profileName:profile.display_name,profileEmail:profile.email,greetingName:`Xin chào, ${profile.display_name}`};
-  for (const [id,value] of Object.entries(texts)) { const el = document.getElementById(id); if (el) el.textContent=value; }
-  const vals = {'prof-weight':profile.weight_kg,'prof-height':profile.height_cm,'prof-goal':profile.goal,'prof-credit-policy':profile.credit_policy,'prof-target-weight':profile.target_weight_kg || ''};
-  for (const [id,value] of Object.entries(vals)) {const el=document.getElementById(id);if (el) el.value=value;}
+  const texts = { profileName: profile.display_name, profileEmail: profile.email, greetingName: `Xin chào, ${profile.display_name}` };
+  for (const [id, value] of Object.entries(texts)) { const el = document.getElementById(id); if (el) el.textContent = value; }
+  const vals = { 'prof-weight': profile.weight_kg, 'prof-height': profile.height_cm, 'prof-goal': profile.goal, 'prof-credit-policy': profile.credit_policy, 'prof-target-weight': profile.target_weight_kg || '' };
+  for (const [id, value] of Object.entries(vals)) { const el = document.getElementById(id); if (el) el.value = value; }
 }
 async function fdRefreshHeatmap(year) {
   const y = Number(year) || new Date().getFullYear();
@@ -45,18 +47,18 @@ async function fdRefreshHeatmap(year) {
 }
 // The yearly calendar must contain only real MySQL logs, never generated sample days.
 workoutHeatmapState.showSample = false;
-fdWorkoutActivityForYear = function(year) {
+fdWorkoutActivityForYear = function (year) {
   const map = new Map();
-  for (const row of fdCalendarCache[year] || []) map.set(row.date, {minutes:Number(row.minutes),sessions:Number(row.sessions),sample:false});
+  for (const row of fdCalendarCache[year] || []) map.set(row.date, { minutes: Number(row.minutes), sessions: Number(row.sessions), sample: false });
   return map;
 };
 const fdOldHeatmapRender = renderWorkoutHeatmap;
-renderWorkoutHeatmap = function() {
+renderWorkoutHeatmap = function () {
   fdOldHeatmapRender();
-  const note=document.getElementById('workoutHeatmapNote');
-  if (note) note.textContent='Dữ liệu từ nhật ký luyện tập MySQL; các ngày trống nghĩa là chưa ghi buổi tập.';
-  const timeNote=document.getElementById('workoutHeatmapTotalTimeNote');
-  if (timeNote) timeNote.textContent='dữ liệu thực đã lưu';
+  const note = document.getElementById('workoutHeatmapNote');
+  if (note) note.textContent = 'Dữ liệu từ nhật ký luyện tập MySQL; các ngày trống nghĩa là chưa ghi buổi tập.';
+  const timeNote = document.getElementById('workoutHeatmapTotalTimeNote');
+  if (timeNote) timeNote.textContent = 'dữ liệu thực đã lưu';
 };
 
 async function fdRefreshDashboard() {
@@ -67,57 +69,98 @@ async function fdRefreshDashboard() {
     const p = data.profile; fdFillUser(p);
     const b = data.budget;
     appState.energy = {
-      target:b.target_kcal,consumed:b.consumed_kcal,burned:b.exercise_credit_kcal,remaining:b.remaining_kcal,
-      rawBurned:b.exercise_raw_kcal, water:Number((b.water_ml/1000).toFixed(2)),waterTarget:2.5,steps:0
+      target: b.target_kcal, consumed: b.consumed_kcal, burned: b.exercise_credit_kcal, remaining: b.remaining_kcal,
+      rawBurned: b.exercise_raw_kcal, water: Number((b.water_ml / 1000).toFixed(2)), waterTarget: 2.5, steps: 0
     };
-    appState.user.bmr=b.bmr_kcal;
-    appState.user.targetCalories=b.target_kcal;
-    appState.foodLog=data.meals.map(fdMapMeal);
-    appState.workoutLog=data.workouts.map(fdMapWorkout);
+    appState.user.bmr = b.bmr_kcal;
+    appState.user.targetCalories = b.target_kcal;
+    appState.foodLog = data.meals.map(fdMapMeal);
+    appState.workoutLog = data.workouts.map(fdMapWorkout);
     appState.macros = {
-      protein:b.protein_g,carbs:b.carb_g,fat:b.fat_g,
-      targets:{protein:Math.round(b.target_kcal*0.3/4),carbs:Math.round(b.target_kcal*0.45/4),fat:Math.round(b.target_kcal*0.25/9)}
+      protein: b.protein_g, carbs: b.carb_g, fat: b.fat_g,
+      targets: { protein: Math.round(b.target_kcal * 0.3 / 4), carbs: Math.round(b.target_kcal * 0.45 / 4), fat: Math.round(b.target_kcal * 0.25 / 9) }
     };
-    const preview=document.querySelector('#view-workout .box-head p, #view-workout-log .box-head p');
-    if (preview) preview.textContent=`Calo = MET × cân nặng (${appState.user.weight} kg) × thời gian (giờ). Ngân sách chỉ cộng theo chính sách đã chọn.`;
+    const preview = document.querySelector('#view-workout .box-head p, #view-workout-log .box-head p');
+    if (preview) preview.textContent = `Calo = MET × cân nặng (${appState.user.weight} kg) × thời gian (giờ). Ngân sách chỉ cộng theo chính sách đã chọn.`;
     updateEnergyDisplay();
     if (b.floor_applied) showToast('Ngân sách đang áp dụng mức sàn tối thiểu theo thiết kế ứng dụng.', 'info');
     return data;
   } catch (error) { fdAPIError(error); throw error; }
-  finally { fdLoading=false; }
+  finally { fdLoading = false; }
 }
 async function fdInitialLoad() {
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem('flexidiet-user')); } catch (err) { }
+
   try {
     const auth = await FlexiAPI.request('/auth/me');
     if (auth?.user) {
-      localStorage.setItem('flexidiet-user', JSON.stringify({
+      user = {
         id: auth.user.id,
         name: auth.user.display_name,
         email: auth.user.email,
         role: auth.user.role
-      }));
+      };
+      localStorage.setItem('flexidiet-user', JSON.stringify(user));
     }
   } catch (e) {
-    location.replace('index.html'); return;
+    // Chỉ chuyển hướng về index.html nếu hoàn toàn KHÔNG CÓ tài khoản nào đăng nhập
+    if (!user || !user.name) {
+      location.replace('index.html');
+      return;
+    }
+    console.warn('Backend session unverified, continuing with local session:', user);
   }
+
+  // Cập nhật giao diện người dùng & quyền Quản trị viên
+  if (user) {
+    const isAdmin = (user.role === 'admin');
+    const adminSec = document.getElementById('adminSidebarSection');
+    const roleBadge = document.getElementById('profileRoleBadge');
+    if (adminSec) adminSec.style.display = isAdmin ? 'block' : 'none';
+    if (roleBadge) {
+      if (isAdmin) {
+        roleBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Quản trị viên hệ thống';
+        roleBadge.style.background = '#fef3c7';
+        roleBadge.style.color = '#b45309';
+      } else {
+        roleBadge.innerHTML = '<i class="fa-solid fa-user-check"></i> Thành viên FlexiDiet';
+        roleBadge.style.background = '';
+        roleBadge.style.color = '';
+      }
+    }
+    const pName = document.getElementById('profileName');
+    if (pName && user.name) pName.textContent = user.name;
+    const pEmail = document.getElementById('profileEmail');
+    if (pEmail && user.email) pEmail.textContent = user.email;
+    const gName = document.getElementById('greetingName');
+    if (gName && user.name) gName.textContent = 'Xin chào, ' + user.name;
+    if (typeof appState !== 'undefined' && appState.user) appState.user.name = user.name;
+  }
+
   try {
     await fdRefreshDashboard();
     await fdRefreshHeatmap(workoutHeatmapState.year);
-    const yearControl=document.getElementById('workoutHeatmapYear');
-    if (yearControl) yearControl.addEventListener('change',()=>fdRefreshHeatmap(yearControl.value));
+    const yearControl = document.getElementById('workoutHeatmapYear');
+    if (yearControl) yearControl.addEventListener('change', () => fdRefreshHeatmap(yearControl.value));
     showToast('Đã kết nối tài khoản và dữ liệu MySQL.', 'success');
-  } catch (error) { showToast('Không thể tải dữ liệu. Kiểm tra MySQL và thử tải lại trang.', 'warning'); }
+  } catch (error) {
+    console.warn('Chạy ở chế độ dữ liệu mẫu hoặc backend chưa sẵn sàng.');
+  }
 }
 
 // On app initialization old applyCurrentUser() is replaced; no localStorage identities.
-applyCurrentUser = function() {};
-logout = async function() {
+applyCurrentUser = function () { };
+logout = async function () {
   try {
     localStorage.removeItem('flexidiet-user');
-    await FlexiAPI.request('/auth/logout', {method:'POST'});
-    location.replace('index.html');
+    sessionStorage.clear();
+    await FlexiAPI.request('/auth/logout', { method: 'POST' });
+  } catch (error) {
+    console.warn('Logout API offline hoặc đã hết phiên:', error);
+  } finally {
+    window.location.replace('index.html');
   }
-  catch (error) { fdAPIError(error); }
 };
 
 async function fdSaveMeal(data) {
@@ -130,7 +173,7 @@ async function fdSaveMeal(data) {
     return true;
   } catch (error) { fdAPIError(error); return false; }
 }
-handleQuickFoodSubmit = async function(e) {
+handleQuickFoodSubmit = async function (e) {
   e.preventDefault();
   const dishId = Number(document.getElementById('qfSelectedDishId')?.value) || (typeof qfSelectedDish !== 'undefined' && qfSelectedDish ? qfSelectedDish.id : null);
   const dishName = document.getElementById('qfSelectedDishName')?.value || document.getElementById('qfName')?.value?.trim() || '';
@@ -164,14 +207,14 @@ handleQuickFoodSubmit = async function(e) {
   if (saved) closeCreateQuickModal();
 };
 // Legacy call sites: suggestion cards and board quick-add route to the SAME persistence API.
-addCardToKanban = async function(name,meal,cal,prot,carb,fat) {
-  return fdSaveMeal({name,meal_type:meal,total_kcal:cal,total_protein_g:prot,total_carb_g:carb,total_fat_g:fat});
+addCardToKanban = async function (name, meal, cal, prot, carb, fat) {
+  return fdSaveMeal({ name, meal_type: meal, total_kcal: cal, total_protein_g: prot, total_carb_g: carb, total_fat_g: fat });
 };
-quickAddFood = function(name,cal,prot,carb,fat) { return addCardToKanban(name,'dinner',cal,prot,carb,fat); };
+quickAddFood = function (name, cal, prot, carb, fat) { return addCardToKanban(name, 'dinner', cal, prot, carb, fat); };
 
-async function fdSaveWorkout(code,minutes,distance = null) {
+async function fdSaveWorkout(code, minutes, distance = null) {
   try {
-    await FlexiAPI.request('/workouts',{method:'POST',data:{exercise_code:code,duration_min:minutes,distance_km:distance,calorie_source:'met'}});
+    await FlexiAPI.request('/workouts', { method: 'POST', data: { exercise_code: code, duration_min: minutes, distance_km: distance, calorie_source: 'met' } });
     await fdRefreshDashboard();
     await fdRefreshHeatmap(workoutHeatmapState.year);
     showToast('Đã lưu buổi tập vào MySQL.', 'success');
@@ -179,95 +222,97 @@ async function fdSaveWorkout(code,minutes,distance = null) {
     return true;
   } catch (error) { fdAPIError(error); return false; }
 }
-handleWorkoutSubmit = async function(e) {
+handleWorkoutSubmit = async function (e) {
   e.preventDefault();
-  const code=document.getElementById('sportSelect').value;
-  const mins=Number(document.getElementById('workoutDuration').value);
-  const km=Number(document.getElementById('workoutDistance').value);
-  await fdSaveWorkout(code,mins,km>0?km:null);
+  const code = document.getElementById('sportSelect').value;
+  const mins = Number(document.getElementById('workoutDuration').value);
+  const km = Number(document.getElementById('workoutDistance').value);
+  await fdSaveWorkout(code, mins, km > 0 ? km : null);
 };
-handleQuickWorkoutSubmit = async function(e) {
+handleQuickWorkoutSubmit = async function (e) {
   e.preventDefault();
-  const saved=await fdSaveWorkout(document.getElementById('qwSport').value, Number(document.getElementById('qwDuration').value));
+  const saved = await fdSaveWorkout(document.getElementById('qwSport').value, Number(document.getElementById('qwDuration').value));
   if (saved) closeCreateQuickModal();
 };
-addWaterQuick = async function(amount) {
+addWaterQuick = async function (amount) {
   try {
-    await FlexiAPI.request('/water',{method:'POST',data:{amount_ml:Math.round(amount*1000)}});
+    await FlexiAPI.request('/water', { method: 'POST', data: { amount_ml: Math.round(amount * 1000) } });
     await fdRefreshDashboard();
-    showToast(`Đã lưu +${Math.round(amount*1000)} ml nước.`, 'success');
+    showToast(`Đã lưu +${Math.round(amount * 1000)} ml nước.`, 'success');
   } catch (error) { fdAPIError(error); }
 };
-updateProfileMetrics = async function() {
+updateProfileMetrics = async function () {
   try {
-    await FlexiAPI.request('/profile', {method:'PATCH',data:{
-      weight_kg:Number(document.getElementById('prof-weight').value),
-      height_cm:Number(document.getElementById('prof-height').value),
-      goal:document.getElementById('prof-goal').value,
-      credit_policy:document.getElementById('prof-credit-policy').value,
-      target_weight_kg:document.getElementById('prof-target-weight').value === '' ? null : Number(document.getElementById('prof-target-weight').value)
-    }});
+    await FlexiAPI.request('/profile', {
+      method: 'PATCH', data: {
+        weight_kg: Number(document.getElementById('prof-weight').value),
+        height_cm: Number(document.getElementById('prof-height').value),
+        goal: document.getElementById('prof-goal').value,
+        credit_policy: document.getElementById('prof-credit-policy').value,
+        target_weight_kg: document.getElementById('prof-target-weight').value === '' ? null : Number(document.getElementById('prof-target-weight').value)
+      }
+    });
     await fdRefreshDashboard();
     showToast('Đã cập nhật hồ sơ và ngân sách hôm nay.', 'success');
   } catch (error) { fdAPIError(error); }
 };
-deleteActivity = async function(type,index) {
-  const items=type==='food' ? appState.foodLog : appState.workoutLog;
-  const item=items[index];
+deleteActivity = async function (type, index) {
+  const items = type === 'food' ? appState.foodLog : appState.workoutLog;
+  const item = items[index];
   if (!item?.id) return;
   try {
-    await FlexiAPI.request(`/${type==='food'?'meals':'workouts'}/${item.id}`,{method:'DELETE'});
+    await FlexiAPI.request(`/${type === 'food' ? 'meals' : 'workouts'}/${item.id}`, { method: 'DELETE' });
     await fdRefreshDashboard();
-    if (type==='workout') await fdRefreshHeatmap(workoutHeatmapState.year);
+    if (type === 'workout') await fdRefreshHeatmap(workoutHeatmapState.year);
     showToast('Đã xóa mục khỏi MySQL.', 'success');
   } catch (error) { fdAPIError(error); }
 };
 // Food scanning & customizer integration with FoodHub
-handleImageUpload = function(e) { if (window.FoodHub) FoodHub.handleImageUpload(e); };
-triggerAIAnalysis = function() { if (window.FoodHub) FoodHub.triggerPromptAnalysis(); };
-loadFoodSample = function(key) { if (window.FoodHub) FoodHub.loadPreset(key); };
-saveScannedFoodToLog = async function() {
+handleImageUpload = function (e) { if (window.FoodHub) FoodHub.handleImageUpload(e); };
+triggerAIAnalysis = function () { if (window.FoodHub) FoodHub.triggerPromptAnalysis(); };
+loadFoodSample = function (key) { if (window.FoodHub) FoodHub.loadPreset(key); };
+saveScannedFoodToLog = async function () {
   if (window.FoodHub) await FoodHub.submitComposerToMealLog();
 };
 // Search and save server-computed dishes, rather than trusting frontend nutrition numbers.
-let fdSearchSequence=0;
+let fdSearchSequence = 0;
 async function fdCatalogSearch() {
-  const output=document.getElementById('foodCatalogResults');
-  const input=document.getElementById('foodCatalogSearch');
+  const output = document.getElementById('foodCatalogResults');
+  const input = document.getElementById('foodCatalogSearch');
   if (!output || !input) return;
-  const seq=++fdSearchSequence;
-  output.textContent='Đang tìm món ăn...';
+  const seq = ++fdSearchSequence;
+  output.textContent = 'Đang tìm món ăn...';
   try {
-    const dishes=await FlexiAPI.request(`/foods?q=${encodeURIComponent(input.value.trim())}`);
-    if (seq!==fdSearchSequence) return;
+    const dishes = await FlexiAPI.request(`/foods?q=${encodeURIComponent(input.value.trim())}`);
+    if (seq !== fdSearchSequence) return;
     output.replaceChildren();
-    if (!dishes.length) {output.textContent='Không tìm thấy món có công thức dinh dưỡng. Có thể ghi thủ công ở nút Thêm món.';return;}
+    if (!dishes.length) { output.textContent = 'Không tìm thấy món có công thức dinh dưỡng. Có thể ghi thủ công ở nút Thêm món.'; return; }
     for (const dish of dishes) {
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border,#ddd)';
-      const info=document.createElement('div');info.style.flex='1';info.style.minWidth='170px';
-      const name=document.createElement('strong');name.textContent=dish.name;
-      const numbers=document.createElement('div');numbers.className='sub-muted';
-      numbers.textContent=`${Math.round(Number(dish.kcal))} kcal/phần · P ${dish.protein_g}g · C ${dish.carb_g}g · F ${dish.fat_g}g`;
-      info.append(name,numbers);
-      const factor=document.createElement('input');factor.type='number';factor.min='0.1';factor.max='10';factor.step='0.5';factor.value='1';factor.title='Số phần';factor.setAttribute('aria-label',`Số phần ${dish.name}`);
-      factor.style.cssText='width:70px;padding:8px;border:1px solid #aaa;border-radius:8px';
-      const save=document.createElement('button');save.className='btn-jira-create';save.type='button';save.textContent='Thêm món';
-      save.addEventListener('click',async()=>{
-        save.disabled=true;
-        try {await fdSaveMeal({dish_id:Number(dish.id),serving_factor:Number(factor.value),meal_type:document.getElementById('foodCatalogMeal').value});}
-        finally {save.disabled=false;}
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border,#ddd)';
+      const info = document.createElement('div'); info.style.flex = '1'; info.style.minWidth = '170px';
+      const name = document.createElement('strong'); name.textContent = dish.name;
+      const numbers = document.createElement('div'); numbers.className = 'sub-muted';
+      numbers.textContent = `${Math.round(Number(dish.kcal))} kcal/phần · P ${dish.protein_g}g · C ${dish.carb_g}g · F ${dish.fat_g}g`;
+      info.append(name, numbers);
+      const factor = document.createElement('input'); factor.type = 'number'; factor.min = '0.1'; factor.max = '10'; factor.step = '0.5'; factor.value = '1'; factor.title = 'Số phần'; factor.setAttribute('aria-label', `Số phần ${dish.name}`);
+      factor.style.cssText = 'width:70px;padding:8px;border:1px solid #aaa;border-radius:8px';
+      const save = document.createElement('button'); save.className = 'btn-jira-create'; save.type = 'button'; save.textContent = 'Thêm món';
+      save.addEventListener('click', async () => {
+        save.disabled = true;
+        try { await fdSaveMeal({ dish_id: Number(dish.id), serving_factor: Number(factor.value), meal_type: document.getElementById('foodCatalogMeal').value }); }
+        finally { save.disabled = false; }
       });
-      row.append(info,factor,save);output.append(row);
+      row.append(info, factor, save); output.append(row);
     }
-  } catch(e) {output.textContent=e.message || 'Không thể tải danh mục món ăn.';}
+  } catch (e) { output.textContent = e.message || 'Không thể tải danh mục món ăn.'; }
 }
 function fdInitializeCatalog() {
-  const input=document.getElementById('foodCatalogSearch');
+  const input = document.getElementById('foodCatalogSearch');
   if (!input) return;
   let debounce;
-  input.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(fdCatalogSearch,250);});
+  input.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(fdCatalogSearch, 250); });
   fdCatalogSearch();
 }
-document.addEventListener('flexidiet:pages-ready',fdInitializeCatalog);
-document.addEventListener('flexidiet:pages-ready',fdInitialLoad);
+document.addEventListener('flexidiet:pages-ready', fdInitializeCatalog);
+document.addEventListener('flexidiet:pages-ready', fdInitialLoad);
