@@ -16,8 +16,36 @@
     document.dispatchEvent(new CustomEvent('flexidiet:themechange', { detail: next }));
   }
 
+  function syncThemeControls() {
+    var isDark = root.getAttribute('data-theme') === 'dark';
+    var profileToggle = document.getElementById('profile-theme-toggle');
+    if (profileToggle) {
+      profileToggle.checked = isDark;
+      if (!profileToggle.dataset.themeBound) {
+        profileToggle.addEventListener('change', toggleTheme);
+        profileToggle.dataset.themeBound = 'true';
+      }
+    }
+
+    var button = document.getElementById('theme-toggle');
+    if (button) {
+      button.setAttribute('aria-pressed', String(isDark));
+      button.setAttribute('aria-label', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+      button.setAttribute('title', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
+      var icon = button.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-sun', isDark);
+        icon.classList.toggle('fa-moon', !isDark);
+      }
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var btn = document.getElementById('theme-toggle');
     if (btn) btn.addEventListener('click', toggleTheme);
+    syncThemeControls();
   });
+
+  document.addEventListener('flexidiet:themechange', syncThemeControls);
+  document.addEventListener('flexidiet:pages-ready', syncThemeControls);
 })();
