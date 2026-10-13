@@ -8,11 +8,53 @@
 </div>
 <button class="btn-top-landing" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng Xuất Về Trang Chủ</button>
 </div>
-<!-- Charts will be implemented after historical weight/budget APIs. Avoid fake statistics. -->
-<div class="jira-card-box" style="margin-bottom:24px;padding:22px;">
-  <h3><i class="fa-solid fa-chart-line"></i> Biểu đồ tiến trình</h3>
-  <p class="sub-muted" style="margin-top:10px;">Chưa có biểu đồ lịch sử thực. Hồ sơ và cân nặng hiện tại đã lưu trong MySQL; phiên bản tiếp theo sẽ tổng hợp các bản ghi <code>weight_logs</code>.</p>
+<!-- FlexiDiet Analytics -->
+<div class="fd-analytics" id="profileInsights">
+  <div class="fd-analytics-topline">
+    <div><span class="section-tag">THEO DÕI TIẾN TRÌNH</span><h3><i class="fa-solid fa-chart-line"></i> Sức khỏe &amp; cân bằng năng lượng</h3></div>
+    <span class="fd-analytics-source"><i class="fa-solid fa-database"></i> Dữ liệu MySQL của bạn</span>
+  </div>
+  <p class="fd-analytics-status" id="profileInsightsStatus" role="status" aria-live="polite">Đang tải dữ liệu tiến trình...</p>
+  <div class="fd-analytics-kpis">
+    <div class="fd-analytics-kpi"><div class="fd-analytics-kpi-label">BMI hiện tại <i class="fa-solid fa-circle-info" title="BMI chỉ mang tính tham khảo, không đo trực tiếp tỷ lệ mỡ cơ thể"></i></div>
+      <strong id="profileBmiValue">—</strong><span id="profileBmiCategory">Chưa có dữ liệu</span>
+      <div class="fd-bmi-track" aria-hidden="true"><span id="profileBmiMarker"></span></div>
+      <small id="profileBmiNote">BMI = cân nặng (kg) / chiều cao² (m)</small>
+    </div>
+    <div class="fd-analytics-kpi"><div class="fd-analytics-kpi-label">Cân nặng hiện tại</div>
+      <strong id="profileWeightCurrent">—</strong><span id="profileWeightGoal">Mục tiêu: chưa thiết lập</span>
+      <small id="profileWeightTrend">Theo dõi thay đổi qua các mốc cân</small>
+    </div>
+  </div>
+  <section class="fd-analytics-panel" aria-labelledby="profileWeightHeading">
+    <div class="fd-analytics-panel-head">
+      <div><h3 id="profileWeightHeading">Biến động cân nặng</h3><p>Thay đổi theo ngày, tháng và năm · kg</p></div>
+      <label class="fd-select-label">Khoảng xem <select id="profileWeightPeriod" aria-label="Khoảng xem biểu đồ cân nặng"><option value="30">30 ngày</option><option value="90">3 tháng</option><option value="365" selected>12 tháng</option><option value="1825">5 năm</option></select></label>
+    </div>
+    <div class="fd-chart-scroller"><svg id="profileWeightChart" class="fd-analytics-svg" viewBox="0 0 900 265" role="img" aria-label="Biểu đồ đường cân nặng thực tế"></svg></div>
+    <p id="profileWeightEmpty" class="fd-analytics-empty" hidden>Chưa có lịch sử cân nặng. Hãy ghi nhận lần cân đầu tiên.</p>
+    <p id="profileWeightDetail" class="fd-analytics-detail" aria-live="polite"></p>
+    <form id="profileWeightForm" class="fd-weight-form">
+      <div><label for="profileWeightDate">Ngày cân</label><input type="date" id="profileWeightDate" required></div>
+      <div><label for="profileWeightInput">Cân nặng đo được (kg)</label><input type="number" id="profileWeightInput" min="20" max="400" step="0.1" required placeholder="Ví dụ 68.5"></div>
+      <button type="submit" class="btn-jira-create" id="profileRecordWeight"><i class="fa-solid fa-plus"></i> Ghi nhận cân nặng</button>
+    </form>
+    <p class="fd-analytics-footnote">Một bản ghi/ngày. Ghi lại cùng ngày sẽ cập nhật mốc đó; không tự tạo lịch sử khi chỉ lưu tùy chọn hồ sơ.</p>
+  </section>
+  <section class="fd-analytics-panel" aria-labelledby="profileEnergyHeading">
+    <div class="fd-analytics-panel-head">
+      <div><h3 id="profileEnergyHeading">Cân bằng calo ăn uống &amp; luyện tập</h3><p>Cột: đã ăn · Đường: ngân sách calo động</p></div>
+      <label class="fd-select-label">Thời gian <select id="profileEnergyPeriod" aria-label="Khoảng xem biểu đồ năng lượng"><option value="7" selected>7 ngày</option><option value="30">30 ngày</option><option value="365">12 tháng</option></select></label>
+    </div>
+    <div class="fd-chart-legend"><span><i class="fd-legend-swatch fd-legend-intake"></i> Calo đã ăn</span><span><i class="fd-legend-swatch fd-legend-budget"></i> Ngân sách động</span><span><i class="fd-legend-swatch fd-legend-missing"></i> Chưa ghi bữa ăn</span></div>
+    <div class="fd-chart-scroller"><svg id="profileEnergyChart" class="fd-analytics-svg" viewBox="0 0 900 290" role="img" aria-label="Biểu đồ kết hợp calo đã ăn và ngân sách động"></svg></div>
+    <p id="profileEnergyEmpty" class="fd-analytics-empty" hidden>Chưa có ngày nào đủ dữ liệu ăn uống và ngân sách trong khoảng đã chọn.</p>
+    <div class="fd-analytics-energy-summary" id="profileEnergySummary"></div>
+    <div class="fd-analytics-detail fd-energy-detail" id="profileEnergyDetail" aria-live="polite">Chọn một ngày trên biểu đồ để xem calo còn lại hoặc vượt.</div>
+    <p class="fd-analytics-footnote">Chênh lệch = ngân sách động − calo đã ăn. Số dương là ăn dưới <em>ngân sách đặt ra</em>, không phải toàn bộ thâm hụt năng lượng thực tế. Ngày chưa ghi ăn không được tính là 0 kcal. Với chế độ 12 tháng, số liệu chỉ cộng những ngày có ghi bữa ăn.</p>
+  </section>
 </div>
+
 <div class="profile-two-col-grid">
 <!-- Profile Card -->
 <div class="jira-card-box">
@@ -33,7 +75,7 @@
 <div class="form-grid">
 <div class="form-group">
 <label>Cân Nặng Hiện Tại (kg)</label>
-<input class="jira-input" id="prof-weight" step="0.1" type="number" value="68.5"/>
+<input class="jira-input" id="prof-weight" step="0.1" type="number" value="68.5" readonly>
 </div>
 <div class="form-group">
 <label>Chiều Cao (cm)</label>

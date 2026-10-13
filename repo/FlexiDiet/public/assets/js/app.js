@@ -171,6 +171,7 @@ function switchTab(tabId) {
   if (label) label.textContent = pageNames[tabId] || 'Tổng quan';
   if (tabId === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
   if (tabId === 'history' && typeof renderActivityList === 'function') renderActivityList();
+  if (tabId === 'profile' && typeof fdLoadProfileInsights === 'function') fdLoadProfileInsights();
   if (location.hash !== `#${tabId}`) history.pushState(null, '', `#${tabId}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
 }

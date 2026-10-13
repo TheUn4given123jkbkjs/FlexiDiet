@@ -243,16 +243,15 @@ addWaterQuick = async function (amount) {
 };
 updateProfileMetrics = async function () {
   try {
-    await FlexiAPI.request('/profile', {
-      method: 'PATCH', data: {
-        weight_kg: Number(document.getElementById('prof-weight').value),
-        height_cm: Number(document.getElementById('prof-height').value),
-        goal: document.getElementById('prof-goal').value,
-        credit_policy: document.getElementById('prof-credit-policy').value,
-        target_weight_kg: document.getElementById('prof-target-weight').value === '' ? null : Number(document.getElementById('prof-target-weight').value)
-      }
-    });
+    await FlexiAPI.request('/profile', {method:'PATCH',data:{
+      // Cân nặng được ghi riêng qua /weight-logs.
+      height_cm:Number(document.getElementById('prof-height').value),
+      goal:document.getElementById('prof-goal').value,
+      credit_policy:document.getElementById('prof-credit-policy').value,
+      target_weight_kg:document.getElementById('prof-target-weight').value === '' ? null : Number(document.getElementById('prof-target-weight').value)
+    }});
     await fdRefreshDashboard();
+    if (typeof fdLoadProfileInsights === 'function') await fdLoadProfileInsights();
     showToast('Đã cập nhật hồ sơ và ngân sách hôm nay.', 'success');
   } catch (error) { fdAPIError(error); }
 };
