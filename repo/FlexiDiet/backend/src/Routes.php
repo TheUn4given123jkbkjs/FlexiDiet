@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/AdminRoutes.php';
+
 function authData(PDO $pdo, int $uid): array {
     $user = one($pdo, 'SELECT id,display_name,email,role FROM users WHERE id=?', [$uid]);
     if (!$user) { unset($_SESSION['uid']); fail(401, 'UNAUTHENTICATED', 'Phiên đăng nhập không tồn tại.'); }
@@ -442,50 +444,50 @@ function executeRoute(string $route,string $method): never {
         response(['amount_ml'=>$ml,'water_total_ml'=>(int)one($pdo,'SELECT SUM(amount_ml) total FROM water_logs WHERE user_id=? AND log_date=?',[$uid,$day])['total']],201);
     }
     if ($route === '/ai/recognize' && $method === 'POST') response(recognizeFood($pdo, $uid));
-    if ($route === '/admin/ai/health' && $method === 'GET') {
+    if (str_starts_with($route, '/admin/')) {
         requireAdmin($pdo, $uid);
-        $h = proxyAiGet('/health') ?: [
-            'status' => 'Offline', 'service' => 'FlexiDiet AI Microservice',
-            'model' => 'YOLOv10m-VietFood67', 'uptime' => '0 phút', 'cpu' => 0, 'ram' => 0
-        ];
-        response($h);
-    }
-    if ($route === '/admin/ai/metrics' && $method === 'GET') {
-        requireAdmin($pdo, $uid);
-        $m = proxyAiGet('/v1/metrics') ?: [
-            'volume_today' => 0, 'volume_week' => 0, 'volume_month' => 0,
-            'in_flight' => 0, 'error_rate' => 0, 'p50_ms' => 180, 'p95_ms' => 340, 'unknown_detections' => 0
-        ];
-        response($m);
-    }
-    if ($route === '/admin/ai/labels' && $method === 'GET') {
-        requireAdmin($pdo, $uid);
-        $res = proxyAiGet('/v1/labels');
-        $usedCodes = array_column(all($pdo, 'SELECT dish_code FROM dishes WHERE dish_code IS NOT NULL AND is_active=1'), 'dish_code');
-        $usedMap = array_fill_keys($usedCodes, true);
-        $items = [];
-        if ($res && !empty($res['labels'])) {
-            foreach ($res['labels'] as $l) {
-                $code = $l['dish_code'] ?? '';
-                $items[] = [
-                    'dish_code' => $code,
-                    'name_full' => $l['name_full'] ?? $code,
-                    'name_vi' => $l['name_vi'] ?? $code,
-                    'used' => isset($usedMap[$code]) ? 1 : 0
-                ];
+        if ($route === '/admin/ai/health' && $method === 'GET') {
+            $h = proxyAiGet('/health') ?: [
+                'status' => 'Offline', 'service' => 'FlexiDiet AI Microservice',
+                'model' => 'YOLOv10m-VietFood67', 'uptime' => '0 phút', 'cpu' => 0, 'ram' => 0
+            ];
+            response($h);
+        }
+        if ($route === '/admin/ai/metrics' && $method === 'GET') {
+            $m = proxyAiGet('/v1/metrics') ?: [
+                'volume_today' => 0, 'volume_week' => 0, 'volume_month' => 0,
+                'in_flight' => 0, 'error_rate' => 0, 'p50_ms' => 180, 'p95_ms' => 340, 'unknown_detections' => 0
+            ];
+            response($m);
+        }
+        if ($route === '/admin/ai/labels' && $method === 'GET') {
+            $res = proxyAiGet('/v1/labels');
+            $usedCodes = array_column(all($pdo, 'SELECT dish_code FROM dishes WHERE dish_code IS NOT NULL AND is_active=1'), 'dish_code');
+            $usedMap = array_fill_keys($usedCodes, true);
+            $items = [];
+            if ($res && !empty($res['labels'])) {
+                foreach ($res['labels'] as $l) {
+                    $code = $l['dish_code'] ?? '';
+                    $items[] = [
+                        'dish_code' => $code,
+                        'name_full' => $l['name_full'] ?? $code,
+                        'name_vi' => $l['name_vi'] ?? $code,
+                        'used' => isset($usedMap[$code]) ? 1 : 0
+                    ];
+                }
             }
+            response($items);
         }
-        response($items);
-    }
-    if ($route === '/admin/ai/throughput' && $method === 'GET') {
-        requireAdmin($pdo, $uid);
-        $h = (int)date('G');
-        $bars = [];
-        for ($i = 0; $i < 24; $i++) {
-            $hr = ($h - 23 + $i + 24) % 24;
-            $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => rand(15, 85)];
+        if ($route === '/admin/ai/throughput' && $method === 'GET') {
+            $h = (int)date('G');
+            $bars = [];
+            for ($i = 0; $i < 24; $i++) {
+                $hr = ($h - 23 + $i + 24) % 24;
+                $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => rand(15, 85)];
+            }
+            response($bars);
         }
-        response($bars);
+        if (handleAdminRoute($pdo, $uid, $route, $method)) exit;
     }
     fail(404,'ENDPOINT_NOT_FOUND','API không tồn tại hoặc phương thức không hỗ trợ.');
 }
