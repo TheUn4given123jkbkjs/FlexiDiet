@@ -326,10 +326,26 @@ function createMeal(PDO $pdo,int $uid,array $p): array {
                 fail(409, 'BUDGET_EXCEEDED', 'Món ăn sẽ vượt ngân sách calo hôm nay. Vui lòng xác nhận nếu vẫn muốn thêm.');
             }
         }
-        execSql($pdo, 'INSERT INTO meal_entries (user_id,entry_date,meal_type,name,source_kind,source_dish_id,serving_factor,total_kcal,total_protein_g,total_carb_g,total_fat_g) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$uid,$day,$meal,$name,'manual',$dishId,$factor,$kcal,$protein,$carb,$fat]);
+        $sourceKind = in_array($p['source_kind'] ?? '', ['ai','manual','saved'], true) ? (string)$p['source_kind'] : (!empty($p['ai_dish_code']) ? 'ai' : 'manual');
+        $aiDishCode = !empty($p['ai_dish_code']) ? (string)$p['ai_dish_code'] : null;
+        $aiConfidence = isset($p['ai_confidence']) && is_numeric($p['ai_confidence']) ? (float)$p['ai_confidence'] : null;
+        $imagePath = !empty($p['image_path']) ? (string)$p['image_path'] : null;
+
+        execSql($pdo, 'INSERT INTO meal_entries (user_id,entry_date,meal_type,name,source_kind,source_dish_id,serving_factor,ai_dish_code,ai_confidence,image_path,total_kcal,total_protein_g,total_carb_g,total_fat_g) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$uid,$day,$meal,$name,$sourceKind,$dishId,$factor,$aiDishCode,$aiConfidence,$imagePath,$kcal,$protein,$carb,$fat]);
         $id=(int)$pdo->lastInsertId();
         foreach ($recipeItems as $i=>$it) {
             execSql($pdo,'INSERT INTO meal_entry_items (entry_id,ingredient_id,ingredient_name,grams,kcal,protein_g,carb_g,fat_g,nutrition_source,line_origin,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?)',[$id,$it['ingredient_id'],$it['name'],$it['grams'],$it['kcal'],$it['protein_g'],$it['carb_g'],$it['fat_g'],$it['source'],'recipe',$i]);
+        }
+
+        if (!empty($p['ai_predicted_dish_code'])) {
+            $predCode = (string)$p['ai_predicted_dish_code'];
+            $predConf = isset($p['ai_predicted_confidence']) ? (float)$p['ai_predicted_confidence'] : $aiConfidence;
+            $correctedCode = $aiDishCode ?? ($dish['dish_code'] ?? $name);
+            try {
+                execSql($pdo, 'INSERT INTO ai_feedback (user_id, model_version, predicted_dish_code, predicted_confidence, corrected_dish_code, image_path, created_at) VALUES (?, "YOLOv10m-VietFood67", ?, ?, ?, ?, NOW())', [
+                    $uid, $predCode, $predConf, $correctedCode, $imagePath
+                ]);
+            } catch (Throwable) {}
         }
         $pdo->commit();
     } catch (Throwable $e) {if ($pdo->inTransaction()) $pdo->rollBack(); throw $e;}
@@ -521,6 +537,18 @@ function executeRoute(string $route,string $method): never {
         response(['amount_ml'=>$ml,'water_total_ml'=>(int)one($pdo,'SELECT SUM(amount_ml) total FROM water_logs WHERE user_id=? AND log_date=?',[$uid,$day])['total']],201);
     }
     if ($route === '/ai/recognize' && $method === 'POST') response(recognizeFood($pdo, $uid));
+    if ($route === '/ai/feedback' && $method === 'POST') {
+        $p = body();
+        $predCode = !empty($p['predicted_dish_code']) ? (string)$p['predicted_dish_code'] : null;
+        $predConf = isset($p['predicted_confidence']) ? (float)$p['predicted_confidence'] : null;
+        $correctedCode = !empty($p['corrected_dish_code']) ? (string)$p['corrected_dish_code'] : null;
+        $imgPath = !empty($p['image_path']) ? (string)$p['image_path'] : null;
+        $items = isset($p['corrected_items']) ? json_encode($p['corrected_items'], JSON_UNESCAPED_UNICODE) : null;
+        execSql($pdo, 'INSERT INTO ai_feedback (user_id, model_version, predicted_dish_code, predicted_confidence, corrected_dish_code, corrected_items, image_path, created_at) VALUES (?, "YOLOv10m-VietFood67", ?, ?, ?, ?, ?, NOW())', [
+            $uid, $predCode, $predConf, $correctedCode, $items, $imgPath
+        ]);
+        response(['id' => (int)$pdo->lastInsertId(), 'status' => 'recorded'], 201);
+    }
     if (str_starts_with($route, '/admin/')) {
         requireAdmin($pdo, $uid);
         if ($route === '/admin/ai/health' && $method === 'GET') {

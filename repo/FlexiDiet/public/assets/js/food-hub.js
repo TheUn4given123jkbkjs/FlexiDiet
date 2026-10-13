@@ -401,6 +401,7 @@ const FoodHub = (() => {
       const { dish, ingredients } = recipeData;
       state.composer.dishId = dish.id;
       state.composer.name = dish.name;
+      state.composer.dishCode = dish.dish_code || null;
       state.composer.servingLabel = dish.serving_label || '1 phần';
       state.composer.origin = dish.origin || 'system';
       if (suggestedMeal) state.composer.mealType = suggestedMeal;
@@ -724,11 +725,19 @@ const FoodHub = (() => {
       const payload = {
         name,
         meal_type: meal,
+        dish_id: state.composer.dishId || null,
         items: state.composer.ingredients.map(i => ({
           ingredient_id: i.ingredient_id,
           grams: i.grams
         }))
       };
+
+      if (lastRecognizedResult && lastRecognizedResult.top_prediction) {
+        payload.source_kind = 'ai';
+        payload.ai_predicted_dish_code = lastRecognizedResult.top_prediction.dish_code;
+        payload.ai_predicted_confidence = lastRecognizedResult.top_prediction.confidence;
+        payload.ai_dish_code = state.composer.dishCode || (lastRecognizedResult.dish && lastRecognizedResult.dish.dish_code) || name;
+      }
 
       // Calculate the same per-ingredient 0.1 kcal rounding as createMeal() in PHP.
       const estimatedKcal = Math.round(state.composer.ingredients.reduce((sum, i) =>

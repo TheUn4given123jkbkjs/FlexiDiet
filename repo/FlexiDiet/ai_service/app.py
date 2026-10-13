@@ -249,8 +249,17 @@ async def recognize(
                 "box": box
             }
 
-    # Sort classes by confidence descending
-    sorted_items = sorted(preds_dict.items(), key=lambda x: x[1]["score"], reverse=True)
+    # Sort classes by score weighted with box prominence
+    # Prevents tiny garnish condiments (e.g. lime wedge, chili pepper) from edging out the full bowl of noodle soup/rice
+    def calc_rank_score(item):
+        score = item[1]["score"]
+        box = item[1]["box"]
+        w = max(0.0, box[2] - box[0])
+        h = max(0.0, box[3] - box[1])
+        area_ratio = (w * h) / (640.0 * 640.0)
+        return score * (1.0 + 0.15 * min(1.0, area_ratio / 0.20))
+
+    sorted_items = sorted(preds_dict.items(), key=calc_rank_score, reverse=True)
     top_items = sorted_items[:max(1, top_k)]
 
     predictions: List[PredictionItem] = []
