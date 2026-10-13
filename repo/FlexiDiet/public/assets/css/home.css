@@ -53,28 +53,6 @@ header .wrap{
   background:linear-gradient(135deg, var(--primary), var(--secondary));
   flex-shrink:0;
 }
-.fd-brand-mark{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  flex-shrink:0;
-  font-family:'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif;
-  font-size:20px;
-  font-weight:600;
-  letter-spacing:-0.01em;
-}
-.fd-brand-mark .fa-leaf{
-  width:32px;
-  height:32px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:11px;
-  background:linear-gradient(135deg, var(--primary), var(--secondary));
-  color:#fff;
-  font-size:16px;
-  transform:rotate(-7deg);
-}
 .main-nav{
   display:flex;
   align-items:center;
