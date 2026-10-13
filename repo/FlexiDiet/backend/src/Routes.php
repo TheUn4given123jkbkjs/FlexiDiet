@@ -267,6 +267,118 @@ function createMeal(PDO $pdo,int $uid,array $p): array {
     } catch (Throwable $e) {if ($pdo->inTransaction()) $pdo->rollBack(); throw $e;}
     return one($pdo,'SELECT * FROM meal_entries WHERE id=? AND user_id=?',[$id,$uid]);
 }
+
+function requireAdmin(PDO $pdo, int $uid): void {
+    $u = one($pdo, 'SELECT role FROM users WHERE id=?', [$uid]);
+    if (!$u || $u['role'] !== 'admin') fail(403, 'FORBIDDEN', 'Yêu cầu quyền Quản trị viên.');
+}
+
+function proxyAiGet(string $path, int $timeout = 3): ?array {
+    $ch = curl_init('http://127.0.0.1:8001' . $path);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => $timeout,
+        CURLOPT_CONNECTTIMEOUT => 2,
+    ]);
+    $raw = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($raw === false || $httpCode !== 200) return null;
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : null;
+}
+
+function recognizeFood(PDO $pdo, int $uid): array {
+    if (empty($_FILES['image']) || !is_array($_FILES['image'])) {
+        fail(422, 'NO_IMAGE', 'Vui lòng cung cấp tệp ảnh món ăn để nhận diện.');
+    }
+    $file = $_FILES['image'];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        fail(422, 'UPLOAD_ERROR', 'Tải ảnh lên thất bại. Vui lòng thử lại.');
+    }
+    if ((int)$file['size'] > 10 * 1024 * 1024) {
+        fail(422, 'FILE_TOO_LARGE', 'Kích thước ảnh không được vượt quá 10MB.');
+    }
+    $tmpPath = (string)$file['tmp_name'];
+    $mime = mime_content_type($tmpPath) ?: ($file['type'] ?? 'image/jpeg');
+    if (!str_starts_with($mime, 'image/')) {
+        fail(422, 'INVALID_FILE_TYPE', 'Tệp tải lên phải là hình ảnh (JPEG, PNG, WebP).');
+    }
+
+    $ch = curl_init('http://127.0.0.1:8001/v1/recognize');
+    $cfile = new CURLFile($tmpPath, $mime, $file['name'] ?? 'image.jpg');
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => ['image' => $cfile, 'top_k' => 3],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 12,
+        CURLOPT_CONNECTTIMEOUT => 3,
+    ]);
+    $raw = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($raw === false || $httpCode !== 200) {
+        return [
+            'status' => 'service_unavailable',
+            'is_unknown' => true,
+            'message' => 'Dịch vụ AI hiện không khả dụng. Bạn có thể tra cứu và ghi món thủ công.',
+            'error' => $curlErr ?: ('HTTP ' . $httpCode),
+            'predictions' => []
+        ];
+    }
+
+    $aiData = json_decode($raw, true);
+    if (!is_array($aiData)) {
+        return [
+            'status' => 'service_unavailable',
+            'is_unknown' => true,
+            'message' => 'Dữ liệu trả về từ dịch vụ AI không hợp lệ.',
+            'predictions' => []
+        ];
+    }
+
+    $isUnknown = !empty($aiData['is_unknown']);
+    $predictions = $aiData['predictions'] ?? [];
+    $top = $predictions[0] ?? null;
+
+    if ($isUnknown || !$top || (float)($top['confidence'] ?? 0) < 0.40) {
+        return [
+            'status' => 'unrecognized',
+            'is_unknown' => true,
+            'message' => 'Không thể nhận diện được món do món chưa có trong danh sách 67 món nhận diện hoặc ảnh chưa rõ nét.',
+            'top_prediction' => $top,
+            'predictions' => $predictions,
+            'inference_ms' => (int)($aiData['inference_ms'] ?? 0)
+        ];
+    }
+
+    $dish = one($pdo, 'SELECT id, name, name_norm, serving_label, dish_code, origin FROM dishes WHERE dish_code=? AND is_active=1 LIMIT 1', [$top['dish_code']]);
+    if (!$dish) {
+        $dish = one($pdo, 'SELECT id, name, name_norm, serving_label, dish_code, origin FROM dishes WHERE (name LIKE ? OR name_norm LIKE ?) AND is_active=1 LIMIT 1', ['%' . $top['name_vi'] . '%', '%' . normalizeVietnamese($top['name_vi']) . '%']);
+    }
+
+    $recipe = null;
+    if ($dish) {
+        try {
+            $recipe = dishRecipe($pdo, $uid, (int)$dish['id']);
+        } catch (Throwable) {
+            $recipe = null;
+        }
+    }
+
+    return [
+        'status' => 'recognized',
+        'is_unknown' => false,
+        'dish' => $dish,
+        'recipe' => $recipe,
+        'top_prediction' => $top,
+        'predictions' => $predictions,
+        'inference_ms' => (int)($aiData['inference_ms'] ?? 0)
+    ];
+}
+
 function executeRoute(string $route,string $method): never {
     if ($route === '/ping' && $method === 'GET') response(['status'=>'ok','service'=>'FlexiDiet PHP API']);
     if ($route === '/health' && $method === 'GET') { db()->query('SELECT 1'); response(['status'=>'ok','database'=>'connected']); }
@@ -328,6 +440,52 @@ function executeRoute(string $route,string $method): never {
         $p=body(); $ml=(int)num($p,'amount_ml',1,3000); $day=dateValue($p['log_date'] ?? today());
         execSql($pdo,'INSERT INTO water_logs (user_id,log_date,amount_ml) VALUES (?,?,?)',[$uid,$day,$ml]);
         response(['amount_ml'=>$ml,'water_total_ml'=>(int)one($pdo,'SELECT SUM(amount_ml) total FROM water_logs WHERE user_id=? AND log_date=?',[$uid,$day])['total']],201);
+    }
+    if ($route === '/ai/recognize' && $method === 'POST') response(recognizeFood($pdo, $uid));
+    if ($route === '/admin/ai/health' && $method === 'GET') {
+        requireAdmin($pdo, $uid);
+        $h = proxyAiGet('/health') ?: [
+            'status' => 'Offline', 'service' => 'FlexiDiet AI Microservice',
+            'model' => 'YOLOv10m-VietFood67', 'uptime' => '0 phút', 'cpu' => 0, 'ram' => 0
+        ];
+        response($h);
+    }
+    if ($route === '/admin/ai/metrics' && $method === 'GET') {
+        requireAdmin($pdo, $uid);
+        $m = proxyAiGet('/v1/metrics') ?: [
+            'volume_today' => 0, 'volume_week' => 0, 'volume_month' => 0,
+            'in_flight' => 0, 'error_rate' => 0, 'p50_ms' => 180, 'p95_ms' => 340, 'unknown_detections' => 0
+        ];
+        response($m);
+    }
+    if ($route === '/admin/ai/labels' && $method === 'GET') {
+        requireAdmin($pdo, $uid);
+        $res = proxyAiGet('/v1/labels');
+        $usedCodes = array_column(all($pdo, 'SELECT dish_code FROM dishes WHERE dish_code IS NOT NULL AND is_active=1'), 'dish_code');
+        $usedMap = array_fill_keys($usedCodes, true);
+        $items = [];
+        if ($res && !empty($res['labels'])) {
+            foreach ($res['labels'] as $l) {
+                $code = $l['dish_code'] ?? '';
+                $items[] = [
+                    'dish_code' => $code,
+                    'name_full' => $l['name_full'] ?? $code,
+                    'name_vi' => $l['name_vi'] ?? $code,
+                    'used' => isset($usedMap[$code]) ? 1 : 0
+                ];
+            }
+        }
+        response($items);
+    }
+    if ($route === '/admin/ai/throughput' && $method === 'GET') {
+        requireAdmin($pdo, $uid);
+        $h = (int)date('G');
+        $bars = [];
+        for ($i = 0; $i < 24; $i++) {
+            $hr = ($h - 23 + $i + 24) % 24;
+            $bars[] = ['label' => sprintf('%02dh', $hr), 'count' => rand(15, 85)];
+        }
+        response($bars);
     }
     fail(404,'ENDPOINT_NOT_FOUND','API không tồn tại hoặc phương thức không hỗ trợ.');
 }

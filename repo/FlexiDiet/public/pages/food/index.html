@@ -51,7 +51,8 @@
           </div>
         </div>
         <div class="scanner-right-zone">
-          <div class="scanner-guide-card">
+          <!-- Guide card shown when idle -->
+          <div class="scanner-guide-card" id="foodScannerGuideCard">
             <div class="sgc-head">
               <i class="fa-solid fa-circle-nodes text-green"></i>
               <h4>Quy trình ghi món thông minh</h4>
@@ -68,6 +69,90 @@
               </button>
             </div>
           </div>
+
+          <!-- Recognition Result Card shown when AI succeeds -->
+          <div class="scanner-result-card" id="foodScannerResultCard" style="display: none;">
+            <div class="fh-res-header">
+              <span class="fh-res-status-tag" id="foodScanStatusTag">
+                <i class="fa-solid fa-circle-check"></i> Đã nhận diện (92%)
+              </span>
+              <span class="fh-res-latency" id="foodScanLatencyTag">
+                <i class="fa-solid fa-bolt"></i> 250ms
+              </span>
+            </div>
+            <div class="fh-res-body">
+              <div class="fh-res-title-row">
+                <div class="fh-res-icon"><i class="fa-solid fa-bowl-food"></i></div>
+                <div>
+                  <h3 class="fh-res-title" id="foodScanDishTitle">Phở Bò Tái Nạm</h3>
+                  <p class="fh-res-sub" id="foodScanServingSub">Khẩu phần chuẩn: 1 tô vừa · Công thức dinh dưỡng VDD</p>
+                </div>
+              </div>
+              <div class="fh-res-macros-grid">
+                <div class="fh-res-macro cal">
+                  <span class="lbl">Năng lượng</span>
+                  <strong id="foodScanCal">485</strong>
+                  <small>kcal</small>
+                </div>
+                <div class="fh-res-macro p">
+                  <span class="lbl">Protein</span>
+                  <strong id="foodScanProt">32.5</strong>
+                  <small>g</small>
+                </div>
+                <div class="fh-res-macro c">
+                  <span class="lbl">Carbs</span>
+                  <strong id="foodScanCarb">68.0</strong>
+                  <small>g</small>
+                </div>
+                <div class="fh-res-macro f">
+                  <span class="lbl">Fat</span>
+                  <strong id="foodScanFat">11.2</strong>
+                  <small>g</small>
+                </div>
+              </div>
+              <!-- Alternative Predictions / Candidates -->
+              <div class="fh-res-alts" id="foodScanAltsWrap" style="display:none;">
+                <span class="alts-lbl"><i class="fa-solid fa-list-check"></i> Các phỏng đoán khác của AI:</span>
+                <div class="alts-chips" id="foodScanAltsChips"></div>
+              </div>
+            </div>
+            <div class="fh-res-actions">
+              <button class="btn-jira-create" id="btnFoodScanGoComposer" type="button" onclick="FoodHub.onResultGoComposer()">
+                <i class="fa-solid fa-sliders"></i> Tùy chỉnh trong Composer &amp; Ghi món &rarr;
+              </button>
+              <button class="btn-jira-tool" type="button" onclick="FoodHub.resetScanner()">
+                <i class="fa-solid fa-rotate-left"></i> Chụp / Chọn ảnh khác
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fallback Modal: AI Unrecognized or Low Confidence Flow -->
+      <div class="fd-modal-overlay" id="fdAiUnrecognizedModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="aiUnrecTitle">
+        <div class="fd-modal-card fd-ai-unrecognized-card">
+          <div class="fd-modal-icon-wrap warning">
+            <i class="fa-solid fa-circle-question"></i>
+          </div>
+          <h3 id="aiUnrecTitle">Chưa Nhận Diện Được Món Ăn</h3>
+          <p class="fd-modal-desc">
+            Không thể nhận diện được món do món chưa có trong danh sách 67 món nhận diện hoặc ảnh chụp chưa rõ nét / bị mờ.
+          </p>
+          <div class="fd-ai-low-pred-box" id="aiLowPredBox" style="display:none;">
+            <span class="low-pred-lbl"><i class="fa-solid fa-wand-magic-sparkles"></i> Phỏng đoán gần nhất (độ tin cậy thấp):</span>
+            <strong id="aiLowPredText">—</strong>
+          </div>
+          <div class="fd-modal-actions">
+            <button class="btn-jira-tool" type="button" onclick="FoodHub.retryScannerImage()">
+              <i class="fa-solid fa-camera-rotate"></i> Chụp Lại Ảnh Khác
+            </button>
+            <button class="btn-jira-create" type="button" onclick="FoodHub.goToManualComposer()">
+              <i class="fa-solid fa-pen-to-square"></i> Tới Ghi Món Thủ Công &rarr;
+            </button>
+          </div>
+          <button class="fd-modal-close-btn" type="button" onclick="FoodHub.closeUnrecognizedModal()" aria-label="Đóng">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
       </div>
     </div>

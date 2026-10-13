@@ -6,10 +6,17 @@ const FlexiAPI = (() => {
     const i = path.indexOf('?');
     const route = i < 0 ? path : path.slice(0, i);
     const query = i < 0 ? '' : '&' + path.slice(i + 1);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const headers = {
+      'Accept': 'application/json',
+      ...(data && !isFormData ? {'Content-Type': 'application/json'} : {}),
+      ...(method !== 'GET' ? {'X-CSRF-Token': csrfToken} : {})
+    };
+    const body = isFormData ? data : (data ? JSON.stringify(data) : undefined);
     const res = await fetch(`api/index.php?route=${encodeURIComponent(route)}${query}`, {
       method, credentials: 'same-origin', cache: 'no-store',
-      headers: {'Accept':'application/json', ...(data ? {'Content-Type':'application/json'} : {}), ...(method !== 'GET' ? {'X-CSRF-Token':csrfToken} : {})},
-      ...(data ? {body:JSON.stringify(data)} : {})
+      headers,
+      ...(body !== undefined ? {body} : {})
     });
     let json;
     try { json = await res.json(); } catch { throw new Error('Server không trả JSON. Kiểm tra đường dẫn PHP và cấu hình máy chủ.'); }
