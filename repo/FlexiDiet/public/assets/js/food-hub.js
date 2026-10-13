@@ -559,7 +559,11 @@ const FoodHub = (() => {
         }))
       };
 
-      const saved = await FlexiAPI.request('/meals', { method: 'POST', data: payload });
+      // Calculate the same per-ingredient 0.1 kcal rounding as createMeal() in PHP.
+      const estimatedKcal = Math.round(state.composer.ingredients.reduce((sum, i) =>
+        sum + Math.round(Number(i.grams) / 100 * Number(i.kcal_100g) * 10) / 10, 0) * 10) / 10;
+      const saved = await FlexiBudgetConfirm.saveMeal(payload, {name, estimatedKcal});
+      if (!saved) return; // Explicit choice: do not eat/add the item.
       if (typeof fdRefreshDashboard === 'function') await fdRefreshDashboard();
       showToast(`Đã lưu "${saved.name}" vào nhật ký ${meal} dạng snapshot thành công!`, 'success');
       switchTab('dashboard');

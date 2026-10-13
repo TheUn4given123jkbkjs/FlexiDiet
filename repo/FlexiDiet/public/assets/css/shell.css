@@ -11,7 +11,7 @@
   --fd-shadow: 0 8px 30px rgba(36, 76, 51, .045);
   color: var(--fd-ink);
   background: var(--fd-bg);
-  font-family: 'DM Sans', 'Inter', sans-serif;
+  font-family: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif;
 }
 :root[data-theme="dark"] .fd-app {
   --fd-ink: #eef5ed; --fd-subtle: #a7b8af; --fd-bg: #121b17;
@@ -19,7 +19,7 @@
   --fd-green-soft: #294534; --fd-shadow: 0 8px 35px rgba(0,0,0,.15);
 }
 .fd-app h1, .fd-app h2, .fd-app h3, .fd-app .app-brand-name,
-.fd-app .fd-brand {font-family:'Plus Jakarta Sans','DM Sans',sans-serif}
+.fd-app .fd-brand {font-family:'Be Vietnam Pro',sans-serif}
 .fd-layout {display:flex;min-height:100vh;align-items:stretch}
 .fd-sidebar {width:253px;flex:none;position:sticky;top:0;height:100vh;background:var(--fd-surface);border-right:1px solid var(--fd-border);display:flex;flex-direction:column;padding:28px 17px 20px;z-index:40}
 .fd-brand {display:flex;align-items:center;gap:10px;padding:2px 10px 33px;font-weight:800;font-size:23px;letter-spacing:-1.25px;color:var(--fd-ink)}
@@ -31,7 +31,7 @@
 .fd-nav-caption {font-size:10px;letter-spacing:1.6px;color:#a2afa7;font-weight:800;padding:15px 15px 11px}
 .fd-nav-caption-spaced {padding-top:35px}
 .fd-side-nav {display:grid;gap:5px}
-.fd-side-nav .app-nav-link,.fd-legacy-details .app-nav-link {width:100%;display:flex;align-items:center;gap:13px;border:0;background:transparent;text-align:left;border-radius:11px;padding:12px 14px;color:#78877d;font:600 13px 'DM Sans',sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.fd-side-nav .app-nav-link,.fd-legacy-details .app-nav-link {width:100%;display:flex;align-items:center;gap:13px;border:0;background:transparent;text-align:left;border-radius:11px;padding:12px 14px;color:#78877d;font:600 13px 'Be Vietnam Pro',sans-serif;cursor:pointer;transition:background .2s,color .2s}
 .fd-side-nav .app-nav-link i,.fd-legacy-details .app-nav-link i {font-size:15px;display:flex;justify-content:center;min-width:20px}
 .fd-side-nav .app-nav-link:hover,.fd-legacy-details .app-nav-link:hover {background:var(--fd-green-soft);color:var(--fd-green)}
 .fd-side-nav .app-nav-link.active,.fd-legacy-details .app-nav-link.active {color:#246844;background:#e7f2e8;font-weight:800}
@@ -175,7 +175,7 @@
  .fd-today{display:none}
  .fd-app .main-workspace{padding:24px 19px 110px}
  .fd-mobile-nav{position:fixed;bottom:0;left:0;right:0;height:calc(69px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);z-index:100;background:var(--fd-surface);border-top:1px solid var(--fd-border);display:flex;justify-content:space-around;align-items:center;box-shadow:0 -8px 25px rgba(0,0,0,.045)}
- .fd-mobile-nav .app-nav-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;min-width:0;flex:1;height:100%;font-size:10px;font-weight:700;color:var(--fd-subtle);font-family:'DM Sans',sans-serif}
+ .fd-mobile-nav .app-nav-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;min-width:0;flex:1;height:100%;font-size:10px;font-weight:700;color:var(--fd-subtle);font-family:'Be Vietnam Pro',sans-serif}
  .fd-mobile-nav .app-nav-link i{font-size:18px}
  .fd-mobile-nav .app-nav-link.active{color:var(--fd-green)}
 }

@@ -1,0 +1,147 @@
+/* FlexiDiet 2.0 — thống nhất tiếng Việt + bố cục màn hình nhỏ.
+ * Loaded LAST, after legacy app.css and page-specific modules.
+ * All fonts use Be Vietnam Pro (full Vietnamese glyph coverage).
+ * Avoid overriding Font Awesome's icon font-family. */
+:root { --fd-font-vi: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif; }
+body, button, input, textarea, select, option { font-family: var(--fd-font-vi); }
+.fd-app, .fd-app h1, .fd-app h2, .fd-app h3,
+.fd-app .jira-section-header h2, .fd-app .fd-brand,
+.fd-app .fd-breadcrumb, .fd-app .app-nav-link {
+  font-family: var(--fd-font-vi);
+}
+
+/* App shell and breadcrumb must shrink instead of pushing the viewport. */
+.fd-app .fd-layout, .fd-app .fd-main-wrap,
+.fd-app .main-workspace, .fd-app .page-view,
+.fd-app .view-inner-container { min-width: 0; }
+.fd-app .fd-top-left { min-width: 0; flex: 1 1 auto; }
+.fd-app .fd-top-right { flex: 0 0 auto; }
+.fd-app .fd-breadcrumb { min-width: 0; display: inline-flex; align-items: center; max-width: 100%; white-space: nowrap; }
+.fd-app .fd-breadcrumb strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-app .fd-breadcrumb i { flex: none; }
+.fd-app .jira-section-header h2, .fd-app .fd-page-head h1,
+.fd-app .fd-panel h2 { overflow-wrap: break-word; }
+.fd-app img, .fd-app video, .fd-app iframe { max-width: 100%; }
+.fd-app .fd-side-nav .app-nav-link span { min-width: 0; overflow-wrap: break-word; }
+.fd-app.fd-drawer-open { overflow: hidden; }
+
+/* Don't let a fixed minimum search size break Food Hub at 320–390px. */
+.fd-app .fh-cat-left, .fd-app .fh-cat-search-wrap { min-width: 0; }
+.fd-app .fh-cat-left { flex-basis: 100%; }
+.fd-app .fh-cat-search-wrap { max-width: 100%; }
+.fd-app .fh-cat-search-wrap input { min-width: 0; }
+.fd-app .fh-dc-info { min-width: 0; }
+.fd-app .fh-dc-left { min-width: 0; }
+.fd-app .fh-nutrition-summary-bar { min-width: 0; }
+
+/* Scrollable areas: contain their own horizontal scrolling. */
+.fd-app .fd-hm-scroll { width: 100%; max-width: 100%; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.fd-app .suggestions-filter-bar { max-width: 100%; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.fd-app .jira-table-container, .fd-app .table-responsive,
+.fd-app .jira-data-table-wrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 820px) {
+  .fd-app .fd-sidebar { height: 100dvh; max-height: 100dvh; }
+  .fd-app .fd-sidebar-backdrop { z-index: 190; }
+  .fd-app .fd-topbar { max-width: 100%; }
+  .fd-app .fd-top-left { gap: 2px; }
+  .fd-app .fd-hamburger-btn { margin-right: 7px; }
+  .fd-app .fd-mobile-nav .app-nav-link { font-family: var(--fd-font-vi); line-height: 1.35; padding: 5px 2px; }
+  .fd-app .fd-mobile-nav .app-nav-link span { text-align: center; overflow-wrap: break-word; }
+  .fd-app .fd-mobile-nav { padding-left: env(safe-area-inset-left,0px); padding-right: env(safe-area-inset-right,0px); }
+}
+
+@media (max-width: 600px) {
+  .fd-app .jira-section-header { gap: 10px; min-width: 0; flex-wrap: wrap; }
+  .fd-app .jira-section-header > div { min-width: 0; }
+  .fd-app .food-hub-tabs-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fd-app .fh-tab-btn { min-width: 0; white-space: normal; text-align: center; justify-content: center; overflow-wrap: break-word; line-height: 1.4; }
+  .fd-app .fh-tab-btn i { flex: none; }
+  .fd-app .fh-catalog-header { min-width: 0; }
+  .fd-app .fh-cat-left { width: 100%; display: grid; grid-template-columns: minmax(0,1fr); }
+  .fd-app .fh-cat-search-wrap { width: 100%; min-width: 0; }
+  .fd-app .fh-cat-filter-pills { width: 100%; }
+  .fd-app .fh-dish-card { flex-wrap: wrap; }
+  .fd-app .fh-dc-left { flex-basis: 100%; }
+  .fd-app .fh-dc-macros { flex: 1 1 auto; }
+  .fd-app .fh-dc-actions { margin-left: auto; }
+  .fd-app .fh-suggestions-box { padding: 14px; }
+  .fd-app .suggestions-cards-grid { grid-template-columns: minmax(0, 1fr); }
+  .fd-app .suggest-card { min-width: 0; }
+  .fd-app .sc-body, .fd-app .sc-footer { min-width: 0; }
+  .fd-app .form-row { min-width: 0; flex-wrap: wrap; }
+  .fd-app .form-row > .form-group { min-width: 0; flex: 1 1 100%; }
+  .fd-app .fh-nutrition-summary-bar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .fd-app .fh-nutrition-summary-bar .ns-divider { display: none; }
+  .fd-app .fh-nutrition-summary-bar .ns-item { min-width: 0; }
+  .fd-app .fd-hm-heading { gap: 8px; }
+  .fd-app .fd-hm-heading-left { min-width: 0; }
+  .fd-app .fd-hm-heading h3 { overflow-wrap: break-word; }
+  .fd-app .fd-hm-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .fd-app .fd-hm-stat { min-width: 0; }
+  .fd-app .fd-hm-stat strong { overflow-wrap: anywhere; }
+  .fd-app .fd-hm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .fd-app .fd-action-tile strong { white-space: normal; }
+  .fd-app .fd-top-right { gap: 5px; }
+  .fd-app .fd-icon-button { width: 30px; height: 32px; }
+  .fd-app .fd-top-avatar { width: 30px; height: 32px; }
+}
+
+@media (max-width: 360px) {
+  .fd-app .main-workspace { padding: 18px 10px 104px; }
+  .fd-app .fd-topbar { padding: 0 10px; }
+  .fd-app .fd-breadcrumb { font-size: 10px; }
+  .fd-app .fd-breadcrumb i { margin: 0 6px; }
+  .fd-app .fd-mobile-nav .app-nav-link { font-size: 9px; }
+  .fd-app .fd-hm-logo { display: none; }
+  .fd-app .fd-page-head { flex-wrap: wrap; }
+  .fd-app .fd-page-head h1 { font-size: 20px; }
+  .fd-app .fd-calorie-hero { padding: 18px 13px; }
+  .fd-app .fd-big-number strong { font-size: 41px; }
+  .fd-app .fd-hero-breakdown { gap: 4px; }
+  .fd-app .fd-hero-breakdown div { padding-left: 7px; }
+  .fd-app .fd-hero-breakdown strong { font-size: 14px; }
+  .fd-app .fd-ring { width: 90px; height: 90px; }
+  .fd-app .fd-ring-center { width: 75px; height: 75px; }
+}
+
+/* Landing page: keep registration inputs within mobile viewport. */
+@media(max-width: 520px) {
+  .register-shell, .onboarding-wrapper, .onboarding-card-box { max-width: 100%; min-width: 0; }
+  .page.register-page { padding-left: 14px; padding-right: 14px; }
+  .form-grid { min-width: 0; }
+  .modal { max-width: calc(100vw - 24px); }
+}
+
+/* Suggestions: wrap filters on desktop rather than showing a permanent scrollbar. */
+.fd-app .suggestions-filter-bar { flex-wrap: wrap; overflow-x: visible; }
+.fd-app .suggestions-cards-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.fd-app .sab-content { min-width: 0; }
+.fd-app .sab-content h3, .fd-app .sab-content p { overflow-wrap: break-word; }
+.fd-app .jira-card-box, .fd-app .workout-logging-grid { min-width: 0; }
+
+@media (max-width: 820px) {
+  .fd-app .smart-alert-banner {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 8px 12px;
+    padding: 15px;
+    align-items: start;
+  }
+  .fd-app .sab-icon { grid-column: 1; font-size: 22px; }
+  .fd-app .sab-content { grid-column: 2; }
+  .fd-app .sab-actions { grid-column: 1 / -1; justify-self: stretch; }
+  .fd-app .sab-actions button { max-width: 100%; white-space: normal; }
+  .fd-app .workout-logging-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .fd-app .suggestions-filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 7px;
+  }
+  .fd-app .suggestions-filter-bar > button { flex: 0 0 auto; }
+  .fd-app .sc-nutrition-chips { flex-wrap: wrap; }
+}

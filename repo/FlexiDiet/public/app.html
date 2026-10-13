@@ -8,14 +8,16 @@
   <link rel="icon" type="image/png" href="pictures/brand.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/app.css?v=1.2">
-  <link rel="stylesheet" href="assets/css/shell.css?v=1.1">
-  <link rel="stylesheet" href="assets/css/dashboard.css">
-  <link rel="stylesheet" href="assets/css/workout-heatmap.css">
-  <link rel="stylesheet" href="assets/css/food.css?v=1.1">
+  <link rel="stylesheet" href="assets/css/theme.css?v=2.1">
+  <link rel="stylesheet" href="assets/css/app.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/shell.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/workout-heatmap.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/food.css?v=1.2">
+  <link rel="stylesheet" href="assets/css/responsive-fix.css?v=2.0">
+  <link rel="stylesheet" href="assets/css/budget-warning.css?v=1.0">
   <script src="assets/js/theme.js"></script>
 </head>
 <body class="fd-app">
@@ -50,7 +52,7 @@
     <div class="fd-main-wrap">
       <header class="fd-topbar">
         <div class="fd-top-left">
-          <button class="fd-hamburger-btn" id="sidebarToggle" type="button" aria-label="Mở menu điều hướng" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i></button>
+          <button class="fd-hamburger-btn" id="sidebarToggle" type="button" aria-controls="appSidebar" aria-expanded="false" aria-label="Mở menu điều hướng" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i></button>
           <span class="fd-breadcrumb">Ứng dụng <i class="fa-solid fa-chevron-right"></i> <strong id="currentPageLabel">Tổng quan</strong></span>
         </div>
         <div class="fd-top-right">
@@ -191,13 +193,33 @@
 </form>
 </div>
 </div>
+  <!-- Must be outside quick-create modal so either entry flow can show the warning. -->
+  <div class="fd-budget-overlay" id="fdBudgetWarning" hidden>
+    <div class="fd-budget-dialog" id="fdBudgetDialog" role="dialog" aria-modal="true" aria-labelledby="fdBudgetTitle" aria-describedby="fdBudgetMessage" tabindex="-1">
+      <div class="fd-budget-alert-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h2 id="fdBudgetTitle">Món ăn sẽ vượt ngân sách calo!</h2>
+      <p class="fd-budget-description"><span class="fd-budget-dish" id="fdBudgetFoodName"></span>: <span id="fdBudgetMessage"></span></p>
+      <div class="fd-budget-summary">
+        <div class="fd-budget-summary-row"><span>Calo còn lại hôm nay</span><strong id="fdBudgetRemaining"></strong></div>
+        <div class="fd-budget-summary-row"><span>Calo của món định thêm</span><strong id="fdBudgetFoodKcal"></strong></div>
+        <div class="fd-budget-summary-row"><span>Tổng đã ăn sau khi thêm / ngân sách</span><strong id="fdBudgetAfter"></strong></div>
+        <div class="fd-budget-summary-row fd-budget-excess"><span>Dự kiến vượt ngân sách</span><strong id="fdBudgetExceeded"></strong></div>
+      </div>
+      <p class="fd-budget-note">Bạn vẫn có thể ghi nhận món ăn để theo dõi trung thực. FlexiDiet chỉ cảnh báo, không tự động cấm món ăn.</p>
+      <div class="fd-budget-buttons">
+        <button type="button" id="fdBudgetCancel" class="fd-budget-cancel">Không thêm món</button>
+        <button type="button" id="fdBudgetApprove" class="fd-budget-approve">Vẫn thêm món</button>
+      </div>
+    </div>
+  </div>
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
   <script src="assets/js/api-client.js"></script>
-  <script src="assets/js/app.js?v=1.4"></script>
+  <script src="assets/js/app.js?v=2.0"></script>
   <script src="assets/js/dashboard.js"></script>
   <script src="assets/js/workout-heatmap.js"></script>
   <script src="assets/js/food-hub.js?v=1.3"></script>
-  <script src="assets/js/backend-sync.js?v=1.1"></script>
+  <script src="assets/js/budget-warning.js?v=1.0"></script>
+  <script src="assets/js/backend-sync.js?v=1.2"></script>
   <script src="assets/js/pages-loader.js"></script>
 </body>
 </html>

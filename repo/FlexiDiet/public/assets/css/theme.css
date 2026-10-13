@@ -24,3 +24,22 @@
   --secondary: #A3E635;
   --accent: #FBBF24;
 }
+
+
+/* Legacy Food Hub color aliases.
+ * food.css previously referenced undefined --bg-surface, --text-secondary,
+ * etc.; their light fallbacks produced white-on-white text in dark mode.
+ * Map them to the shared light/dark palette instead of fixed light values.
+ */
+:root {
+  --bg-surface: var(--card);
+  --bg-surface-secondary: color-mix(in srgb, var(--text) 4%, var(--bg));
+  --bg-input: color-mix(in srgb, var(--text) 4%, var(--card));
+  --bg-hover: color-mix(in srgb, var(--text) 9%, var(--card));
+  --text-primary: var(--text);
+  --text-secondary: var(--text-soft);
+  --border: var(--line);
+  --border-subtle: var(--line);
+  --primary-light: color-mix(in srgb, var(--primary) 55%, var(--card));
+  --primary-light-bg: color-mix(in srgb, var(--primary) 10%, var(--card));
+}

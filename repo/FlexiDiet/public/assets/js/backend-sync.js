@@ -122,7 +122,8 @@ logout = async function() {
 
 async function fdSaveMeal(data) {
   try {
-    const saved = await FlexiAPI.request('/meals', {method:'POST',data});
+    const saved = await FlexiBudgetConfirm.saveMeal(data);
+    if (!saved) return false; // User cancelled; no API write.
     await fdRefreshDashboard();
     showToast(`Đã lưu món "${saved.name}" vào MySQL.`, 'success');
     switchTab('dashboard');

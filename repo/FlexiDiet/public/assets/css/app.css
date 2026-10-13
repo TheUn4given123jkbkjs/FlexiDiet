@@ -98,7 +98,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Be Vietnam Pro', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--jira-bg-darkest);
   color: var(--text-main);
   line-height: 1.5;
@@ -116,7 +116,7 @@ h1, h2, h3,
 .m-val,
 .mb-val,
 .c-val {
-  font-family: 'Fraunces', serif;
+  font-family: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif;
 }
 
 a {

@@ -112,19 +112,33 @@ let currentScannedBase = null;
 // ==============================================================================
 // 1. NAVIGATION TAB ROUTER (SWITCHING PAGES ON 1 MAIN PAGE)
 // ==============================================================================
+function setMobileSidebarOpen(open) {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const toggle = document.getElementById('sidebarToggle');
+  if (!sidebar || !backdrop) return;
+  const isOpen = Boolean(open && window.innerWidth <= 820);
+  sidebar.classList.toggle('mobile-open', isOpen);
+  backdrop.classList.toggle('show', isOpen);
+  document.body.classList.toggle('fd-drawer-open', isOpen);
+  sidebar.setAttribute('aria-hidden', isOpen ? 'false' : (window.innerWidth <= 820 ? 'true' : 'false'));
+  if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+}
 function toggleMobileSidebar() {
-  const sb = document.getElementById('appSidebar');
-  const bd = document.getElementById('sidebarBackdrop');
-  if (sb) sb.classList.toggle('mobile-open');
-  if (bd) bd.classList.toggle('show');
+  setMobileSidebarOpen(!document.getElementById('appSidebar')?.classList.contains('mobile-open'));
 }
-
 function closeMobileSidebar() {
-  const sb = document.getElementById('appSidebar');
-  const bd = document.getElementById('sidebarBackdrop');
-  if (sb) sb.classList.remove('mobile-open');
-  if (bd) bd.classList.remove('show');
+  setMobileSidebarOpen(false);
 }
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 820) closeMobileSidebar();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && document.getElementById('appSidebar')?.classList.contains('mobile-open')) {
+    closeMobileSidebar();
+    document.getElementById('sidebarToggle')?.focus();
+  }
+});
 
 function switchTab(tabId) {
   closeMobileSidebar();

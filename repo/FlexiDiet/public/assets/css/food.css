@@ -790,3 +790,37 @@
     gap: 4px;
   }
 }
+
+
+/* Scanner instructions: always match app light/dark palette. */
+.fd-app .scanner-guide-card {
+  background: var(--fd-surface, var(--card));
+  border-color: var(--fd-border, var(--line));
+  color: var(--fd-ink, var(--text));
+}
+.fd-app .scanner-guide-card .sgc-head h4,
+.fd-app .scanner-guide-card .sgc-steps strong {
+  color: var(--fd-ink, var(--text));
+}
+.fd-app .scanner-guide-card .sgc-steps {
+  color: var(--text-soft);
+}
+.fd-app .scanner-guide-card .sgc-action {
+  border-top-color: var(--fd-border, var(--line));
+}
+.fd-app .scanner-guide-card .sgc-action .btn-jira-tool {
+  color: var(--fd-ink, var(--text));
+  background: transparent;
+  border-color: var(--fd-border, var(--line));
+  height: auto;
+  min-height: 34px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  white-space: normal;
+  text-align: left;
+}
+.fd-app .scanner-guide-card .sgc-action .btn-jira-tool:hover,
+.fd-app .scanner-guide-card .sgc-action .btn-jira-tool:focus-visible {
+  color: var(--fd-ink, var(--text));
+  background: var(--fd-green-soft, var(--bg-hover));
+}

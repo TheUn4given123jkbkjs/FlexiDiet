@@ -245,7 +245,19 @@ function createMeal(PDO $pdo,int $uid,array $p): array {
     }
     $pdo->beginTransaction();
     try {
-        if ($day === today()) ensureBudget($pdo,$uid,$day);
+        if ($day === today()) {
+            ensureBudget($pdo,$uid,$day);
+            // Lock the daily budget row and read the latest committed meals.
+            // Locking reads avoid a stale REPEATABLE READ snapshot when other tabs
+            // save meals at almost the same time; no database migration is needed.
+            $budget = one($pdo, 'SELECT target_kcal,exercise_credit_kcal FROM daily_budgets WHERE user_id=? AND budget_date=? FOR UPDATE', [$uid,$day]);
+            $existingMeals = all($pdo, 'SELECT total_kcal FROM meal_entries WHERE user_id=? AND entry_date=? FOR UPDATE', [$uid,$day]);
+            $consumed = array_sum(array_map(static fn($meal) => (float)$meal['total_kcal'], $existingMeals));
+            $remaining = (float)$budget['target_kcal'] + (float)$budget['exercise_credit_kcal'] - $consumed;
+            if ($kcal > $remaining + 0.0001 && ($p['confirm_over_budget'] ?? false) !== true) {
+                fail(409, 'BUDGET_EXCEEDED', 'Món ăn sẽ vượt ngân sách calo hôm nay. Vui lòng xác nhận nếu vẫn muốn thêm.');
+            }
+        }
         execSql($pdo, 'INSERT INTO meal_entries (user_id,entry_date,meal_type,name,source_kind,source_dish_id,serving_factor,total_kcal,total_protein_g,total_carb_g,total_fat_g) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$uid,$day,$meal,$name,'manual',$dishId,$factor,$kcal,$protein,$carb,$fat]);
         $id=(int)$pdo->lastInsertId();
         foreach ($recipeItems as $i=>$it) {

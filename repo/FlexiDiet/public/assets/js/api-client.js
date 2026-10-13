@@ -13,7 +13,12 @@ const FlexiAPI = (() => {
     });
     let json;
     try { json = await res.json(); } catch { throw new Error('Server không trả JSON. Kiểm tra đường dẫn PHP và cấu hình máy chủ.'); }
-    if (!res.ok) throw new Error(json.error?.message || `HTTP ${res.status}`);
+    if (!res.ok) {
+      const error = new Error(json.error?.message || `HTTP ${res.status}`);
+      error.status = res.status;
+      error.code = json.error?.code || 'HTTP_ERROR';
+      throw error;
+    }
     if (json.data?.csrf_token) csrfToken = json.data.csrf_token;
     return json.data;
   }

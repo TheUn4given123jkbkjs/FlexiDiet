@@ -1,0 +1,38 @@
+/* Shared confirmation modal for over-budget meals. Always above quick-create. */
+.fd-budget-dialog-open { overflow: hidden; }
+.fd-budget-overlay[hidden] { display: none !important; }
+.fd-budget-overlay {
+  position: fixed; inset: 0; z-index: 20000;
+  display: flex; justify-content: center; align-items: center;
+  background: rgba(3, 16, 12, 0.76); padding: 18px;
+  overflow-y: auto; backdrop-filter: blur(5px);
+}
+.fd-budget-dialog {
+  width: min(100%, 480px); max-height: calc(100dvh - 36px); overflow-y: auto;
+  border-radius: 21px; padding: clamp(20px, 4vw, 30px);
+  background: #1a2d25; color: #f0f6f1; border: 1px solid #41694b;
+  box-shadow: 0 24px 85px rgba(0,0,0,.4);
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+.fd-budget-alert-icon {
+  width: 52px; height: 52px; border-radius: 15px;
+  display: grid; place-items: center; background: rgba(249, 177, 76, .16);
+  color: #ffc16e; font-size: 24px; margin-bottom: 13px;
+}
+.fd-budget-dialog h2 { margin: 0 0 9px; color: #fff7e7; font-size: clamp(20px, 4.5vw, 24px); line-height: 1.35; }
+.fd-budget-description { margin: 0 0 20px; font-size: 13px; line-height: 1.8; color: #c3d8ca; }
+.fd-budget-dish { font-weight: 700; color: #fff; overflow-wrap: anywhere; }
+.fd-budget-summary { border: 1px solid #395848; border-radius: 14px; padding: 4px 15px; background: #22392c; }
+.fd-budget-summary-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 0; font-size: 12.5px; color: #c9dfd2; }
+.fd-budget-summary-row + .fd-budget-summary-row { border-top: 1px solid rgba(197,226,204,.13); }
+.fd-budget-summary-row strong { color: #fff; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+.fd-budget-summary-row.fd-budget-excess { color: #ffc16e; font-weight: 800; }
+.fd-budget-summary-row.fd-budget-excess strong { color: #ffc16e; font-size: 17px; }
+.fd-budget-note { margin: 15px 0 21px; color: #c1d5c7; font-size: 12px; line-height: 1.7; }
+.fd-budget-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fd-budget-buttons button { min-width: 0; border-radius: 10px; min-height: 46px; padding: 10px; font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer; transition: filter .15s; }
+.fd-budget-buttons button:hover { filter: brightness(1.1); }
+.fd-budget-buttons button:focus-visible { outline: 3px solid #a2e5b4; outline-offset: 3px; }
+.fd-budget-cancel { border: 1px solid #627c6b; color: #fff; background: #2c4236; }
+.fd-budget-approve { border: 1px solid #f5bd70; color: #35230b; background: #ffc16e; }
+@media(max-width: 370px) { .fd-budget-buttons { grid-template-columns: 1fr; } .fd-budget-dialog { padding: 20px 16px; } }
