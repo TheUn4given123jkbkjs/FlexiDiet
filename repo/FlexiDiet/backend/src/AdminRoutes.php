@@ -394,15 +394,12 @@ function adminAiRecognitionStats(PDO $pdo): array {
         $acceptanceRate = $aiMeals > 0 ? 100.0 : null;
     }
 
-    // 2. Label Distribution: Toàn bộ danh mục 67 nhãn chuẩn từ bảng dishes và tần suất thực tế
+    // 2. Label Distribution: Toàn bộ danh mục 67 nhãn chuẩn từ bảng dishes và tần suất thực tế đã ghi nhận
     $labelDistRows = all($pdo, '
         SELECT 
             d.dish_code, 
             d.name AS dish_name,
-            (
-                (SELECT COUNT(*) FROM meal_entries m WHERE m.ai_dish_code = d.dish_code) +
-                (SELECT COUNT(*) FROM ai_feedback f WHERE f.predicted_dish_code = d.dish_code)
-            ) AS count
+            (SELECT COUNT(*) FROM meal_entries m WHERE m.ai_dish_code = d.dish_code AND m.source_kind = "ai") AS count
         FROM dishes d
         WHERE d.dish_code IS NOT NULL AND d.is_active = 1
         ORDER BY d.id ASC
@@ -416,25 +413,16 @@ function adminAiRecognitionStats(PDO $pdo): array {
         ];
     }
 
-    // 3. Top Dishes: 5 món nhận diện nhiều nhất trên hệ thống
+    // 3. Top Dishes: 5 món nhận diện thực tế được ghi nhận nhiều nhất
     $topRows = all($pdo, '
         SELECT 
-            COALESCE(d.name, x.dish_code) AS dish_name,
-            x.dish_code,
-            SUM(x.c) AS count
-        FROM (
-            SELECT ai_dish_code AS dish_code, COUNT(*) AS c 
-            FROM meal_entries 
-            WHERE ai_dish_code IS NOT NULL AND ai_dish_code != ""
-            GROUP BY ai_dish_code
-            UNION ALL
-            SELECT predicted_dish_code AS dish_code, COUNT(*) AS c 
-            FROM ai_feedback 
-            WHERE predicted_dish_code IS NOT NULL AND predicted_dish_code != ""
-            GROUP BY predicted_dish_code
-        ) x
-        LEFT JOIN dishes d ON d.dish_code = x.dish_code
-        GROUP BY x.dish_code, d.name
+            COALESCE(d.name, m.name) AS dish_name,
+            m.ai_dish_code AS dish_code,
+            COUNT(*) AS count
+        FROM meal_entries m
+        LEFT JOIN dishes d ON d.dish_code = m.ai_dish_code
+        WHERE m.source_kind = "ai" AND m.ai_dish_code IS NOT NULL AND m.ai_dish_code != ""
+        GROUP BY m.ai_dish_code, dish_name
         ORDER BY count DESC
         LIMIT 5
     ');
