@@ -141,47 +141,105 @@ function handleAdminRoute(PDO $pdo, int $uid, string $route, string $method): bo
 // =========================================================================
 
 function adminOverviewStats(PDO $pdo): array {
-    $dau = (int)(one($pdo, 'SELECT COUNT(DISTINCT user_id) c FROM meal_entries WHERE entry_date = CURDATE()')['c'] ?? 0);
-    $wau = (int)(one($pdo, 'SELECT COUNT(DISTINCT user_id) c FROM meal_entries WHERE entry_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)')['c'] ?? 0);
+    $dau = (int)(one($pdo, 'SELECT COUNT(DISTINCT user_id) c FROM (
+        SELECT user_id FROM meal_entries WHERE entry_date = CURDATE()
+        UNION
+        SELECT user_id FROM workouts WHERE workout_date = CURDATE()
+        UNION
+        SELECT user_id FROM water_logs WHERE log_date = CURDATE()
+    ) u')['c'] ?? 0);
+    $wau = (int)(one($pdo, 'SELECT COUNT(DISTINCT user_id) c FROM (
+        SELECT user_id FROM meal_entries WHERE entry_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        UNION
+        SELECT user_id FROM workouts WHERE workout_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        UNION
+        SELECT user_id FROM water_logs WHERE log_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    ) u')['c'] ?? 0);
     $totalDishes = (int)(one($pdo, 'SELECT COUNT(*) c FROM dishes WHERE is_active=1 AND origin="system"')['c'] ?? 0);
     $totalIngs = (int)(one($pdo, 'SELECT COUNT(*) c FROM ingredients WHERE is_active=1')['c'] ?? 0);
     $totalMeals = (int)(one($pdo, 'SELECT COUNT(*) c FROM meal_entries')['c'] ?? 0);
     $totalUsers = (int)(one($pdo, 'SELECT COUNT(*) c FROM users')['c'] ?? 0);
 
-    if ($dau === 0) $dau = min($totalUsers, 1);
-    if ($wau === 0) $wau = min($totalUsers, 2);
-
-    // Goal fulfillment rate
-    $goalRows = all($pdo, 'SELECT b.target_kcal, b.exercise_credit_kcal, SUM(m.total_kcal) consumed FROM daily_budgets b LEFT JOIN meal_entries m ON m.user_id = b.user_id AND m.entry_date = b.budget_date GROUP BY b.id LIMIT 300');
+    // Goal fulfillment rate (Community target achievement)
+    $goalRows = all($pdo, 'SELECT b.target_kcal, b.exercise_credit_kcal, COALESCE(SUM(m.total_kcal), 0) consumed FROM daily_budgets b LEFT JOIN meal_entries m ON m.user_id = b.user_id AND m.entry_date = b.budget_date GROUP BY b.id');
     $within = 0; $over = 0; $under = 0;
     foreach ($goalRows as $r) {
         $allowed = (float)$r['target_kcal'] + (float)$r['exercise_credit_kcal'];
-        $consumed = (float)($r['consumed'] ?? 0);
+        $consumed = (float)$r['consumed'];
         if ($consumed > $allowed + 50) $over++;
         elseif ($consumed >= $allowed * 0.85) $within++;
         else $under++;
     }
-    $totalG = max(1, count($goalRows));
+    $totalG = count($goalRows);
     $goalRate = [
-        'within' => (int)round(($within / $totalG) * 100) ?: 70,
-        'over' => (int)round(($over / $totalG) * 100) ?: 18,
-        'under' => (int)round(($under / $totalG) * 100) ?: 12
+        'within' => $totalG > 0 ? (int)round(($within / $totalG) * 100) : 0,
+        'over' => $totalG > 0 ? (int)round(($over / $totalG) * 100) : 0,
+        'under' => $totalG > 0 ? (int)round(($under / $totalG) * 100) : 0
     ];
 
-    // Average Intake and Workout by Goal category
-    $intakeByGoal = [
-        ['label' => 'Giảm cân', 'kcal' => 1650, 'color' => '#3b82f6', 'icon' => 'arrow-down'],
-        ['label' => 'Duy trì vóc dáng', 'kcal' => 2080, 'color' => 'var(--fd-green)', 'icon' => 'scale-balanced'],
-        ['label' => 'Tăng cân an toàn', 'kcal' => 2520, 'color' => '#f97316', 'icon' => 'arrow-up'],
-        ['label' => 'Tăng cơ & Thể hình', 'kcal' => 2360, 'color' => '#8b5cf6', 'icon' => 'dumbbell'],
+    // Average Intake by Goal category (Real database calculations)
+    $dbIntake = all($pdo, 'SELECT p.goal, ROUND(AVG(daily.day_kcal)) AS avg_kcal
+        FROM user_profiles p
+        JOIN (
+            SELECT user_id, entry_date, SUM(total_kcal) AS day_kcal
+            FROM meal_entries
+            GROUP BY user_id, entry_date
+        ) daily ON daily.user_id = p.user_id
+        GROUP BY p.goal');
+    $intakeMap = [];
+    foreach ($dbIntake as $r) {
+        $intakeMap[$r['goal']] = (int)$r['avg_kcal'];
+    }
+
+    $goalMeta = [
+        'lose' => ['label' => 'Giảm cân', 'color' => '#3b82f6', 'icon' => 'arrow-down'],
+        'maintain' => ['label' => 'Duy trì vóc dáng', 'color' => 'var(--fd-green)', 'icon' => 'scale-balanced'],
+        'gain' => ['label' => 'Tăng cân an toàn', 'color' => '#f97316', 'icon' => 'arrow-up'],
+        'build_muscle' => ['label' => 'Tăng cơ & Thể hình', 'color' => '#8b5cf6', 'icon' => 'dumbbell'],
     ];
 
-    $burnedByGoal = [
-        ['label' => 'Giảm cân', 'kcal' => 450, 'color' => '#3b82f6', 'icon' => 'person-running'],
-        ['label' => 'Duy trì vóc dáng', 'kcal' => 310, 'color' => 'var(--fd-green)', 'icon' => 'bicycle'],
-        ['label' => 'Tăng cân an toàn', 'kcal' => 220, 'color' => '#f97316', 'icon' => 'dumbbell'],
-        ['label' => 'Tăng cơ & Thể hình', 'kcal' => 380, 'color' => '#8b5cf6', 'icon' => 'fire'],
+    $intakeByGoal = [];
+    foreach ($goalMeta as $gKey => $meta) {
+        $intakeByGoal[] = [
+            'goal' => $gKey,
+            'label' => $meta['label'],
+            'kcal' => $intakeMap[$gKey] ?? 0,
+            'color' => $meta['color'],
+            'icon' => $meta['icon']
+        ];
+    }
+
+    // Average Burned by Goal category (Real database calculations)
+    $dbBurned = all($pdo, 'SELECT p.goal, ROUND(AVG(daily.day_burned)) AS avg_burned
+        FROM user_profiles p
+        JOIN (
+            SELECT user_id, workout_date, SUM(raw_kcal) AS day_burned
+            FROM workouts
+            GROUP BY user_id, workout_date
+        ) daily ON daily.user_id = p.user_id
+        GROUP BY p.goal');
+    $burnedMap = [];
+    foreach ($dbBurned as $r) {
+        $burnedMap[$r['goal']] = (int)$r['avg_burned'];
+    }
+
+    $burnedMeta = [
+        'lose' => ['label' => 'Giảm cân', 'color' => '#3b82f6', 'icon' => 'person-running'],
+        'maintain' => ['label' => 'Duy trì vóc dáng', 'color' => 'var(--fd-green)', 'icon' => 'bicycle'],
+        'gain' => ['label' => 'Tăng cân an toàn', 'color' => '#f97316', 'icon' => 'dumbbell'],
+        'build_muscle' => ['label' => 'Tăng cơ & Thể hình', 'color' => '#8b5cf6', 'icon' => 'fire'],
     ];
+
+    $burnedByGoal = [];
+    foreach ($burnedMeta as $gKey => $meta) {
+        $burnedByGoal[] = [
+            'goal' => $gKey,
+            'label' => $meta['label'],
+            'kcal' => $burnedMap[$gKey] ?? 0,
+            'color' => $meta['color'],
+            'icon' => $meta['icon']
+        ];
+    }
 
     return [
         'dau' => $dau,
@@ -202,32 +260,78 @@ function adminUserGrowthTrend(PDO $pdo, string $period): array {
     if ($period === '6m') {
         for ($i = 5; $i >= 0; $i--) {
             $m = $now->sub(new DateInterval("P{$i}M"));
+            $mStart = $m->format('Y-m-01 00:00:00');
+            $mEnd = $m->format('Y-m-t 23:59:59');
+            $dStart = $m->format('Y-m-01');
+            $dEnd = $m->format('Y-m-t');
+
+            $stmtNu = $pdo->prepare('SELECT COUNT(*) FROM users WHERE created_at BETWEEN ? AND ?');
+            $stmtNu->execute([$mStart, $mEnd]);
+            $nu = (int)$stmtNu->fetchColumn();
+
+            $stmtAct = $pdo->prepare('SELECT COUNT(DISTINCT user_id) FROM (
+                SELECT user_id FROM meal_entries WHERE entry_date BETWEEN ? AND ?
+                UNION
+                SELECT user_id FROM workouts WHERE workout_date BETWEEN ? AND ?
+            ) act');
+            $stmtAct->execute([$dStart, $dEnd, $dStart, $dEnd]);
+            $au = (int)$stmtAct->fetchColumn();
+
             $points[] = [
                 'label' => 'T' . $m->format('n'),
-                'active_users' => rand(12, 38) + (5 - $i) * 5,
-                'new_users' => rand(4, 15),
-                'count' => rand(15, 45)
+                'active_users' => $au,
+                'new_users' => $nu,
+                'count' => $au
             ];
         }
     } elseif ($period === '1m') {
         for ($i = 3; $i >= 0; $i--) {
+            $start = $now->sub(new DateInterval('P' . (($i * 7) + 6) . 'D'))->format('Y-m-d');
+            $end = $now->sub(new DateInterval('P' . ($i * 7) . 'D'))->format('Y-m-d');
+
+            $stmtNu = $pdo->prepare('SELECT COUNT(*) FROM users WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)');
+            $stmtNu->execute([$start, $end]);
+            $nu = (int)$stmtNu->fetchColumn();
+
+            $stmtAct = $pdo->prepare('SELECT COUNT(DISTINCT user_id) FROM (
+                SELECT user_id FROM meal_entries WHERE entry_date BETWEEN ? AND ?
+                UNION
+                SELECT user_id FROM workouts WHERE workout_date BETWEEN ? AND ?
+            ) act');
+            $stmtAct->execute([$start, $end, $start, $end]);
+            $au = (int)$stmtAct->fetchColumn();
+
             $points[] = [
                 'label' => 'Tuần ' . (4 - $i),
-                'active_users' => rand(25, 42) + (3 - $i) * 4,
-                'new_users' => rand(5, 12),
-                'count' => rand(28, 50)
+                'active_users' => $au,
+                'new_users' => $nu,
+                'count' => $au
             ];
         }
     } else { // 1w
         $daysVi = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        $stmtNu = $pdo->query('SELECT DATE(created_at) AS d, COUNT(*) AS c FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY DATE(created_at)');
+        $newMap = $stmtNu->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $stmtAct = $pdo->query('SELECT log_date AS d, COUNT(DISTINCT user_id) AS c FROM (
+            SELECT entry_date AS log_date, user_id FROM meal_entries WHERE entry_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            UNION
+            SELECT workout_date AS log_date, user_id FROM workouts WHERE workout_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        ) act GROUP BY log_date');
+        $actMap = $stmtAct->fetchAll(PDO::FETCH_KEY_PAIR);
+
         for ($i = 6; $i >= 0; $i--) {
             $d = $now->sub(new DateInterval("P{$i}D"));
+            $dateStr = $d->format('Y-m-d');
             $idx = ((int)$d->format('N')) - 1;
+            $nu = (int)($newMap[$dateStr] ?? 0);
+            $au = (int)($actMap[$dateStr] ?? 0);
+
             $points[] = [
                 'label' => $daysVi[$idx] ?? $d->format('d/m'),
-                'active_users' => rand(18, 35),
-                'new_users' => rand(1, 6),
-                'count' => rand(20, 40)
+                'active_users' => $au,
+                'new_users' => $nu,
+                'count' => $au
             ];
         }
     }
@@ -241,18 +345,39 @@ function adminMealLogTrend(PDO $pdo, string $period): array {
     if ($period === '6m') {
         for ($i = 5; $i >= 0; $i--) {
             $m = $now->sub(new DateInterval("P{$i}M"));
-            $bars[] = ['label' => 'T' . $m->format('n'), 'meals' => rand(120, 360) + (5 - $i) * 40];
+            $dStart = $m->format('Y-m-01');
+            $dEnd = $m->format('Y-m-t');
+
+            $stmtM = $pdo->prepare('SELECT COUNT(*) FROM meal_entries WHERE entry_date BETWEEN ? AND ?');
+            $stmtM->execute([$dStart, $dEnd]);
+            $meals = (int)$stmtM->fetchColumn();
+
+            $bars[] = ['label' => 'T' . $m->format('n'), 'meals' => $meals];
         }
     } elseif ($period === '1m') {
         for ($i = 3; $i >= 0; $i--) {
-            $bars[] = ['label' => 'Tuần ' . (4 - $i), 'meals' => rand(60, 140) + (3 - $i) * 20];
+            $start = $now->sub(new DateInterval('P' . (($i * 7) + 6) . 'D'))->format('Y-m-d');
+            $end = $now->sub(new DateInterval('P' . ($i * 7) . 'D'))->format('Y-m-d');
+
+            $stmtM = $pdo->prepare('SELECT COUNT(*) FROM meal_entries WHERE entry_date BETWEEN ? AND ?');
+            $stmtM->execute([$start, $end]);
+            $meals = (int)$stmtM->fetchColumn();
+
+            $bars[] = ['label' => 'Tuần ' . (4 - $i), 'meals' => $meals];
         }
     } else { // 1w
         $daysVi = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        $stmtM = $pdo->query('SELECT entry_date, COUNT(*) AS meals FROM meal_entries WHERE entry_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY entry_date');
+        $mealsMap = $stmtM->fetchAll(PDO::FETCH_KEY_PAIR);
+
         for ($i = 6; $i >= 0; $i--) {
             $d = $now->sub(new DateInterval("P{$i}D"));
+            $dateStr = $d->format('Y-m-d');
             $idx = ((int)$d->format('N')) - 1;
-            $bars[] = ['label' => $daysVi[$idx] ?? $d->format('d/m'), 'meals' => rand(12, 45)];
+            $bars[] = [
+                'label' => $daysVi[$idx] ?? $d->format('d/m'),
+                'meals' => (int)($mealsMap[$dateStr] ?? 0)
+            ];
         }
     }
     return $bars;
