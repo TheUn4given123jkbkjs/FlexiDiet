@@ -521,15 +521,25 @@
     <!-- Quên mật khẩu -->
     <div id="forgot-pane" hidden>
       <form id="forgot-form">
-        <p class="modal-desc">Nhập email đã đăng ký, chúng tôi sẽ gửi liên kết để bạn đặt lại mật khẩu.</p>
+        <p class="modal-desc">Nhập email đã đăng ký để nhận mã OTP đặt lại mật khẩu.</p>
         <label for="fp-email">Email</label>
         <input type="email" id="fp-email" placeholder="ban@vidu.com" required>
-        <button type="submit" class="btn btn-solid">Gửi liên kết đặt lại</button>
+        <button type="submit" class="btn btn-solid">Gửi mã OTP</button>
+      </form>
+      <form id="forgot-reset-form" hidden>
+        <p class="modal-desc">Nếu email đã đăng ký, mã OTP gồm 6 chữ số đã được gửi và có hiệu lực trong 10 phút.</p>
+        <label for="fp-otp">Mã OTP</label>
+        <input type="text" id="fp-otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="6 chữ số" required>
+        <label for="fp-new-password">Mật khẩu mới</label>
+        <input type="password" id="fp-new-password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="Tối thiểu 8 ký tự" required>
+        <label for="fp-confirm-password">Nhập lại mật khẩu mới</label>
+        <input type="password" id="fp-confirm-password" autocomplete="new-password" minlength="8" maxlength="72" placeholder="Nhập lại mật khẩu" required>
+        <button type="submit" class="btn btn-solid">Đặt lại mật khẩu</button>
+        <button type="button" class="link-btn" id="resend-forgot-otp">Gửi lại mã OTP</button>
       </form>
       <div class="forgot-success" id="forgot-success" hidden>
         <div class="success-mark">&#10003;</div>
-        <p>Nếu <b id="fp-sent-email"></b> đã được đăng ký, bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu trong ít phút.</p>
-        <p class="hint">Chưa thấy email? Hãy kiểm tra cả mục Spam.</p>
+        <p>Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập bằng mật khẩu mới.</p>
       </div>
       <p class="switch-line"><a id="back-to-signin">&larr; Quay lại đăng nhập</a></p>
     </div>
@@ -537,7 +547,7 @@
 </div>
 
 <script src="assets/js/api-client.js"></script>
-<script src="assets/js/home.js?v=2.0"></script>
+<script src="assets/js/home.js?v=2.1"></script>
 
 </body>
 </html>

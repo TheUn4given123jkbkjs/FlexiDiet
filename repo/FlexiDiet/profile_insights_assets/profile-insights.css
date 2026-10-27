@@ -1,0 +1,74 @@
+/* FlexiDiet profile — 2 charts + BMI/weight cards, all color tokens respond to theme. */
+.fd-app .fd-analytics{display:grid;gap:18px;margin:0 0 28px;min-width:0;font-family:'Be Vietnam Pro','Segoe UI',sans-serif;color:var(--fd-ink)}
+.fd-analytics-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fd-analytics-topline h3{font-size:21px;font-weight:800;margin:5px 0 0}
+.fd-analytics-topline h3 i{color:#4ade80;margin-right:8px}
+.fd-analytics-source{font-size:11px;font-weight:700;color:var(--fd-subtle);padding:8px 12px;border:1px solid var(--fd-border);border-radius:99px}
+.fd-analytics-status{font-size:12px;margin:0;min-height:17px;color:var(--fd-subtle)}
+.fd-analytics-status[data-kind="error"]{color:#e67e7e}
+.fd-analytics-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.fd-analytics-kpi,.fd-analytics-panel{background:var(--fd-surface);border:1px solid var(--fd-border);border-radius:18px;min-width:0;box-shadow:var(--fd-shadow)}
+.fd-analytics-kpi{padding:20px 23px;display:flex;flex-direction:column;gap:8px}
+.fd-analytics-kpi-label{font-size:12px;color:var(--fd-subtle);font-weight:700}
+.fd-analytics-kpi strong{font-size:35px;font-weight:800;line-height:1.3;color:var(--fd-ink);font-variant-numeric:tabular-nums}
+.fd-analytics-kpi>span{font-size:12px;color:var(--fd-green);font-weight:800}
+.fd-analytics-kpi>small{color:var(--fd-subtle);font-size:11px;line-height:1.6}
+.fd-bmi-track{height:8px;background:linear-gradient(90deg,#70b0ed 0%,#70b0ed 23%,#5cd68d 24%,#5cd68d 47%,#e6bc5a 48%,#e6bc5a 65%,#e78c73 66%);border-radius:30px;margin:5px 0;position:relative}
+.fd-bmi-track span{position:absolute;top:-3px;width:4px;height:14px;border:2px solid var(--fd-ink);background:var(--fd-surface);border-radius:3px;transform:translateX(-50%)}
+.fd-analytics-panel{padding:22px 23px}
+.fd-analytics-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.fd-analytics-panel-head h3{font-size:17px;font-weight:800;color:var(--fd-ink);margin:0 0 7px}
+.fd-analytics-panel-head p{font-size:11px;color:var(--fd-subtle);margin:0;line-height:1.55}
+.fd-select-label{font-size:11px;font-weight:700;color:var(--fd-subtle);display:flex;align-items:center;gap:8px}
+.fd-select-label select,.fd-weight-form input{color:var(--fd-ink);background:var(--fd-bg);border:1px solid var(--fd-border);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:12px;min-width:0}
+.fd-chart-scroller{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.fd-analytics-svg{display:block;width:100%;height:auto;min-height:200px;min-width:460px;color:var(--fd-ink);overflow:visible}
+.fd-chart-grid{stroke:var(--fd-border);stroke-width:1}
+.fd-axis-label{font-family:'Be Vietnam Pro',sans-serif;font-size:11px;fill:var(--fd-subtle);font-weight:600}
+.fd-goal-label{font-family:'Be Vietnam Pro',sans-serif;font-size:10px;fill:#ddad4a;font-weight:700}
+.fd-weight-polyline{stroke:#4ade80;stroke-width:3.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.fd-weight-goal-line{stroke:#ddad4a;stroke-width:1.8;stroke-dasharray:6 5}
+.fd-weight-dot{fill:#4ade80;stroke:var(--fd-surface);stroke-width:2.5;cursor:pointer}
+.fd-weight-dot:focus{outline:none;stroke:#f0c76e;stroke-width:4}
+.fd-energy-bar{fill:#44bd79}
+.fd-energy-budget-line{stroke:#eac16a;stroke-width:3.2;stroke-linecap:round}
+.fd-energy-budget-dot{fill:#eac16a;stroke:var(--fd-surface);stroke-width:1.6}
+.fd-missing-bar{fill:var(--fd-border)}
+.fd-hit-area{fill:transparent;cursor:pointer;pointer-events:all}
+.fd-hit-area:focus{outline:none;fill:rgba(70,180,112,.14)}
+.fd-chart-legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--fd-subtle);font-size:10px;font-weight:600;margin:5px 0 13px}
+.fd-chart-legend span{display:inline-flex;align-items:center;gap:7px}
+.fd-legend-swatch{width:17px;height:6px;border-radius:4px;display:inline-block;background:var(--fd-border)}
+.fd-legend-intake{background:#44bd79}.fd-legend-budget{background:#eac16a;height:3px}.fd-legend-missing{background:var(--fd-border)}
+.fd-analytics-detail{margin:12px 0 0;padding:11px 14px;background:var(--fd-green-soft);border-radius:10px;color:var(--fd-ink);font-size:12px;line-height:1.7}
+.fd-analytics-detail strong{display:block;font-size:13px;margin-bottom:4px}
+.fd-analytics-detail p{margin:0 0 8px;color:var(--fd-ink)}
+.fd-analytics-detail small{display:block;color:var(--fd-subtle);font-size:10px;margin-top:7px}
+.fd-analytics-empty{padding:14px;background:var(--fd-green-soft);border-radius:10px;font-size:12px;color:var(--fd-subtle);line-height:1.7}
+.fd-analytics-footnote{color:var(--fd-subtle);line-height:1.8;font-size:10px;margin:13px 0 0}
+.fd-weight-form{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:19px 0 0;padding:15px;background:var(--fd-bg);border-radius:12px;border:1px solid var(--fd-border)}
+.fd-weight-form>div{display:grid;gap:6px;flex:1;min-width:140px}
+.fd-weight-form label{color:var(--fd-subtle);font-size:11px;font-weight:700}
+.fd-weight-form button{min-height:39px;border-radius:10px;white-space:nowrap;padding:9px 14px;font-family:inherit;font-size:12px}
+.fd-weight-form button:disabled{opacity:.5;cursor:wait}
+.fd-readonly-hint{font-size:10px;color:var(--fd-subtle);line-height:1.5}
+.fd-app #prof-weight[readonly]{opacity:.8;cursor:default}
+.fd-analytics-energy-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.fd-analytics-energy-summary>div{border:1px solid var(--fd-border);border-radius:11px;padding:12px;display:grid;gap:7px;min-width:0}
+.fd-analytics-energy-summary span{font-size:10px;color:var(--fd-subtle);font-weight:700}
+.fd-analytics-energy-summary strong{font-size:13px;color:var(--fd-ink);overflow-wrap:anywhere}
+.fd-difference{font-size:16px;font-weight:800}
+.fd-under{color:#3dc47c}.fd-over{color:#e38c76}
+@media(max-width:720px){
+ .fd-analytics-kpis{grid-template-columns:1fr;gap:11px}
+ .fd-analytics-panel{padding:17px 13px}
+ .fd-analytics-svg{min-width:570px}
+ .fd-analytics-panel:has(#profileEnergyChart) .fd-analytics-svg{min-width:620px}
+ .fd-analytics-energy-summary{grid-template-columns:1fr 1fr}
+ .fd-analytics-energy-summary>div:last-child{grid-column:1/-1}
+ .fd-weight-form>div{min-width:118px}
+ .fd-weight-form button{width:100%}
+ .fd-analytics-topline h3{font-size:18px}
+}
+
+.fd-delta-positive,.fd-delta-negative{font-family:'Be Vietnam Pro',sans-serif;font-size:10px;font-weight:800;fill:#4ade80}.fd-delta-negative{fill:#f39a86}

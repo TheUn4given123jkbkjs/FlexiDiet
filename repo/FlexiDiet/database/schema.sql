@@ -28,6 +28,7 @@ DROP TABLE IF EXISTS exercise_met_rules;
 DROP TABLE IF EXISTS exercise_types;
 DROP TABLE IF EXISTS daily_budgets;
 DROP TABLE IF EXISTS weight_logs;
+DROP TABLE IF EXISTS password_reset_otps;
 DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS users;
 
@@ -46,6 +47,18 @@ CREATE TABLE users (
   updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE password_reset_otps (
+  email      VARCHAR(255)    NOT NULL,
+  user_id    BIGINT UNSIGNED NOT NULL,
+  otp_hash   VARCHAR(255)    NOT NULL,
+  expires_at DATETIME        NOT NULL,
+  attempts   TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  sent_at    DATETIME        NOT NULL,
+  PRIMARY KEY (email),
+  KEY idx_password_reset_user_id (user_id),
+  CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Hồ sơ KHÔNG có cột cân nặng: cân nặng hiện tại = bản ghi mới nhất của weight_logs.

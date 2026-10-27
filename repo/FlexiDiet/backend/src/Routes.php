@@ -48,6 +48,85 @@ function login(PDO $pdo, array $p): array {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
     return authData($pdo, (int)$user['id']);
 }
+function ensurePasswordResetTable(PDO $pdo): void {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS password_reset_otps (
+        email VARCHAR(255) NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        otp_hash VARCHAR(255) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        sent_at DATETIME NOT NULL,
+        PRIMARY KEY (email),
+        KEY idx_password_reset_user_id (user_id),
+        CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+}
+function requestPasswordReset(PDO $pdo, array $p): array {
+    $email = mb_strtolower(requiredString($p, 'email', 255));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'INVALID_EMAIL', 'Địa chỉ email không hợp lệ.');
+    ensurePasswordResetTable($pdo);
+    $genericResponse = ['message' => 'Nếu email đã đăng ký, mã OTP sẽ được gửi trong ít phút.'];
+    $user = one($pdo, 'SELECT id,display_name FROM users WHERE email=?', [$email]);
+    if (!$user) return $genericResponse;
+
+    $existing = one($pdo, 'SELECT sent_at FROM password_reset_otps WHERE email=?', [$email]);
+    if ($existing && strtotime($existing['sent_at']) > time() - 60) return $genericResponse;
+
+    $otp = (string)random_int(100000, 999999);
+    $expiresAt = (new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh')))
+        ->modify('+10 minutes')->format('Y-m-d H:i:s');
+    $message = "Xin chào {$user['display_name']},\n\n"
+        . "Mã OTP đặt lại mật khẩu FlexiDiet của bạn là: $otp\n"
+        . "Mã có hiệu lực trong 10 phút và chỉ sử dụng được một lần.\n\n"
+        . "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.";
+    try {
+        sendFlexiDietEmail($email, 'Ma OTP dat lai mat khau FlexiDiet', $message);
+    } catch (Throwable $error) {
+        error_log('FlexiDiet password reset email failed: ' . $error->getMessage());
+        fail(503, 'EMAIL_UNAVAILABLE', 'Chưa thể gửi email lúc này. Vui lòng thử lại sau.');
+    }
+
+    execSql($pdo, 'INSERT INTO password_reset_otps (email,user_id,otp_hash,expires_at,attempts,sent_at)
+        VALUES (?,?,?,?,0,NOW()) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),otp_hash=VALUES(otp_hash),
+        expires_at=VALUES(expires_at),attempts=0,sent_at=NOW()',
+        [$email, (int)$user['id'], password_hash($otp, PASSWORD_DEFAULT), $expiresAt]);
+    return $genericResponse;
+}
+function resetPassword(PDO $pdo, array $p): array {
+    $email = mb_strtolower(requiredString($p, 'email', 255));
+    $otp = requiredString($p, 'otp', 6);
+    $password = requiredString($p, 'password', 200);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'INVALID_EMAIL', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+    if (!preg_match('/^\d{6}$/D', $otp)) fail(422, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+    if (strlen($password) < 8 || strlen($password) > 72) fail(422, 'INVALID_PASSWORD', 'Mật khẩu phải từ 8–72 byte.');
+
+    ensurePasswordResetTable($pdo);
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT user_id,otp_hash,expires_at,attempts FROM password_reset_otps WHERE email=? FOR UPDATE');
+        $stmt->execute([$email]);
+        $reset = $stmt->fetch();
+        $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh'));
+        if (!$reset || (int)$reset['attempts'] >= 5 || new DateTimeImmutable($reset['expires_at']) <= $now) {
+            if ($reset) execSql($pdo, 'DELETE FROM password_reset_otps WHERE email=?', [$email]);
+            $pdo->commit();
+            fail(400, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+        }
+        if (!password_verify($otp, $reset['otp_hash'])) {
+            execSql($pdo, 'UPDATE password_reset_otps SET attempts=attempts+1 WHERE email=?', [$email]);
+            $pdo->commit();
+            fail(400, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+        }
+        execSql($pdo, 'UPDATE users SET password_hash=? WHERE id=?',
+            [password_hash($password, PASSWORD_DEFAULT), (int)$reset['user_id']]);
+        execSql($pdo, 'DELETE FROM password_reset_otps WHERE email=?', [$email]);
+        $pdo->commit();
+    } catch (Throwable $error) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $error;
+    }
+    return ['message' => 'Mật khẩu đã được đặt lại. Bạn có thể đăng nhập bằng mật khẩu mới.'];
+}
 function updateProfile(PDO $pdo, int $uid, array $p): array {
     $current = profileRow($pdo, $uid);
     $name = isset($p['display_name']) ? requiredString($p, 'display_name', 100) : $current['display_name'];
@@ -474,6 +553,8 @@ function executeRoute(string $route,string $method): never {
     if ($method !== 'GET') verifyCsrf();
     if ($route === '/auth/register' && $method === 'POST') response(registration(db(),body()),201);
     if ($route === '/auth/login' && $method === 'POST') response(login(db(),body()));
+    if ($route === '/auth/forgot-password' && $method === 'POST') response(requestPasswordReset(db(),body()));
+    if ($route === '/auth/reset-password' && $method === 'POST') response(resetPassword(db(),body()));
     if ($route === '/auth/logout' && $method === 'POST') {
         currentUserId(); unset($_SESSION['uid']); session_regenerate_id(true); $_SESSION['csrf']=bin2hex(random_bytes(32)); response(['logged_out'=>true]);
     }

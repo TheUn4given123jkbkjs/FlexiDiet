@@ -6,4 +6,11 @@ return [
     'db_name' => 'flexidiet',
     'db_user' => 'root',
     'db_pass' => '',
+    'smtp_host' => 'smtp.gmail.com',
+    'smtp_port' => '587',
+    'smtp_security' => 'tls',
+    'smtp_user' => 'flexidiet.giamcancungminh@gmail.com',
+    'smtp_pass' => 'PASTE_GMAIL_APP_PASSWORD_HERE',
+    'smtp_from_email' => 'flexidiet.giamcancungminh@gmail.com',
+    'smtp_from_name' => 'FlexiDiet',
 ];
