@@ -24,6 +24,7 @@ function closeSignin() { signinOverlay.classList.remove('open'); }
 const signinPane = document.getElementById('signin-pane');
 const forgotPane = document.getElementById('forgot-pane');
 const forgotForm = document.getElementById('forgot-form');
+const forgotResetForm = document.getElementById('forgot-reset-form');
 const forgotSuccess = document.getElementById('forgot-success');
 const modalTitle = document.getElementById('modal-title');
 
@@ -37,6 +38,7 @@ function showForgotPane() {
   // Điền sẵn email nếu người dùng đã nhập ở form đăng nhập
   document.getElementById('fp-email').value = document.getElementById('si-email').value.trim();
   forgotForm.hidden = false;
+  forgotResetForm.hidden = true;
   forgotSuccess.hidden = true;
   signinPane.hidden = true;
   forgotPane.hidden = false;
@@ -70,10 +72,52 @@ document.getElementById('to-signup').addEventListener('click', showSignup);
 document.getElementById('open-forgot').addEventListener('click', showForgotPane);
 document.getElementById('back-to-signin').addEventListener('click', showSigninPane);
 
-// Chưa triển khai reset password: không giả thông báo đã gửi email.
+async function requestForgotOtp() {
+  const submit = forgotForm.querySelector('[type="submit"]');
+  if (submit) submit.disabled = true;
+  try {
+    await FlexiAPI.request('/auth/forgot-password', {
+      method:'POST',
+      data:{email:document.getElementById('fp-email').value.trim()}
+    });
+    forgotForm.hidden = true;
+    forgotResetForm.hidden = false;
+    document.getElementById('fp-otp').focus();
+  } catch (error) {
+    showAuthError(error);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
+}
+
 forgotForm.addEventListener('submit', e => {
   e.preventDefault();
-  alert('Tính năng khôi phục mật khẩu đang được phát triển. Vui lòng liên hệ quản trị viên để được hỗ trợ.');
+  requestForgotOtp();
+});
+document.getElementById('resend-forgot-otp').addEventListener('click', requestForgotOtp);
+
+forgotResetForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const password = document.getElementById('fp-new-password').value;
+  if (password !== document.getElementById('fp-confirm-password').value) {
+    alert('Mật khẩu nhập lại không khớp.');
+    return;
+  }
+  const submit = forgotResetForm.querySelector('[type="submit"]');
+  if (submit) submit.disabled = true;
+  try {
+    await FlexiAPI.request('/auth/reset-password', {method:'POST', data:{
+      email:document.getElementById('fp-email').value.trim(),
+      otp:document.getElementById('fp-otp').value.trim(),
+      password
+    }});
+    forgotResetForm.hidden = true;
+    forgotSuccess.hidden = false;
+  } catch (error) {
+    showAuthError(error);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
 });
 
 document.getElementById('to-signin').addEventListener('click', () => { showHome(); openSignin(); });

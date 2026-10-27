@@ -28,7 +28,7 @@ rem 2. Tu dong tim PHP
 set "PHP_BIN="
 where php >nul 2>nul
 if %errorlevel% equ 0 set "PHP_BIN=php"
-if "%PHP_BIN%"=="" if exist "D:\xampp\php\php.exe" set "PHP_BIN=D:\xampp\php\php.exe"
+if "%PHP_BIN%"=="" if exist "F:\xampp\php\php.exe" set "PHP_BIN=F:\xampp\php\php.exe"
 if "%PHP_BIN%"=="" if exist "C:\xampp\php\php.exe" set "PHP_BIN=C:\xampp\php\php.exe"
 if "%PHP_BIN%"=="" if exist "E:\xampp\php\php.exe" set "PHP_BIN=E:\xampp\php\php.exe"
 
@@ -45,12 +45,19 @@ if %errorlevel% equ 0 set "MYSQL_BIN=mysql"
 if "%MYSQL_BIN%"=="" if exist "D:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=D:\xampp\mysql\bin\mysql.exe"
 if "%MYSQL_BIN%"=="" if exist "C:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=C:\xampp\mysql\bin\mysql.exe"
 if "%MYSQL_BIN%"=="" if exist "E:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=E:\xampp\mysql\bin\mysql.exe"
+if "%MYSQL_BIN%"=="" if exist "F:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=F:\xampp\mysql\bin\mysql.exe"
 
 if "%MYSQL_BIN%"=="" (
     echo [LOI] Khong tim thay mysql.exe! Vui long kiem tra XAMPP da cai dat o o C: hoac D:.
     pause
     exit /b 1
 )
+
+rem Tim bo cai XAMPP de co the tu dong khoi dong MySQL
+set "XAMPP_HOME="
+for %%D in (C D E F) do if exist "%%D:\xampp\mysql_start.bat" set "XAMPP_HOME=%%D:\xampp"
+set "MYSQL_START="
+if not "%XAMPP_HOME%"=="" set "MYSQL_START=%XAMPP_HOME%\mysql_start.bat"
 
 rem 4. Tu dong tim Python
 set "PYTHON_BIN="
@@ -69,6 +76,30 @@ echo.
 
 rem 5. Kiem tra MySQL va Khoi tao CSDL neu chua co
 echo [1/3] Dang kiem tra co so du lieu flexidiet...
+"%MYSQL_BIN%" -u root -e "SELECT 1;" >nul 2>nul
+if errorlevel 1 (
+    if "%MYSQL_START%"=="" goto :MYSQL_START_FAILED
+    echo [THONG BAO] MySQL chua chay. Dang tu dong khoi dong XAMPP MySQL...
+    start "" /min "%MYSQL_START%"
+    set "MYSQL_WAIT=0"
+    goto :WAIT_FOR_MYSQL
+)
+goto :MYSQL_READY
+
+:WAIT_FOR_MYSQL
+timeout /t 1 /nobreak >nul
+"%MYSQL_BIN%" -u root -e "SELECT 1;" >nul 2>nul
+if not errorlevel 1 goto :MYSQL_READY
+set /a MYSQL_WAIT+=1
+if %MYSQL_WAIT% lss 30 goto :WAIT_FOR_MYSQL
+
+:MYSQL_START_FAILED
+echo.
+echo [LOI] Khong the khoi dong MySQL. Hay kiem tra XAMPP hoac bat MySQL thu cong.
+pause
+exit /b 1
+
+:MYSQL_READY
 "%MYSQL_BIN%" -u root -e "USE flexidiet; SELECT COUNT(*) FROM dishes;" >nul 2>nul
 if %errorlevel% equ 0 (
     echo [OK] Co so du lieu flexidiet da san sang.
@@ -129,10 +160,24 @@ if not "%PYTHON_BIN%"=="" (
     start "FlexiDiet - AI Vision Microservice (Port 8001)" "%PYTHON_BIN%" ai_service\app.py
 )
 
-rem Cho 2 giay de server khoi tao cong
-ping -n 3 127.0.0.1 >nul
+rem Cho web server san sang truoc khi mo trinh duyet
+set "WEB_WAIT=0"
+:WAIT_FOR_WEB
+powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:8000' -TimeoutSec 2; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } } catch {}; exit 1" >nul 2>nul
+if not errorlevel 1 goto :WEB_READY
+set /a WEB_WAIT+=1
+if %WEB_WAIT% lss 15 (
+    timeout /t 1 /nobreak >nul
+    goto :WAIT_FOR_WEB
+)
+echo.
+echo [LOI] PHP Web Server khong phan hoi tren cong 8000.
+echo Hay kiem tra PHP va dam bao cong 8000 khong bi ung dung khac su dung.
+pause
+goto :STOP_ALL
 
 rem 9. Tu dong mo trinh duyet Web
+:WEB_READY
 start http://localhost:8000
 
 :MENU_LOOP

@@ -25,6 +25,92 @@
   --accent: #FBBF24;
 }
 
+/* Toggle design adapted from Uiverse.io Galaxy (MIT): https://github.com/uiverse-io/galaxy */
+#theme-toggle.fd-theme-switch {
+  position: relative;
+  display: block;
+  width: 58px;
+  min-width: 58px;
+  height: 30px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #e2e2e2;
+  color: #687386;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color .22s ease, transform .15s ease;
+}
+#theme-toggle.fd-theme-switch:hover {
+  border-color: transparent;
+  background: #d7dbe2;
+  transform: translateY(-1px);
+}
+.fd-theme-switch-track {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+#theme-toggle.fd-theme-switch .fd-theme-switch-track > i {
+  position: absolute;
+  top: 8px;
+  z-index: 1;
+  display: block;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 14px;
+  transition: color .22s ease;
+}
+#theme-toggle.fd-theme-switch .fd-theme-switch-track > .fd-theme-switch-moon,
+#theme-toggle.fd-theme-switch .fd-theme-switch-track > .fd-theme-switch-sun {
+  display: block;
+}
+.fd-theme-switch-moon { left: 7px; }
+.fd-theme-switch-sun { right: 7px; }
+.fd-theme-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 31px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  transition: left .22s cubic-bezier(.2,.8,.2,1), background-color .22s ease;
+}
+:root[data-theme="dark"] #theme-toggle.fd-theme-switch {
+  background: #77849b;
+  color: #f5d875;
+}
+:root[data-theme="dark"] #theme-toggle.fd-theme-switch:hover {
+  background: #68758c;
+}
+:root[data-theme="dark"] #theme-toggle.fd-theme-switch .fd-theme-switch-thumb {
+  left: 3px;
+  background: #fff;
+}
+:root[data-theme="dark"] #theme-toggle.fd-theme-switch .fd-theme-switch-moon {
+  color: #f5d875;
+  display: block;
+}
+:root[data-theme="dark"] #theme-toggle.fd-theme-switch .fd-theme-switch-sun {
+  color: #fff2bd;
+  display: block;
+}
+#theme-toggle.fd-theme-switch:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #theme-toggle.fd-theme-switch,
+  #theme-toggle.fd-theme-switch .fd-theme-switch-track > i,
+  #theme-toggle.fd-theme-switch .fd-theme-switch-thumb {
+    transition: none;
+  }
+}
 
 /* Legacy Food Hub color aliases.
  * food.css previously referenced undefined --bg-surface, --text-secondary,
