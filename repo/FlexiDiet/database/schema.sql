@@ -12,6 +12,9 @@ SET time_zone = '+07:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Dọn dẹp bảng cũ nếu đã tồn tại để script có thể chạy lại an toàn nhiều lần
+DROP TABLE IF EXISTS post_likes;
+DROP TABLE IF EXISTS post_media;
+DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS ai_feedback;
 DROP TABLE IF EXISTS rate_limit_hits;
 DROP TABLE IF EXISTS draft_images;
@@ -28,6 +31,8 @@ DROP TABLE IF EXISTS exercise_met_rules;
 DROP TABLE IF EXISTS exercise_types;
 DROP TABLE IF EXISTS daily_budgets;
 DROP TABLE IF EXISTS weight_logs;
+DROP TABLE IF EXISTS profile_avatars;
+DROP TABLE IF EXISTS password_reset_otps;
 DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS users;
 
@@ -46,6 +51,67 @@ CREATE TABLE users (
   updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE posts (
+  id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id    BIGINT UNSIGNED NOT NULL,
+  content    TEXT NOT NULL,
+  created_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_posts_user_created (user_id, created_at DESC),
+  KEY idx_posts_created (created_at DESC),
+  CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE post_media (
+  id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  post_id    BIGINT UNSIGNED NOT NULL,
+  user_id    BIGINT UNSIGNED NOT NULL,
+  mime_type  VARCHAR(32)     NOT NULL,
+  file_name  VARCHAR(255)    NOT NULL,
+  file_path  VARCHAR(500)    NOT NULL,
+  file_size  BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  sort_order TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_post_media_post (post_id, sort_order),
+  CONSTRAINT fk_post_media_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  CONSTRAINT fk_post_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE post_likes (
+  id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  post_id    BIGINT UNSIGNED NOT NULL,
+  user_id    BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_post_likes (post_id, user_id),
+  KEY idx_post_likes_post (post_id),
+  CONSTRAINT fk_post_likes_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  CONSTRAINT fk_post_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE profile_avatars (
+  user_id    BIGINT UNSIGNED NOT NULL,
+  mime_type  VARCHAR(32)     NOT NULL,
+  image_data MEDIUMBLOB      NOT NULL,
+  updated_at DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  CONSTRAINT fk_profile_avatars_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE password_reset_otps (
+  email      VARCHAR(255)    NOT NULL,
+  user_id    BIGINT UNSIGNED NOT NULL,
+  otp_hash   VARCHAR(255)    NOT NULL,
+  expires_at DATETIME        NOT NULL,
+  attempts   TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  sent_at    DATETIME        NOT NULL,
+  PRIMARY KEY (email),
+  KEY idx_password_reset_user_id (user_id),
+  CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Hồ sơ KHÔNG có cột cân nặng: cân nặng hiện tại = bản ghi mới nhất của weight_logs.

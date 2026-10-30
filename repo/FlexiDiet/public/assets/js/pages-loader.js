@@ -5,7 +5,7 @@
  * Later these can be lazy-loaded behind a dedicated data/API layer.
  */
 const PAGE_MODULES = [
-  'dashboard', 'food/index', 'workout', 'history', 'profile'
+  'dashboard', 'enews', 'food/index', 'workout', 'history', 'profile'
 ];
 async function mountPageModules() {
   const target = document.getElementById('mainWorkspace');

@@ -48,6 +48,140 @@ function login(PDO $pdo, array $p): array {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
     return authData($pdo, (int)$user['id']);
 }
+function ensurePasswordResetTable(PDO $pdo): void {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS password_reset_otps (
+        email VARCHAR(255) NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        otp_hash VARCHAR(255) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        sent_at DATETIME NOT NULL,
+        PRIMARY KEY (email),
+        KEY idx_password_reset_user_id (user_id),
+        CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+}
+function requestPasswordReset(PDO $pdo, array $p): array {
+    $email = mb_strtolower(requiredString($p, 'email', 255));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'INVALID_EMAIL', 'Địa chỉ email không hợp lệ.');
+    ensurePasswordResetTable($pdo);
+    $genericResponse = ['message' => 'Nếu email đã đăng ký, mã OTP sẽ được gửi trong ít phút.'];
+    $user = one($pdo, 'SELECT id,display_name FROM users WHERE email=?', [$email]);
+    if (!$user) return $genericResponse;
+
+    $existing = one($pdo, 'SELECT sent_at FROM password_reset_otps WHERE email=?', [$email]);
+    if ($existing && strtotime($existing['sent_at']) > time() - 60) return $genericResponse;
+
+    $otp = (string)random_int(100000, 999999);
+    $expiresAt = (new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh')))
+        ->modify('+10 minutes')->format('Y-m-d H:i:s');
+    $message = "Xin chào {$user['display_name']},\n\n"
+        . "Mã OTP đặt lại mật khẩu FlexiDiet của bạn là: $otp\n"
+        . "Mã có hiệu lực trong 10 phút và chỉ sử dụng được một lần.\n\n"
+        . "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.";
+    try {
+        sendFlexiDietEmail($email, 'Ma OTP dat lai mat khau FlexiDiet', $message);
+    } catch (Throwable $error) {
+        error_log('FlexiDiet password reset email failed: ' . $error->getMessage());
+        fail(503, 'EMAIL_UNAVAILABLE', 'Chưa thể gửi email lúc này. Vui lòng thử lại sau.');
+    }
+
+    execSql($pdo, 'INSERT INTO password_reset_otps (email,user_id,otp_hash,expires_at,attempts,sent_at)
+        VALUES (?,?,?,?,0,NOW()) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),otp_hash=VALUES(otp_hash),
+        expires_at=VALUES(expires_at),attempts=0,sent_at=NOW()',
+        [$email, (int)$user['id'], password_hash($otp, PASSWORD_DEFAULT), $expiresAt]);
+    return $genericResponse;
+}
+function resetPassword(PDO $pdo, array $p): array {
+    $email = mb_strtolower(requiredString($p, 'email', 255));
+    $otp = requiredString($p, 'otp', 6);
+    $password = requiredString($p, 'password', 200);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'INVALID_EMAIL', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+    if (!preg_match('/^\d{6}$/D', $otp)) fail(422, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+    if (strlen($password) < 8 || strlen($password) > 72) fail(422, 'INVALID_PASSWORD', 'Mật khẩu phải từ 8–72 byte.');
+
+    ensurePasswordResetTable($pdo);
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT user_id,otp_hash,expires_at,attempts FROM password_reset_otps WHERE email=? FOR UPDATE');
+        $stmt->execute([$email]);
+        $reset = $stmt->fetch();
+        $now = new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh'));
+        if (!$reset || (int)$reset['attempts'] >= 5 || new DateTimeImmutable($reset['expires_at']) <= $now) {
+            if ($reset) execSql($pdo, 'DELETE FROM password_reset_otps WHERE email=?', [$email]);
+            $pdo->commit();
+            fail(400, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+        }
+        if (!password_verify($otp, $reset['otp_hash'])) {
+            execSql($pdo, 'UPDATE password_reset_otps SET attempts=attempts+1 WHERE email=?', [$email]);
+            $pdo->commit();
+            fail(400, 'INVALID_OTP', 'Email hoặc mã OTP không hợp lệ hoặc đã hết hạn.');
+        }
+        execSql($pdo, 'UPDATE users SET password_hash=? WHERE id=?',
+            [password_hash($password, PASSWORD_DEFAULT), (int)$reset['user_id']]);
+        execSql($pdo, 'DELETE FROM password_reset_otps WHERE email=?', [$email]);
+        $pdo->commit();
+    } catch (Throwable $error) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $error;
+    }
+    return ['message' => 'Mật khẩu đã được đặt lại. Bạn có thể đăng nhập bằng mật khẩu mới.'];
+}
+function ensureProfileAvatarTable(PDO $pdo): void {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS profile_avatars (
+        user_id BIGINT UNSIGNED NOT NULL,
+        mime_type VARCHAR(32) NOT NULL,
+        image_data MEDIUMBLOB NOT NULL,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id),
+        CONSTRAINT fk_profile_avatars_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+}
+function uploadProfileAvatar(PDO $pdo, int $uid): array {
+    ensureProfileAvatarTable($pdo);
+    $file = $_FILES['avatar'] ?? null;
+    if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        fail(422, 'AVATAR_UPLOAD_FAILED', 'Không nhận được ảnh. Vui lòng chọn ảnh và thử lại.');
+    }
+    if (!isset($file['tmp_name'], $file['size']) || (int)$file['size'] < 1 || (int)$file['size'] > 2 * 1024 * 1024) {
+        fail(422, 'AVATAR_SIZE_INVALID', 'Ảnh phải có dung lượng tối đa 2 MB.');
+    }
+    $imageData = file_get_contents($file['tmp_name']);
+    if ($imageData === false) fail(422, 'AVATAR_UPLOAD_FAILED', 'Không thể đọc ảnh đã tải lên.');
+    $imageInfo = @getimagesizefromstring($imageData);
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->buffer($imageData);
+    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!$imageInfo || !in_array($mime, $allowed, true) || $imageInfo['mime'] !== $mime) {
+        fail(422, 'AVATAR_TYPE_INVALID', 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP hợp lệ.');
+    }
+    if ($imageInfo[0] > 6000 || $imageInfo[1] > 6000 || $imageInfo[0] * $imageInfo[1] > 20000000) {
+        fail(422, 'AVATAR_DIMENSIONS_INVALID', 'Kích thước ảnh quá lớn. Hãy chọn ảnh tối đa 6000 × 6000 pixel.');
+    }
+    $stmt = $pdo->prepare('INSERT INTO profile_avatars (user_id,mime_type,image_data) VALUES (?,?,?)
+        ON DUPLICATE KEY UPDATE mime_type=VALUES(mime_type),image_data=VALUES(image_data),updated_at=CURRENT_TIMESTAMP');
+    $stmt->bindValue(1, $uid, PDO::PARAM_INT);
+    $stmt->bindValue(2, $mime, PDO::PARAM_STR);
+    $stmt->bindValue(3, $imageData, PDO::PARAM_LOB);
+    $stmt->execute();
+    return ['updated' => true];
+}
+function serveProfileAvatar(PDO $pdo, int $uid): never {
+    ensureProfileAvatarTable($pdo);
+    $avatar = one($pdo, 'SELECT mime_type,image_data FROM profile_avatars WHERE user_id=?', [$uid]);
+    if (!$avatar) fail(404, 'AVATAR_NOT_FOUND', 'Bạn chưa cài ảnh đại diện.');
+    header('Content-Type: ' . $avatar['mime_type']);
+    header('Content-Length: ' . strlen($avatar['image_data']));
+    header('Cache-Control: private, max-age=300');
+    header('X-Content-Type-Options: nosniff');
+    echo $avatar['image_data'];
+    exit;
+}
+function deleteProfileAvatar(PDO $pdo, int $uid): array {
+    ensureProfileAvatarTable($pdo);
+    execSql($pdo, 'DELETE FROM profile_avatars WHERE user_id=?', [$uid]);
+    return ['deleted' => true];
+}
 function updateProfile(PDO $pdo, int $uid, array $p): array {
     $current = profileRow($pdo, $uid);
     $name = isset($p['display_name']) ? requiredString($p, 'display_name', 100) : $current['display_name'];
@@ -467,6 +601,248 @@ function recognizeFood(PDO $pdo, int $uid): array {
     ];
 }
 
+function ensureEnNewsTables(PDO $pdo): void {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS posts (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL,
+        content TEXT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_posts_user_created (user_id, created_at DESC),
+        KEY idx_posts_created (created_at DESC),
+        CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS post_media (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        post_id BIGINT UNSIGNED NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        mime_type VARCHAR(32) NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        file_path VARCHAR(500) NOT NULL,
+        file_size BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        sort_order TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_post_media_post (post_id, sort_order),
+        CONSTRAINT fk_post_media_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        CONSTRAINT fk_post_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS post_likes (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        post_id BIGINT UNSIGNED NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_post_likes (post_id, user_id),
+        KEY idx_post_likes_post (post_id),
+        CONSTRAINT fk_post_likes_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        CONSTRAINT fk_post_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+}
+
+function enewsUploadMedia(PDO $pdo, int $uid): array {
+    ensureEnNewsTables($pdo);
+    if (!isset($_FILES['media'])) fail(422, 'INVALID_UPLOAD', 'Không có tệp ảnh nào được gửi lên.');
+
+    $fileGroups = $_FILES['media'];
+    $items = [];
+    if (isset($fileGroups['tmp_name']) && is_array($fileGroups['tmp_name'])) {
+        foreach ($fileGroups['tmp_name'] as $index => $tmpName) {
+            if (!is_string($tmpName) || $tmpName === '') continue;
+            $items[] = [
+                'tmp_name' => $tmpName,
+                'name' => (string)($fileGroups['name'][$index] ?? 'upload.jpg'),
+                'type' => (string)($fileGroups['type'][$index] ?? 'image/jpeg'),
+                'size' => (int)($fileGroups['size'][$index] ?? 0),
+            ];
+        }
+    } else {
+        $items[] = [
+            'tmp_name' => (string)($fileGroups['tmp_name'] ?? ''),
+            'name' => (string)($fileGroups['name'] ?? 'upload.jpg'),
+            'type' => (string)($fileGroups['type'] ?? 'image/jpeg'),
+            'size' => (int)($fileGroups['size'] ?? 0),
+        ];
+    }
+
+    if ($items === []) fail(422, 'INVALID_UPLOAD', 'Không có tệp ảnh nào được gửi lên.');
+    if (count($items) > 6) fail(422, 'TOO_MANY_IMAGES', 'Bạn có thể đăng tối đa 6 ảnh trong một bài viết.');
+
+    $directory = __DIR__ . '/../../public/uploads/enews';
+    if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+        fail(500, 'UPLOAD_DIR_FAILED', 'Không thể tạo thư mục lưu ảnh bài viết.');
+    }
+
+    $uploaded = [];
+    foreach ($items as $item) {
+        $tmpName = (string)($item['tmp_name'] ?? '');
+        if ($tmpName === '' || !is_uploaded_file($tmpName)) continue;
+        $size = (int)($item['size'] ?? 0);
+        if ($size <= 0 || $size > 5 * 1024 * 1024) fail(422, 'INVALID_IMAGE_SIZE', 'Mỗi ảnh tối đa 5 MB.');
+
+        $mime = mime_content_type($tmpName) ?: (string)($item['type'] ?? 'image/jpeg');
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+            fail(422, 'INVALID_FILE_TYPE', 'Chỉ chấp nhận ảnh JPG, PNG hoặc WebP.');
+        }
+
+        $base = preg_replace('/[^a-zA-Z0-9_.-]+/', '-', basename((string)($item['name'] ?? 'upload')));
+        $base = trim($base, '.-');
+        if ($base === '') $base = 'upload';
+        $ext = match ($mime) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            default => 'webp',
+        };
+        $targetName = sprintf('%s_%s_%s.%s', date('YmdHis'), $uid, bin2hex(random_bytes(4)), $ext);
+        $targetPath = $directory . '/' . $targetName;
+        if (!move_uploaded_file($tmpName, $targetPath)) {
+            fail(500, 'UPLOAD_FAILED', 'Không thể lưu ảnh lên máy chủ.');
+        }
+
+        $uploaded[] = [
+            'path' => '/uploads/enews/' . $targetName,
+            'name' => $base,
+            'mime_type' => $mime,
+            'size' => $size,
+        ];
+    }
+
+    if ($uploaded === []) fail(422, 'INVALID_UPLOAD', 'Không có ảnh hợp lệ để tải lên.');
+    return ['files' => $uploaded];
+}
+
+function enewsPostDetail(PDO $pdo, int $uid, int $postId): array {
+    $post = one($pdo, 'SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, u.display_name
+        FROM posts p
+        JOIN users u ON u.id = p.user_id
+        WHERE p.id = ?', [$postId]);
+    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
+
+    $images = all($pdo, 'SELECT id, file_path, mime_type, file_name, sort_order FROM post_media WHERE post_id=? ORDER BY sort_order, id', [$postId]);
+    $likesCount = (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0);
+    $likedByMe = (bool)one($pdo, 'SELECT 1 FROM post_likes WHERE post_id=? AND user_id=? LIMIT 1', [$postId, $uid]);
+
+    return [
+        'id' => (int)$post['id'],
+        'user_id' => (int)$post['user_id'],
+        'content' => (string)$post['content'],
+        'created_at' => $post['created_at'],
+        'updated_at' => $post['updated_at'],
+        'author' => [
+            'id' => (int)$post['user_id'],
+            'display_name' => $post['display_name'],
+        ],
+        'images' => array_map(static fn($image) => [
+            'id' => (int)$image['id'],
+            'path' => $image['file_path'],
+            'mime_type' => $image['mime_type'],
+            'file_name' => $image['file_name'],
+            'sort_order' => (int)$image['sort_order'],
+        ], $images),
+        'likes_count' => $likesCount,
+        'liked_by_me' => $likedByMe,
+        'comments_count' => 0,
+        'can_edit' => ((int)$post['user_id'] === $uid),
+        'can_delete' => ((int)$post['user_id'] === $uid),
+    ];
+}
+
+function enewsFeed(PDO $pdo, int $uid, int $limit = 12, int $offset = 0): array {
+    $limit = max(1, min(25, $limit));
+    $offset = max(0, $offset);
+    $rows = all($pdo, 'SELECT p.id
+        FROM posts p
+        ORDER BY p.created_at DESC, p.id DESC
+        LIMIT ? OFFSET ?', [$limit, $offset]);
+
+    $posts = [];
+    foreach ($rows as $row) {
+        $posts[] = enewsPostDetail($pdo, $uid, (int)$row['id']);
+    }
+
+    return ['posts' => $posts, 'count' => count($posts), 'limit' => $limit, 'offset' => $offset];
+}
+
+function enewsCreatePost(PDO $pdo, int $uid, array $p): array {
+    ensureEnNewsTables($pdo);
+    $content = trim((string)($p['content'] ?? ''));
+    $images = $p['images'] ?? [];
+    if (!is_array($images)) fail(422, 'INVALID_IMAGES', 'Ảnh bài viết không hợp lệ.');
+    if ($content === '' && count($images) === 0) fail(422, 'EMPTY_POST', 'Bài viết phải có nội dung hoặc ít nhất một ảnh.');
+    if (mb_strlen($content) > 2000) fail(422, 'CONTENT_TOO_LONG', 'Nội dung bài viết tối đa 2000 ký tự.');
+    if (count($images) > 6) fail(422, 'TOO_MANY_IMAGES', 'Bạn có thể đăng tối đa 6 ảnh trong một bài viết.');
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('INSERT INTO posts (user_id, content) VALUES (?, ?)');
+        $stmt->execute([$uid, $content]);
+        $postId = (int)$pdo->lastInsertId();
+
+        foreach ($images as $index => $rawPath) {
+            $path = is_string($rawPath) ? trim($rawPath) : '';
+            if ($path === '') continue;
+            if (!preg_match('#^/uploads/enews/[A-Za-z0-9._/-]+\.(jpg|jpeg|png|webp)$#i', $path)) {
+                fail(422, 'INVALID_IMAGE_PATH', 'Đường dẫn ảnh không hợp lệ.');
+            }
+            $storagePath = __DIR__ . '/../../public' . $path;
+            if (!is_file($storagePath)) fail(422, 'INVALID_IMAGE_PATH', 'File ảnh không tồn tại trên máy chủ.');
+            $mime = mime_content_type($storagePath) ?: 'image/jpeg';
+            if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+                fail(422, 'INVALID_FILE_TYPE', 'File ảnh không hợp lệ.');
+            }
+            $fileName = basename($storagePath);
+            execSql($pdo, 'INSERT INTO post_media (post_id, user_id, mime_type, file_name, file_path, file_size, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)', [$postId, $uid, $mime, $fileName, $path, (int)filesize($storagePath), $index]);
+        }
+
+        $pdo->commit();
+        return enewsPostDetail($pdo, $uid, $postId);
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
+}
+
+function enewsUpdatePost(PDO $pdo, int $uid, int $postId, array $p): array {
+    $post = one($pdo, 'SELECT user_id, content FROM posts WHERE id=?', [$postId]);
+    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
+    if ((int)$post['user_id'] !== $uid) fail(403, 'FORBIDDEN', 'Bạn không có quyền sửa bài viết này.');
+
+    $content = trim((string)($p['content'] ?? $post['content']));
+    if ($content === '') fail(422, 'EMPTY_POST', 'Bài viết không được để trống.');
+    if (mb_strlen($content) > 2000) fail(422, 'CONTENT_TOO_LONG', 'Nội dung bài viết tối đa 2000 ký tự.');
+
+    execSql($pdo, 'UPDATE posts SET content=? WHERE id=? AND user_id=?', [$content, $postId, $uid]);
+    return enewsPostDetail($pdo, $uid, $postId);
+}
+
+function enewsDeletePost(PDO $pdo, int $uid, int $postId): array {
+    $post = one($pdo, 'SELECT user_id FROM posts WHERE id=?', [$postId]);
+    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
+    if ((int)$post['user_id'] !== $uid) fail(403, 'FORBIDDEN', 'Bạn không có quyền xóa bài viết này.');
+
+    execSql($pdo, 'DELETE FROM posts WHERE id=? AND user_id=?', [$postId, $uid]);
+    return ['deleted' => true, 'post_id' => $postId];
+}
+
+function enewsToggleLike(PDO $pdo, int $uid, int $postId, bool $liked): array {
+    $post = one($pdo, 'SELECT id FROM posts WHERE id=?', [$postId]);
+    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
+
+    if ($liked) {
+        $exists = one($pdo, 'SELECT 1 FROM post_likes WHERE post_id=? AND user_id=? LIMIT 1', [$postId, $uid]);
+        if (!$exists) {
+            execSql($pdo, 'INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)', [$postId, $uid]);
+        }
+        return ['liked' => true, 'likes_count' => (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0)];
+    }
+
+    execSql($pdo, 'DELETE FROM post_likes WHERE post_id=? AND user_id=?', [$postId, $uid]);
+    return ['liked' => false, 'likes_count' => (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0)];
+}
+
 function executeRoute(string $route,string $method): never {
     if ($route === '/ping' && $method === 'GET') response(['status'=>'ok','service'=>'FlexiDiet PHP API']);
     if ($route === '/health' && $method === 'GET') { db()->query('SELECT 1'); response(['status'=>'ok','database'=>'connected']); }
@@ -474,11 +850,16 @@ function executeRoute(string $route,string $method): never {
     if ($method !== 'GET') verifyCsrf();
     if ($route === '/auth/register' && $method === 'POST') response(registration(db(),body()),201);
     if ($route === '/auth/login' && $method === 'POST') response(login(db(),body()));
+    if ($route === '/auth/forgot-password' && $method === 'POST') response(requestPasswordReset(db(),body()));
+    if ($route === '/auth/reset-password' && $method === 'POST') response(resetPassword(db(),body()));
     if ($route === '/auth/logout' && $method === 'POST') {
         currentUserId(); unset($_SESSION['uid']); session_regenerate_id(true); $_SESSION['csrf']=bin2hex(random_bytes(32)); response(['logged_out'=>true]);
     }
     if ($route === '/auth/me' && $method === 'GET') { $uid=currentUserId(); response(authData(db(),$uid)); }
     $uid = currentUserId(); $pdo = db();
+    if ($route === '/profile/avatar' && $method === 'GET') serveProfileAvatar($pdo, $uid);
+    if ($route === '/profile/avatar' && $method === 'POST') response(uploadProfileAvatar($pdo, $uid));
+    if ($route === '/profile/avatar' && $method === 'DELETE') response(deleteProfileAvatar($pdo, $uid));
     if ($route === '/profile' && $method === 'GET') response(profileRow($pdo,$uid));
     if ($route === '/profile' && $method === 'PATCH') response(updateProfile($pdo,$uid,body()));
     if ($route === '/weight-logs' && $method === 'POST') response(recordWeight($pdo,$uid,body()),201);
@@ -493,6 +874,25 @@ function executeRoute(string $route,string $method): never {
         $pdo->beginTransaction();
         try { ensureBudget($pdo,$uid,$day); $pdo->commit(); } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
         response(['budget'=>budgetView($pdo,$uid,$day),'meals'=>mealList($pdo,$uid,$day),'workouts'=>workoutList($pdo,$uid,$day),'profile'=>profileRow($pdo,$uid)]);
+    }
+    if ($route === '/enews/feed' && $method === 'GET') {
+        $limit = max(1, min(25, (int)num($_GET, 'limit', 1, 25, 12)));
+        $offset = max(0, (int)num($_GET, 'offset', 0, 5000, 0));
+        response(enewsFeed($pdo, $uid, $limit, $offset));
+    }
+    if ($route === '/enews/media' && $method === 'POST') response(enewsUploadMedia($pdo, $uid));
+    if ($route === '/enews/posts' && $method === 'POST') response(enewsCreatePost($pdo, $uid, body()), 201);
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
+        response(enewsUpdatePost($pdo, $uid, (int)$m[1], body()));
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
+        response(enewsDeletePost($pdo, $uid, (int)$m[1]));
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'POST') {
+        response(enewsToggleLike($pdo, $uid, (int)$m[1], true));
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'DELETE') {
+        response(enewsToggleLike($pdo, $uid, (int)$m[1], false));
     }
     if ($route === '/foods' && $method === 'GET') {
         $q = trim((string)($_GET['q'] ?? ''));

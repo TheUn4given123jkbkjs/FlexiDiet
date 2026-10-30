@@ -3,6 +3,7 @@ declare(strict_types=1);
 // API front controller: compatible with PHP built-in server and XAMPP/Apache
 require_once __DIR__ . '/../../backend/src/Http.php';
 require_once __DIR__ . '/../../backend/src/Energy.php';
+require_once __DIR__ . '/../../backend/src/Mailer.php';
 require_once __DIR__ . '/../../backend/src/Routes.php';
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');

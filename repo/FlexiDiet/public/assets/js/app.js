@@ -163,9 +163,9 @@ function switchTab(tabId) {
     view.classList.toggle('active', view.id === `view-${tabId}`);
   });
   const pageNames = {
-    'dashboard':'Tổng quan', 'food':'Ăn uống (Food Hub)',
-    'workout':'Luyện tập', 'history':'Nhật ký chi tiết',
-    'profile':'Hồ sơ cá nhân'
+    'dashboard':'Tổng quan', 'enews':'eNews',
+    'food':'Ăn uống (Food Hub)', 'workout':'Luyện tập',
+    'history':'Nhật ký chi tiết', 'profile':'Hồ sơ cá nhân'
   };
   const label = document.getElementById('currentPageLabel');
   if (label) label.textContent = pageNames[tabId] || 'Tổng quan';

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/theme.css?v=2.1">
+  <link rel="stylesheet" href="assets/css/theme.css?v=2.2">
   <link rel="stylesheet" href="assets/css/app.css?v=2.0">
   <link rel="stylesheet" href="assets/css/shell.css?v=2.0">
   <link rel="stylesheet" href="assets/css/brand.css?v=1.0">
@@ -55,9 +55,12 @@
       <div class="fd-top-right">
         <span class="fd-top-badge" id="systemLiveBadge"><i class="dot"></i> Trực tuyến</span>
         <span class="fd-today" id="todayHeader"></span>
-        <button class="fd-icon-button" id="theme-toggle" type="button" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">
-          <i class="fa-solid fa-moon"></i>
-          <i class="fa-solid fa-sun"></i>
+        <button class="fd-icon-button fd-theme-switch" id="theme-toggle" type="button" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối">
+          <span class="fd-theme-switch-track" aria-hidden="true">
+            <i class="fa-solid fa-moon fd-theme-switch-moon"></i>
+            <i class="fa-solid fa-sun fd-theme-switch-sun"></i>
+            <span class="fd-theme-switch-thumb"></span>
+          </span>
         </button>
         <a class="btn ghost sm admin-top-btn" href="app.html" title="Chuyển sang ứng dụng người dùng">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>

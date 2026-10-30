@@ -1,0 +1,70 @@
+<section class="page-view fd-enews" id="view-enews">
+  <div class="fd-page-head">
+    <div>
+      <span class="fd-eyebrow"><span class="fd-live-dot"></span> CỘNG ĐỒNG KHAI THÁC SỨC KHỎE</span>
+      <h1>eNews</h1>
+      <p>Chia sẻ cập nhật của bạn, động lực mỗi ngày và những khoảnh khắc đáng nhớ.</p>
+    </div>
+    <button class="fd-date-chip" type="button" aria-label="Trạng thái tin tức"><i class="fa-solid fa-bolt"></i><span>Live feed</span></button>
+  </div>
+
+  <div class="fd-enews-shell">
+    <aside class="fd-enews-sidebar">
+      <div class="fd-enews-card fd-enews-card-highlight">
+        <span class="fd-section-kicker">SỐNG MẠNH HƠN</span>
+        <h2>Khám phá cộng đồng</h2>
+        <p>Gửi bài viết, cập nhật thói quen và cùng nhau tạo động lực mỗi ngày.</p>
+      </div>
+      <div class="fd-enews-card">
+        <h3>Xu hướng vừa qua</h3>
+        <ul>
+          <li><i class="fa-solid fa-arrow-trend-up"></i> Chia sẻ kế hoạch ăn uống</li>
+          <li><i class="fa-solid fa-dumbbell"></i> Theo dõi tiến độ luyện tập</li>
+          <li><i class="fa-solid fa-seedling"></i> Duy trì thói quen đều đặn</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="fd-enews-main">
+      <div class="fd-enews-composer">
+        <div class="fd-enews-author-row">
+          <div class="fd-enews-avatar" id="enewsUserAvatar">N</div>
+          <div>
+            <strong id="enewsUserName">Người dùng</strong>
+            <small>Chia sẻ cùng cộng đồng</small>
+          </div>
+        </div>
+
+        <form id="enewsComposerForm" class="fd-enews-form">
+          <textarea id="enewsContent" maxlength="2000" rows="4" placeholder="Bạn đang nghĩ gì về hành trình sức khỏe của mình?"></textarea>
+
+          <div class="fd-enews-upload-bar">
+            <label class="fd-enews-upload-button" for="enewsMediaInput">
+              <i class="fa-solid fa-image"></i>
+              <span>Thêm ảnh</span>
+            </label>
+            <input id="enewsMediaInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+            <button type="button" class="fd-enews-clear-button" id="enewsClearDraft" hidden>Xóa nháp</button>
+          </div>
+
+          <div id="enewsPreview" class="fd-enews-preview" aria-live="polite"></div>
+
+          <div class="fd-enews-form-footer">
+            <span id="enewsStatus">Bạn có thể đăng tối đa 6 ảnh cùng lúc.</span>
+            <div class="fd-enews-form-actions">
+              <button type="button" class="fd-enews-secondary" id="enewsCancelEdit" hidden>Hủy</button>
+              <button type="submit" class="fd-enews-primary" id="enewsSubmit">Đăng bài</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="enewsFeed" class="fd-enews-feed" aria-live="polite"></div>
+      <div id="enewsEmptyState" class="fd-enews-empty" hidden>
+        <i class="fa-solid fa-newspaper"></i>
+        <h3>Chưa có bài viết nào</h3>
+        <p>Hãy là người đầu tiên chia sẻ cảm hứng, món ăn yêu thích hoặc tiến độ luyện tập của bạn.</p>
+      </div>
+    </main>
+  </div>
+</section>

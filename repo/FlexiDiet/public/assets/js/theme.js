@@ -33,7 +33,7 @@
       button.setAttribute('aria-label', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
       button.setAttribute('title', isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối');
       var icon = button.querySelector('i');
-      if (icon) {
+      if (icon && !button.classList.contains('fd-theme-switch')) {
         icon.classList.toggle('fa-sun', isDark);
         icon.classList.toggle('fa-moon', !isDark);
       }

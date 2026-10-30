@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/theme.css?v=2.1">
+  <link rel="stylesheet" href="assets/css/theme.css?v=2.2">
   <link rel="stylesheet" href="assets/css/app.css?v=2.0">
   <link rel="stylesheet" href="assets/css/shell.css?v=2.0">
   <link rel="stylesheet" href="assets/css/brand.css?v=1.0">
@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="assets/css/budget-warning.css?v=1.0">
   <script src="assets/js/theme.js"></script>
   <link rel="stylesheet" href="assets/css/profile-insights.css?v=1.0">
+  <link rel="stylesheet" href="assets/css/enews.css?v=1.0">
 </head>
 <body class="fd-app">
   <div class="fd-layout">
@@ -36,6 +37,7 @@
         <div class="fd-nav-caption">KHÔNG GIAN CỦA BẠN</div>
         <nav class="fd-side-nav" aria-label="Các trang">
           <button class="app-nav-link active" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>Tổng quan</span></button>
+          <button class="app-nav-link" data-target="enews" onclick="switchTab('enews')"><i class="fa-solid fa-newspaper"></i><span>eNews</span></button>
           <button class="app-nav-link" data-target="food" onclick="switchTab('food')"><i class="fa-solid fa-utensils"></i><span>Ăn uống (Food Hub)</span></button>
           <button class="app-nav-link" data-target="workout" onclick="switchTab('workout')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
         </nav>
@@ -57,7 +59,7 @@
       </div>
       <div class="fd-sidebar-footer">
         <div class="fd-tip-box"><i class="fa-solid fa-seedling"></i><strong>Mỗi ngày một chút</strong><span>Thói quen bền vững bắt đầu từ những điều nhỏ.</span></div>
-        <span class="fd-demo-tag"><i class="fa-solid fa-circle"></i> FlexiDiet · MySQL Synced</span>
+        <span class="fd-demo-tag"><i class="fa-solid fa-circle"></i> FlexiDiet · Co may giam can</span>
       </div>
     </aside>
     <div class="fd-main-wrap">
@@ -68,9 +70,18 @@
         </div>
         <div class="fd-top-right">
           <span class="fd-today" id="todayHeader"></span>
-          <button class="fd-icon-button" id="theme-toggle" type="button" aria-label="Đổi giao diện sáng tối" title="Đổi giao diện sáng tối"><i class="fa-solid fa-moon"></i></button>
+          <button class="fd-icon-button fd-theme-switch" id="theme-toggle" type="button" aria-label="Đổi giao diện sáng tối" title="Đổi giao diện sáng tối">
+            <span class="fd-theme-switch-track" aria-hidden="true">
+              <i class="fa-solid fa-moon fd-theme-switch-moon"></i>
+              <i class="fa-solid fa-sun fd-theme-switch-sun"></i>
+              <span class="fd-theme-switch-thumb"></span>
+            </span>
+          </button>
           <button class="fd-icon-button" type="button" onclick="switchTab('profile')" aria-label="Hồ sơ" title="Hồ sơ"><i class="fa-regular fa-user"></i></button>
-          <div class="fd-top-avatar" aria-label="Ảnh đại diện"><i class="fa-solid fa-user"></i></div>
+          <button class="fd-top-avatar" id="openAvatar" type="button" aria-label="Mở ảnh đại diện" title="Ảnh đại diện">
+            <img class="fd-user-avatar-image" alt="" hidden>
+            <i class="fa-solid fa-user" aria-hidden="true"></i>
+          </button>
         </div>
       </header>
       <!-- Page modules loaded by pages-loader.js -->
@@ -81,6 +92,7 @@
   </div>
   <nav class="fd-mobile-nav" aria-label="Điều hướng trên điện thoại">
     <button class="app-nav-link active" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i><span>Tổng quan</span></button>
+    <button class="app-nav-link" data-target="enews" onclick="switchTab('enews')"><i class="fa-solid fa-newspaper"></i><span>eNews</span></button>
     <button class="app-nav-link" data-target="food" onclick="switchTab('food')"><i class="fa-solid fa-utensils"></i><span>Ăn uống</span></button>
     <button class="app-nav-link" data-target="workout" onclick="switchTab('workout')"><i class="fa-solid fa-person-running"></i><span>Luyện tập</span></button>
     <button class="app-nav-link" data-target="history" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>Nhật ký</span></button>
@@ -224,14 +236,39 @@
     </div>
   </div>
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
+  <div class="fd-avatar-modal" id="avatarModal" hidden>
+    <div class="fd-avatar-dialog" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle">
+      <button class="fd-avatar-close" id="closeAvatar" type="button" aria-label="Đóng">&times;</button>
+      <h2 id="avatarModalTitle">Ảnh đại diện</h2>
+      <div class="fd-avatar-current" id="avatarCurrent">
+        <img id="avatarPreviewImage" alt="Ảnh đại diện hiện tại" hidden>
+      </div>
+      <p class="fd-avatar-help" id="avatarHelp">Chọn ảnh JPG, PNG hoặc WebP, tối đa 2 MB.</p>
+      <input id="avatarFileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="fd-avatar-crop" id="avatarCrop" hidden>
+        <canvas id="avatarCropCanvas" width="512" height="512" aria-label="Kéo ảnh để căn khung avatar"></canvas>
+        <label for="avatarZoom">Thu phóng ảnh</label>
+        <input id="avatarZoom" type="range" min="1" max="3" step="0.01" value="1">
+        <p class="fd-avatar-help">Kéo ảnh để căn vị trí, dùng thanh trượt để phóng to.</p>
+      </div>
+      <div class="fd-avatar-actions">
+        <button id="chooseAvatar" type="button">Thêm / đổi ảnh</button>
+        <button id="saveAvatarCrop" type="button" hidden>Lưu ảnh</button>
+        <button id="cancelAvatarCrop" type="button" class="fd-avatar-secondary" hidden>Hủy chỉnh sửa</button>
+        <button id="deleteAvatar" type="button" class="fd-avatar-delete" hidden>Xóa ảnh</button>
+      </div>
+    </div>
+  </div>
   <script src="assets/js/api-client.js?v=1.1"></script>
   <script src="assets/js/app.js?v=2.0"></script>
+  <script src="assets/js/avatar.js?v=1.3"></script>
   <script src="assets/js/dashboard.js"></script>
   <script src="assets/js/workout-heatmap.js"></script>
   <script src="assets/js/food-hub.js?v=1.4"></script>
   <script src="assets/js/budget-warning.js?v=1.0"></script>
   <script src="assets/js/backend-sync.js?v=1.2"></script>
   <script src="assets/js/profile-insights.js?v=1.0"></script>
+  <script src="assets/js/enews.js?v=1.0"></script>
   <script src="assets/js/pages-loader.js"></script>
 </body>
 </html>
