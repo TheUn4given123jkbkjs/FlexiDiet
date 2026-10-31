@@ -330,9 +330,7 @@ function openCreateQuickModal(defaultMeal, type = 'food') {
   }
   if (type === 'food') {
     loadQuickFoodDishesCache();
-    if (!qfSelectedDish) {
-      clearQuickFoodSelection();
-    }
+    clearQuickFoodSelection();
     setTimeout(() => {
       document.getElementById('qfDishSearchInput')?.focus();
     }, 150);
@@ -346,6 +344,7 @@ function closeCreateQuickModal() {
   }
   const dropdown = document.getElementById('qfDishDropdown');
   if (dropdown) dropdown.style.display = 'none';
+  clearQuickFoodSelection();
 }
 
 function handleCreateModalBackdrop(e) {
@@ -489,7 +488,7 @@ function updateQuickFoodPortion() {
   if (fatEl) fatEl.textContent = (baseFat * ratio).toFixed(1);
 }
 
-function clearQuickFoodSelection() {
+function clearQuickFoodSelection(autoFocus = false) {
   qfSelectedDish = null;
   const input = document.getElementById('qfDishSearchInput');
   const clearBtn = document.getElementById('qfSearchClearBtn');
@@ -497,19 +496,24 @@ function clearQuickFoodSelection() {
   const redirectRow = document.getElementById('qfComposerRedirectRow');
   const submitBtn = document.getElementById('btnSubmitQuickFood');
 
-  if (input) { input.value = ''; input.focus(); }
+  if (input) {
+    input.value = '';
+    if (autoFocus) input.focus();
+  }
   if (clearBtn) clearBtn.style.display = 'none';
   if (preview) preview.style.display = 'none';
   if (redirectRow) redirectRow.style.display = 'none';
   if (submitBtn) submitBtn.disabled = true;
 
-  document.getElementById('qfSelectedDishId').value = '';
-  document.getElementById('qfSelectedDishName').value = '';
+  const idEl = document.getElementById('qfSelectedDishId');
+  if (idEl) idEl.value = '';
+  const nameEl = document.getElementById('qfSelectedDishName');
+  if (nameEl) nameEl.value = '';
 }
 
 async function openSelectedDishInComposer() {
-  const dishId = document.getElementById('qfSelectedDishId')?.value || (qfSelectedDish ? qfSelectedDish.id : null);
-  const dishName = document.getElementById('qfSelectedDishName')?.value || (qfSelectedDish ? qfSelectedDish.name : null) || document.getElementById('qfDishSearchInput')?.value?.trim();
+  const targetDishId = document.getElementById('qfSelectedDishId')?.value || (qfSelectedDish ? qfSelectedDish.id : null);
+  const targetDishName = document.getElementById('qfSelectedDishName')?.value || (qfSelectedDish ? qfSelectedDish.name : null) || document.getElementById('qfDishSearchInput')?.value?.trim();
   const meal = document.getElementById('qfMeal')?.value || 'lunch';
 
   closeCreateQuickModal();
@@ -522,10 +526,10 @@ async function openSelectedDishInComposer() {
     window.FoodHub.switchSubtab('composer');
   }
 
-  if (dishId && window.FoodHub && typeof window.FoodHub.loadDishToComposer === 'function') {
-    await window.FoodHub.loadDishToComposer(Number(dishId), meal);
-  } else if (dishName && window.FoodHub && typeof window.FoodHub.loadDishByName === 'function') {
-    await window.FoodHub.loadDishByName(dishName, meal);
+  if (targetDishId && window.FoodHub && typeof window.FoodHub.loadDishToComposer === 'function') {
+    await window.FoodHub.loadDishToComposer(Number(targetDishId), meal);
+  } else if (targetDishName && window.FoodHub && typeof window.FoodHub.loadDishByName === 'function') {
+    await window.FoodHub.loadDishByName(targetDishName, meal);
   }
 
   setTimeout(() => {

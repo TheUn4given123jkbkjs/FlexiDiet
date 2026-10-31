@@ -334,7 +334,20 @@ class FoodService {
         } elseif ($tag === 'low_fat') {
             $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['fat_g'] <= 10.0));
         } elseif ($tag === 'high_energy') {
-            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 550.0));
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 600.0));
+        } elseif ($tag === 'balanced') {
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['protein_g'] >= 15.0 && (float)$d['carb_g'] >= 25.0 && (float)$d['fat_g'] <= 25.0));
+        } elseif ($tag === 'light_digestion') {
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 350.0 && (float)$d['fat_g'] <= 8.0));
+        } elseif ($tag === 'vegetarian') {
+            $meatWords = ['thịt', 'bò', 'heo', 'gà', 'chả', 'lòng', 'cua', 'cá', 'tôm', 'mực', 'ốc', 'ba tê', 'pate'];
+            $filtered = array_values(array_filter($filtered, function($d) use ($meatWords) {
+                $nameLower = mb_strtolower($d['name']);
+                foreach ($meatWords as $w) {
+                    if (str_contains($nameLower, $w)) return false;
+                }
+                return true;
+            }));
         }
 
         // 7. Multi-filter Tiêu chí 3: Phân loại Bữa ăn ($meal)
@@ -455,8 +468,9 @@ class FoodService {
             if ($isCustom) {
                 $timesAll = (int)($userAllMap[$id] ?? 0);
                 if ($timesAll >= 3) $sHist = 10.0;
-                elseif ($timesAll >= 1) $sHist = 9.0;
-                else $sHist = 8.0; // Khởi điểm mặc định 8 điểm
+                elseif ($timesAll >= 1) $sHist = 8.0;
+                elseif ($origin === 'custom' || $origin === 'saved') $sHist = 8.0; // Ưu tiên khi người dùng chủ động chọn tab Món Ruột
+                else $sHist = 4.5; // Khi xem chung Tất cả, cạnh tranh công bằng với món hệ thống
             } else {
                 $times7d = (int)($user7dMap[$id] ?? 0);
                 if ($times7d >= 3) $sHist = 10.0; // Món khoái khẩu tuần qua

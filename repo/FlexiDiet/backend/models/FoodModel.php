@@ -21,7 +21,7 @@ class FoodModel {
               AND (d.owner_user_id IS NULL OR d.owner_user_id = ?)
               AND (d.name LIKE ? OR d.name_norm LIKE ? OR d.dish_code LIKE ?)
             GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.image_url
-            ORDER BY d.origin DESC, d.name
+            ORDER BY (d.origin = "system") DESC, d.name ASC
             LIMIT 300',
             [$uid, $term, $term, $term]
         );

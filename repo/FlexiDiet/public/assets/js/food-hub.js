@@ -20,10 +20,10 @@ const FoodHub = (() => {
     currentDish: null,
     composer: {
       dishId: null,
-      name: 'Phở Bò Tái Nạm',
+      name: '',
       mealType: 'breakfast',
-      servingLabel: '1 tô vừa',
-      origin: 'system',
+      servingLabel: '1 phần',
+      origin: 'saved',
       ingredients: []
     }
   };
