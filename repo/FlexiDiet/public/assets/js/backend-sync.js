@@ -226,7 +226,9 @@ handleWorkoutSubmit = async function (e) {
   e.preventDefault();
   const code = document.getElementById('sportSelect').value;
   const mins = Number(document.getElementById('workoutDuration').value);
-  const km = Number(document.getElementById('workoutDistance').value);
+  const isDist = ['running', 'cycling', 'walking'].includes(code);
+  const distInput = document.getElementById('workoutDistance');
+  const km = isDist && distInput && Number(distInput.value) > 0 ? Number(distInput.value) : null;
   await fdSaveWorkout(code, mins, km > 0 ? km : null);
 };
 handleQuickWorkoutSubmit = async function (e) {
