@@ -302,113 +302,10 @@ function requireAdmin(PDO $pdo, int $uid): void {
 }
 
 function proxyAiGet(string $path, int $timeout = 3): ?array {
-    $ch = curl_init('http://127.0.0.1:8001' . $path);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => $timeout,
-        CURLOPT_CONNECTTIMEOUT => 2,
-    ]);
-    $raw = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    if ($raw === false || $httpCode !== 200) return null;
-    $data = json_decode($raw, true);
-    return is_array($data) ? $data : null;
+    return AiService::proxyGet($path, $timeout);
 }
-
 function recognizeFood(PDO $pdo, int $uid): array {
-    if (empty($_FILES['image']) || !is_array($_FILES['image'])) {
-        fail(422, 'NO_IMAGE', 'Vui lòng cung cấp tệp ảnh món ăn để nhận diện.');
-    }
-    $file = $_FILES['image'];
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        fail(422, 'UPLOAD_ERROR', 'Tải ảnh lên thất bại. Vui lòng thử lại.');
-    }
-    if ((int)$file['size'] > 10 * 1024 * 1024) {
-        fail(422, 'FILE_TOO_LARGE', 'Kích thước ảnh không được vượt quá 10MB.');
-    }
-    $tmpPath = (string)$file['tmp_name'];
-    $mime = mime_content_type($tmpPath) ?: ($file['type'] ?? 'image/jpeg');
-    if (!str_starts_with($mime, 'image/')) {
-        fail(422, 'INVALID_FILE_TYPE', 'Tệp tải lên phải là hình ảnh (JPEG, PNG, WebP).');
-    }
-
-    try {
-        execSql($pdo, 'INSERT INTO rate_limit_hits (user_id, bucket, hit_at) VALUES (?, "analyze", NOW(3))', [$uid]);
-    } catch (Throwable) {}
-
-    $ch = curl_init('http://127.0.0.1:8001/v1/recognize');
-    $cfile = new CURLFile($tmpPath, $mime, $file['name'] ?? 'image.jpg');
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => ['image' => $cfile, 'top_k' => 3],
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 12,
-        CURLOPT_CONNECTTIMEOUT => 3,
-    ]);
-    $raw = curl_exec($ch);
-    $curlErr = curl_error($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($raw === false || $httpCode !== 200) {
-        return [
-            'status' => 'service_unavailable',
-            'is_unknown' => true,
-            'message' => 'Dịch vụ AI hiện không khả dụng. Bạn có thể tra cứu và ghi món thủ công.',
-            'error' => $curlErr ?: ('HTTP ' . $httpCode),
-            'predictions' => []
-        ];
-    }
-
-    $aiData = json_decode($raw, true);
-    if (!is_array($aiData)) {
-        return [
-            'status' => 'service_unavailable',
-            'is_unknown' => true,
-            'message' => 'Dữ liệu trả về từ dịch vụ AI không hợp lệ.',
-            'predictions' => []
-        ];
-    }
-
-    $isUnknown = !empty($aiData['is_unknown']);
-    $predictions = $aiData['predictions'] ?? [];
-    $top = $predictions[0] ?? null;
-
-    if ($isUnknown || !$top || (float)($top['confidence'] ?? 0) < 0.40) {
-        return [
-            'status' => 'unrecognized',
-            'is_unknown' => true,
-            'message' => 'Không thể nhận diện được món do món chưa có trong danh sách 67 món nhận diện hoặc ảnh chưa rõ nét.',
-            'top_prediction' => $top,
-            'predictions' => $predictions,
-            'inference_ms' => (int)($aiData['inference_ms'] ?? 0)
-        ];
-    }
-
-    $dish = one($pdo, 'SELECT id, name, name_norm, serving_label, dish_code, origin FROM dishes WHERE dish_code=? AND is_active=1 LIMIT 1', [$top['dish_code']]);
-    if (!$dish) {
-        $dish = one($pdo, 'SELECT id, name, name_norm, serving_label, dish_code, origin FROM dishes WHERE (name LIKE ? OR name_norm LIKE ?) AND is_active=1 LIMIT 1', ['%' . $top['name_vi'] . '%', '%' . normalizeVietnamese($top['name_vi']) . '%']);
-    }
-
-    $recipe = null;
-    if ($dish) {
-        try {
-            $recipe = dishRecipe($pdo, $uid, (int)$dish['id']);
-        } catch (Throwable) {
-            $recipe = null;
-        }
-    }
-
-    return [
-        'status' => 'recognized',
-        'is_unknown' => false,
-        'dish' => $dish,
-        'recipe' => $recipe,
-        'top_prediction' => $top,
-        'predictions' => $predictions,
-        'inference_ms' => (int)($aiData['inference_ms'] ?? 0)
-    ];
+    return AiService::recognize($pdo, $uid);
 }
 
 function ensureEnNewsTables(PDO $pdo): void {
@@ -786,19 +683,8 @@ function executeRoute(string $route,string $method): never {
         WorkoutController::deleteWorkout($pdo, $uid, (int)$m[1]);
     }
     if ($route === '/water' && $method === 'POST') WorkoutController::recordWater($pdo, $uid, body());
-    if ($route === '/ai/recognize' && $method === 'POST') response(recognizeFood($pdo, $uid));
-    if ($route === '/ai/feedback' && $method === 'POST') {
-        $p = body();
-        $predCode = !empty($p['predicted_dish_code']) ? (string)$p['predicted_dish_code'] : null;
-        $predConf = isset($p['predicted_confidence']) ? (float)$p['predicted_confidence'] : null;
-        $correctedCode = !empty($p['corrected_dish_code']) ? (string)$p['corrected_dish_code'] : null;
-        $imgPath = !empty($p['image_path']) ? (string)$p['image_path'] : null;
-        $items = isset($p['corrected_items']) ? json_encode($p['corrected_items'], JSON_UNESCAPED_UNICODE) : null;
-        execSql($pdo, 'INSERT INTO ai_feedback (user_id, model_version, predicted_dish_code, predicted_confidence, corrected_dish_code, corrected_items, image_path, created_at) VALUES (?, "YOLOv10m-VietFood67", ?, ?, ?, ?, ?, NOW())', [
-            $uid, $predCode, $predConf, $correctedCode, $items, $imgPath
-        ]);
-        response(['id' => (int)$pdo->lastInsertId(), 'status' => 'recorded'], 201);
-    }
+    if ($route === '/ai/recognize' && $method === 'POST') AiController::recognize($pdo, $uid);
+    if ($route === '/ai/feedback' && $method === 'POST') AiController::feedback($pdo, $uid, body());
     if (str_starts_with($route, '/admin/')) {
         requireAdmin($pdo, $uid);
         if ($route === '/admin/ai/health' && $method === 'GET') {
