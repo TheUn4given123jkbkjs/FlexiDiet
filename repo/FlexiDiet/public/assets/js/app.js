@@ -287,6 +287,38 @@ window.refreshQuickFoodDishesCache = () => {
   qfDishesCache = [];
 };
 
+function openCreateQuickModalWithDish(dish, defaultMeal = null) {
+  if (!dish) return;
+  switchCreateTab('food');
+  const modal = document.getElementById('createQuickModal');
+  if (modal) {
+    modal.classList.add('open');
+    if (defaultMeal && document.getElementById('qfMeal')) {
+      document.getElementById('qfMeal').value = defaultMeal;
+    }
+  }
+
+  const portionSelect = document.getElementById('qfPortionRatio');
+  if (portionSelect) portionSelect.value = '1';
+
+  const normalizedDish = {
+    id: Number(dish.id || dish.dish_id),
+    name: dish.name,
+    origin: dish.origin || 'system',
+    serving_label: dish.serving_label || '1 phần',
+    kcal: Number(dish.kcal ?? dish.calories ?? 0),
+    protein_g: Number(dish.protein_g ?? dish.protein ?? 0),
+    carb_g: Number(dish.carb_g ?? dish.carbs ?? 0),
+    fat_g: Number(dish.fat_g ?? dish.fat ?? 0)
+  };
+
+  selectQuickFoodDish(normalizedDish);
+  setTimeout(() => {
+    document.getElementById('qfPortionRatio')?.focus();
+  }, 100);
+}
+window.openCreateQuickModalWithDish = openCreateQuickModalWithDish;
+
 function openCreateQuickModal(defaultMeal, type = 'food') {
   switchCreateTab(type);
   const modal = document.getElementById('createQuickModal');

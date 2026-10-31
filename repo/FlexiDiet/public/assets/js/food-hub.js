@@ -1037,6 +1037,7 @@ const FoodHub = (() => {
       return;
     }
 
+    state.suggestions = suggestions;
     grid.replaceChildren();
     for (const dish of suggestions) {
       const card = document.createElement('div');
@@ -1089,7 +1090,7 @@ const FoodHub = (() => {
 
       const btnSave = card.querySelector('.btn-save-suggestion');
       if (btnSave) {
-        btnSave.addEventListener('click', () => saveSuggestedMeal(dish.dish_id, dish.name));
+        btnSave.addEventListener('click', () => openSuggestionInQuickModal(dish));
       }
 
       grid.appendChild(card);
@@ -1113,14 +1114,56 @@ const FoodHub = (() => {
     loadSmartSuggestions('all', 'all', 'all');
   }
 
-  async function saveSuggestedMeal(dishId, name) {
-    const hour = new Date().getHours();
-    let mealType = 'lunch';
-    if (hour < 10) mealType = 'breakfast';
-    else if (hour < 14) mealType = 'lunch';
-    else if (hour < 17) mealType = 'snack';
-    else mealType = 'dinner';
+  function openSuggestionInQuickModal(dish) {
+    if (!dish) return;
+    let defaultMeal = 'lunch';
+    const sMeal = document.getElementById('filterMealSelect')?.value;
+    if (sMeal === 'breakfast' || sMeal === 'snack') {
+      defaultMeal = sMeal;
+    } else if (sMeal === 'main_meal') {
+      defaultMeal = new Date().getHours() < 15 ? 'lunch' : 'dinner';
+    } else {
+      const hour = new Date().getHours();
+      if (hour < 10) defaultMeal = 'breakfast';
+      else if (hour < 14) defaultMeal = 'lunch';
+      else if (hour < 17) defaultMeal = 'snack';
+      else defaultMeal = 'dinner';
+    }
 
+    if (typeof openCreateQuickModalWithDish === 'function') {
+      openCreateQuickModalWithDish(dish, defaultMeal);
+    } else if (typeof openCreateQuickModal === 'function') {
+      openCreateQuickModal(defaultMeal, 'food');
+      if (typeof selectQuickFoodDish === 'function') {
+        selectQuickFoodDish({
+          id: Number(dish.id || dish.dish_id),
+          name: dish.name,
+          origin: dish.origin || 'system',
+          serving_label: dish.serving_label || '1 phần',
+          kcal: Number(dish.kcal ?? dish.calories ?? 0),
+          protein_g: Number(dish.protein_g ?? dish.protein ?? 0),
+          carb_g: Number(dish.carb_g ?? dish.carbs ?? 0),
+          fat_g: Number(dish.fat_g ?? dish.fat ?? 0)
+        });
+      }
+    } else {
+      saveSuggestedMealDirect(dish.dish_id || dish.id, dish.name, defaultMeal);
+    }
+  }
+
+  function saveSuggestedMeal(dishId, name) {
+    const dish = (state.suggestions || []).find(d => Number(d.dish_id || d.id) === Number(dishId)) || { dish_id: dishId, name };
+    openSuggestionInQuickModal(dish);
+  }
+
+  async function saveSuggestedMealDirect(dishId, name, mealType) {
+    if (!mealType) {
+      const hour = new Date().getHours();
+      if (hour < 10) mealType = 'breakfast';
+      else if (hour < 14) mealType = 'lunch';
+      else if (hour < 17) mealType = 'snack';
+      else mealType = 'dinner';
+    }
     if (typeof fdSaveMeal === 'function') {
       await fdSaveMeal({ dish_id: Number(dishId), meal_type: mealType, serving_factor: 1.0 });
     } else {
