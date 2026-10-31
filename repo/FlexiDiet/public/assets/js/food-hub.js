@@ -65,6 +65,9 @@ const FoodHub = (() => {
     if (subtabName === 'suggestions') {
       loadSmartSuggestions(state.suggestionsTag || 'all');
     }
+    if (subtabName === 'composer') {
+      populateComposerUI();
+    }
   }
 
   // 2. Catalog Traversal & Filter
@@ -460,7 +463,7 @@ const FoodHub = (() => {
   function startNewCustomDish() {
     if (typeof switchTab === 'function') switchTab('food');
     state.composer.dishId = null;
-    state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+    state.composer.name = '';
     state.composer.servingLabel = '1 phần';
     state.composer.origin = 'saved';
     state.composer.ingredients = [];
@@ -476,9 +479,19 @@ const FoodHub = (() => {
     const elMeal = document.getElementById('composerMealType');
     const elLabel = document.getElementById('composerServingLabel');
 
-    if (elName) elName.value = state.composer.name;
-    if (elMeal) elMeal.value = state.composer.mealType;
-    if (elLabel) elLabel.value = state.composer.servingLabel;
+    if (elName) elName.value = state.composer.name || '';
+    if (elMeal) elMeal.value = state.composer.mealType || '';
+    if (elLabel) {
+      const val = state.composer.servingLabel || '1 phần';
+      const exists = Array.from(elLabel.options).some(o => o.value === val);
+      if (!exists && val) {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        elLabel.appendChild(opt);
+      }
+      elLabel.value = val;
+    }
 
     const btnDeleteDish = document.getElementById('btnComposerDeleteDish');
     if (btnDeleteDish) {
@@ -835,7 +848,7 @@ const FoodHub = (() => {
       if (typeof window.refreshQuickFoodDishesCache === 'function') window.refreshQuickFoodDishesCache();
 
       state.composer.dishId = null;
-      state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+      state.composer.name = '';
       state.composer.servingLabel = '1 phần';
       state.composer.origin = 'saved';
       state.composer.ingredients = [];
@@ -867,7 +880,7 @@ const FoodHub = (() => {
 
       if (state.composer.dishId === dishId) {
         state.composer.dishId = null;
-        state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+        state.composer.name = '';
         state.composer.servingLabel = '1 phần';
         state.composer.origin = 'saved';
         state.composer.ingredients = [];
@@ -892,7 +905,7 @@ const FoodHub = (() => {
       }
     }
     state.composer.dishId = null;
-    state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+    state.composer.name = '';
     state.composer.servingLabel = '1 phần';
     state.composer.origin = 'saved';
     state.composer.ingredients = [];
@@ -1089,9 +1102,24 @@ const FoodHub = (() => {
       if (e.key === 'Escape') closeUnrecognizedModal();
     });
 
+    const elName = document.getElementById('composerDishName');
+    if (elName) {
+      elName.addEventListener('input', () => {
+        state.composer.name = elName.value;
+      });
+    }
+
+    const elLabel = document.getElementById('composerServingLabel');
+    if (elLabel) {
+      elLabel.addEventListener('change', () => {
+        state.composer.servingLabel = elLabel.value;
+      });
+    }
+
     // Default load catalog once page modules are ready
     loadCatalog();
     loadSmartSuggestions('all');
+    populateComposerUI();
   }
 
   return {

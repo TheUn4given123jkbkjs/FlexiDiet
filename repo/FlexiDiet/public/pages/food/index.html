@@ -192,40 +192,53 @@
           <div class="form-row fh-composer-meta-row">
             <div class="form-group flex-2">
               <label for="composerDishName"><i class="fa-solid fa-bowl-food"></i> Tên Món Ăn</label>
-              <input class="jira-input" id="composerDishName" placeholder="Tên món ăn..." type="text" value="Phở Bò Tái Nạm"/>
+              <input class="jira-input" id="composerDishName" placeholder="Nhập tên món ăn..." type="text" value=""/>
             </div>
             <div class="form-group flex-1">
               <label for="composerServingLabel"><i class="fa-solid fa-tag"></i> Khẩu Phần</label>
-              <input class="jira-input" id="composerServingLabel" readonly type="text" value="1 tô vừa"/>
+              <select class="jira-select" id="composerServingLabel">
+                <option value="1 phần" selected>1 phần</option>
+                <option value="1 tô">1 tô</option>
+                <option value="1 tô lớn">1 tô lớn</option>
+                <option value="1 đĩa">1 đĩa</option>
+                <option value="1 bát">1 bát</option>
+                <option value="1 ổ">1 ổ</option>
+                <option value="1 suất">1 suất</option>
+                <option value="1 cái">1 cái</option>
+                <option value="1 ly">1 ly</option>
+                <option value="100g">100g</option>
+              </select>
             </div>
           </div>
           <!-- Live Recalculated Nutrition Summary Bar -->
           <div class="fh-nutrition-summary-bar">
             <div class="ns-item cal">
               <span class="ns-label">Tổng Calo</span>
-              <strong class="ns-val" id="composerTotalCal">485</strong>
+              <strong class="ns-val" id="composerTotalCal">0</strong>
               <small>kcal</small>
             </div>
             <div class="ns-divider"></div>
             <div class="ns-item p">
               <span class="ns-label">Protein</span>
-              <strong class="ns-val" id="composerTotalProt">32.5</strong>
+              <strong class="ns-val" id="composerTotalProt">0</strong>
               <small>g</small>
             </div>
+            <div class="ns-divider"></div>
             <div class="ns-item c">
               <span class="ns-label">Carbs</span>
-              <strong class="ns-val" id="composerTotalCarb">68.0</strong>
+              <strong class="ns-val" id="composerTotalCarb">0</strong>
               <small>g</small>
             </div>
+            <div class="ns-divider"></div>
             <div class="ns-item f">
               <span class="ns-label">Fat</span>
-              <strong class="ns-val" id="composerTotalFat">11.2</strong>
+              <strong class="ns-val" id="composerTotalFat">0</strong>
               <small>g</small>
             </div>
             <div class="ns-divider"></div>
             <div class="ns-item w">
               <span class="ns-label">Khối lượng</span>
-              <strong class="ns-val" id="composerTotalWeight">450</strong>
+              <strong class="ns-val" id="composerTotalWeight">0</strong>
               <small>g</small>
             </div>
           </div>
