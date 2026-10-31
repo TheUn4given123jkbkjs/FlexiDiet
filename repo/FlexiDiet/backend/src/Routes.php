@@ -127,10 +127,6 @@ function resetPassword(PDO $pdo, array $p): array {
     }
     return ['message' => 'Mật khẩu đã được đặt lại. Bạn có thể đăng nhập bằng mật khẩu mới.'];
 }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 0918a3caea53f6c797ca5863a24af26eaca4e173
 function ensureProfileAvatarTable(PDO $pdo): void {
     $pdo->exec("CREATE TABLE IF NOT EXISTS profile_avatars (
         user_id BIGINT UNSIGNED NOT NULL,
@@ -186,11 +182,6 @@ function deleteProfileAvatar(PDO $pdo, int $uid): array {
     execSql($pdo, 'DELETE FROM profile_avatars WHERE user_id=?', [$uid]);
     return ['deleted' => true];
 }
-<<<<<<< HEAD
-=======
-=======
->>>>>>> e4a7cad67eae5f63f84a010e5e032e4a90042b0b
->>>>>>> 0918a3caea53f6c797ca5863a24af26eaca4e173
 function updateProfile(PDO $pdo, int $uid, array $p): array {
     $current = profileRow($pdo, $uid);
     $name = isset($p['display_name']) ? requiredString($p, 'display_name', 100) : $current['display_name'];
