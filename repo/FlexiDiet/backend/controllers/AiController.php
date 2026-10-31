@@ -13,3 +13,4 @@ class AiController {
         response(AiService::saveFeedback($pdo, $uid, $params), 201);
     }
 }
+

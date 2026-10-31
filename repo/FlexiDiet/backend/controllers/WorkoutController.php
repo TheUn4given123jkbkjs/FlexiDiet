@@ -36,3 +36,4 @@ class WorkoutController {
         response(WorkoutService::recordWater($pdo, $uid, $params), 201);
     }
 }
+

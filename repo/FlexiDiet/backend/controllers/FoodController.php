@@ -37,3 +37,4 @@ class FoodController {
         response(['deleted' => true]);
     }
 }
+

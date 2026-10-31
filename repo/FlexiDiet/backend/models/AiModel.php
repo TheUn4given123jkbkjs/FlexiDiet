@@ -54,3 +54,4 @@ class AiModel {
         return $dish;
     }
 }
+

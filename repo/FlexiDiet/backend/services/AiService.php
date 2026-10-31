@@ -120,3 +120,4 @@ class AiService {
         return ['id' => $id, 'status' => 'recorded'];
     }
 }
+
