@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/AdminRoutes.php';
 require_once __DIR__ . '/ENews.php';
 
@@ -849,29 +850,27 @@ function executeRoute(string $route,string $method): never {
     if ($route === '/health' && $method === 'GET') { db()->query('SELECT 1'); response(['status'=>'ok','database'=>'connected']); }
     if ($route === '/auth/csrf' && $method === 'GET') response(['csrf_token'=>sessionCsrf()]);
     if ($method !== 'GET') verifyCsrf();
-    if ($route === '/auth/register' && $method === 'POST') response(registration(db(),body()),201);
-    if ($route === '/auth/login' && $method === 'POST') response(login(db(),body()));
-    if ($route === '/auth/forgot-password' && $method === 'POST') response(requestPasswordReset(db(),body()));
-    if ($route === '/auth/reset-password' && $method === 'POST') response(resetPassword(db(),body()));
-    if ($route === '/auth/logout' && $method === 'POST') {
-        currentUserId(); unset($_SESSION['uid']); session_regenerate_id(true); $_SESSION['csrf']=bin2hex(random_bytes(32)); response(['logged_out'=>true]);
-    }
-    if ($route === '/auth/me' && $method === 'GET') { $uid=currentUserId(); response(authData(db(),$uid)); }
+    if ($route === '/auth/register' && $method === 'POST') AuthController::register(db(), body());
+    if ($route === '/auth/login' && $method === 'POST') AuthController::login(db(), body());
+    if ($route === '/auth/forgot-password' && $method === 'POST') AuthController::requestPasswordReset(db(), body());
+    if ($route === '/auth/reset-password' && $method === 'POST') AuthController::resetPassword(db(), body());
+    if ($route === '/auth/logout' && $method === 'POST') AuthController::logout();
+    if ($route === '/auth/me' && $method === 'GET') AuthController::me(db(), currentUserId());
     $uid = currentUserId(); $pdo = db();
     if (preg_match('~^/profile/avatar/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
         enewsInteractionAvatar($pdo, $uid, (int)$m[1]);
     }
-    if ($route === '/profile/avatar' && $method === 'GET') serveProfileAvatar($pdo, $uid);
-    if ($route === '/profile/avatar' && $method === 'POST') response(uploadProfileAvatar($pdo, $uid));
-    if ($route === '/profile/avatar' && $method === 'DELETE') response(deleteProfileAvatar($pdo, $uid));
-    if ($route === '/profile' && $method === 'GET') response(profileRow($pdo,$uid));
-    if ($route === '/profile' && $method === 'PATCH') response(updateProfile($pdo,$uid,body()));
-    if ($route === '/weight-logs' && $method === 'POST') response(recordWeight($pdo,$uid,body()),201);
+    if ($route === '/profile/avatar' && $method === 'GET') ProfileController::getAvatar($pdo, $uid);
+    if ($route === '/profile/avatar' && $method === 'POST') ProfileController::uploadAvatar($pdo, $uid);
+    if ($route === '/profile/avatar' && $method === 'DELETE') ProfileController::deleteAvatar($pdo, $uid);
+    if ($route === '/profile' && $method === 'GET') ProfileController::getProfile($pdo, $uid);
+    if ($route === '/profile' && $method === 'PATCH') ProfileController::updateProfile($pdo, $uid, body());
+    if ($route === '/weight-logs' && $method === 'POST') ProfileController::recordWeight($pdo, $uid, body());
     if ($route === '/profile/insights' && $method === 'GET') {
         $w=(int)num($_GET,'weight_days',30,1825,365);
         $e=(int)num($_GET,'energy_days',7,365,7);
         if (!in_array($w,[30,90,365,1825],true) || !in_array($e,[7,30,365],true)) fail(422,'INVALID_PERIOD','Khoảng thời gian không được hỗ trợ.');
-        response(profileInsights($pdo,$uid,$w,$e));
+        ProfileController::getInsights($pdo, $uid, $w, $e);
     }
     if ($route === '/dashboard' && $method === 'GET') {
         $day = dateValue($_GET['date'] ?? today());
