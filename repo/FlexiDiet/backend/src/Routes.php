@@ -309,245 +309,35 @@ function recognizeFood(PDO $pdo, int $uid): array {
 }
 
 function ensureEnNewsTables(PDO $pdo): void {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS posts (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        user_id BIGINT UNSIGNED NOT NULL,
-        content TEXT NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        KEY idx_posts_user_created (user_id, created_at DESC),
-        KEY idx_posts_created (created_at DESC),
-        CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS post_media (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        post_id BIGINT UNSIGNED NOT NULL,
-        user_id BIGINT UNSIGNED NOT NULL,
-        mime_type VARCHAR(32) NOT NULL,
-        file_name VARCHAR(255) NOT NULL,
-        file_path VARCHAR(500) NOT NULL,
-        file_size BIGINT UNSIGNED NOT NULL DEFAULT 0,
-        sort_order TINYINT UNSIGNED NOT NULL DEFAULT 0,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        KEY idx_post_media_post (post_id, sort_order),
-        CONSTRAINT fk_post_media_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-        CONSTRAINT fk_post_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS post_likes (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        post_id BIGINT UNSIGNED NOT NULL,
-        user_id BIGINT UNSIGNED NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        UNIQUE KEY uq_post_likes (post_id, user_id),
-        KEY idx_post_likes_post (post_id),
-        CONSTRAINT fk_post_likes_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-        CONSTRAINT fk_post_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    ENewsModel::ensureTables($pdo);
 }
 
 function enewsUploadMedia(PDO $pdo, int $uid): array {
-    ensureEnNewsTables($pdo);
-    if (!isset($_FILES['media'])) fail(422, 'INVALID_UPLOAD', 'Không có tệp ảnh nào được gửi lên.');
-
-    $fileGroups = $_FILES['media'];
-    $items = [];
-    if (isset($fileGroups['tmp_name']) && is_array($fileGroups['tmp_name'])) {
-        foreach ($fileGroups['tmp_name'] as $index => $tmpName) {
-            if (!is_string($tmpName) || $tmpName === '') continue;
-            $items[] = [
-                'tmp_name' => $tmpName,
-                'name' => (string)($fileGroups['name'][$index] ?? 'upload.jpg'),
-                'type' => (string)($fileGroups['type'][$index] ?? 'image/jpeg'),
-                'size' => (int)($fileGroups['size'][$index] ?? 0),
-            ];
-        }
-    } else {
-        $items[] = [
-            'tmp_name' => (string)($fileGroups['tmp_name'] ?? ''),
-            'name' => (string)($fileGroups['name'] ?? 'upload.jpg'),
-            'type' => (string)($fileGroups['type'] ?? 'image/jpeg'),
-            'size' => (int)($fileGroups['size'] ?? 0),
-        ];
-    }
-
-    if ($items === []) fail(422, 'INVALID_UPLOAD', 'Không có tệp ảnh nào được gửi lên.');
-    if (count($items) > 6) fail(422, 'TOO_MANY_IMAGES', 'Bạn có thể đăng tối đa 6 ảnh trong một bài viết.');
-
-    $directory = __DIR__ . '/../../public/uploads/enews';
-    if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
-        fail(500, 'UPLOAD_DIR_FAILED', 'Không thể tạo thư mục lưu ảnh bài viết.');
-    }
-
-    $uploaded = [];
-    foreach ($items as $item) {
-        $tmpName = (string)($item['tmp_name'] ?? '');
-        if ($tmpName === '' || !is_uploaded_file($tmpName)) continue;
-        $size = (int)($item['size'] ?? 0);
-        if ($size <= 0 || $size > 5 * 1024 * 1024) fail(422, 'INVALID_IMAGE_SIZE', 'Mỗi ảnh tối đa 5 MB.');
-
-        $mime = mime_content_type($tmpName) ?: (string)($item['type'] ?? 'image/jpeg');
-        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-            fail(422, 'INVALID_FILE_TYPE', 'Chỉ chấp nhận ảnh JPG, PNG hoặc WebP.');
-        }
-
-        $base = preg_replace('/[^a-zA-Z0-9_.-]+/', '-', basename((string)($item['name'] ?? 'upload')));
-        $base = trim($base, '.-');
-        if ($base === '') $base = 'upload';
-        $ext = match ($mime) {
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            default => 'webp',
-        };
-        $targetName = sprintf('%s_%s_%s.%s', date('YmdHis'), $uid, bin2hex(random_bytes(4)), $ext);
-        $targetPath = $directory . '/' . $targetName;
-        if (!move_uploaded_file($tmpName, $targetPath)) {
-            fail(500, 'UPLOAD_FAILED', 'Không thể lưu ảnh lên máy chủ.');
-        }
-
-        $uploaded[] = [
-            'path' => '/uploads/enews/' . $targetName,
-            'name' => $base,
-            'mime_type' => $mime,
-            'size' => $size,
-        ];
-    }
-
-    if ($uploaded === []) fail(422, 'INVALID_UPLOAD', 'Không có ảnh hợp lệ để tải lên.');
-    return ['files' => $uploaded];
+    return enewsInteractionUpload($pdo, $uid);
 }
 
 function enewsPostDetail(PDO $pdo, int $uid, int $postId): array {
-    $post = one($pdo, 'SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, u.display_name
-        FROM posts p
-        JOIN users u ON u.id = p.user_id
-        WHERE p.id = ?', [$postId]);
-    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
-
-    $images = all($pdo, 'SELECT id, file_path, mime_type, file_name, sort_order FROM post_media WHERE post_id=? ORDER BY sort_order, id', [$postId]);
-    $likesCount = (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0);
-    $likedByMe = (bool)one($pdo, 'SELECT 1 FROM post_likes WHERE post_id=? AND user_id=? LIMIT 1', [$postId, $uid]);
-
-    return [
-        'id' => (int)$post['id'],
-        'user_id' => (int)$post['user_id'],
-        'content' => (string)$post['content'],
-        'created_at' => $post['created_at'],
-        'updated_at' => $post['updated_at'],
-        'author' => [
-            'id' => (int)$post['user_id'],
-            'display_name' => $post['display_name'],
-        ],
-        'images' => array_map(static fn($image) => [
-            'id' => (int)$image['id'],
-            'path' => $image['file_path'],
-            'mime_type' => $image['mime_type'],
-            'file_name' => $image['file_name'],
-            'sort_order' => (int)$image['sort_order'],
-        ], $images),
-        'likes_count' => $likesCount,
-        'liked_by_me' => $likedByMe,
-        'comments_count' => 0,
-        'can_edit' => ((int)$post['user_id'] === $uid),
-        'can_delete' => ((int)$post['user_id'] === $uid),
-    ];
+    return enewsInteractionPostDetail($pdo, $uid, $postId);
 }
 
 function enewsFeed(PDO $pdo, int $uid, int $limit = 12, int $offset = 0): array {
-    $limit = max(1, min(25, $limit));
-    $offset = max(0, $offset);
-    $rows = all($pdo, 'SELECT p.id
-        FROM posts p
-        ORDER BY p.created_at DESC, p.id DESC
-        LIMIT ? OFFSET ?', [$limit, $offset]);
-
-    $posts = [];
-    foreach ($rows as $row) {
-        $posts[] = enewsPostDetail($pdo, $uid, (int)$row['id']);
-    }
-
-    return ['posts' => $posts, 'count' => count($posts), 'limit' => $limit, 'offset' => $offset];
+    return enewsInteractionFeed($pdo, $uid, $limit, $offset);
 }
 
 function enewsCreatePost(PDO $pdo, int $uid, array $p): array {
-    ensureEnNewsTables($pdo);
-    $content = trim((string)($p['content'] ?? ''));
-    $images = $p['images'] ?? [];
-    if (!is_array($images)) fail(422, 'INVALID_IMAGES', 'Ảnh bài viết không hợp lệ.');
-    if ($content === '' && count($images) === 0) fail(422, 'EMPTY_POST', 'Bài viết phải có nội dung hoặc ít nhất một ảnh.');
-    if (mb_strlen($content) > 2000) fail(422, 'CONTENT_TOO_LONG', 'Nội dung bài viết tối đa 2000 ký tự.');
-    if (count($images) > 6) fail(422, 'TOO_MANY_IMAGES', 'Bạn có thể đăng tối đa 6 ảnh trong một bài viết.');
-
-    $pdo->beginTransaction();
-    try {
-        $stmt = $pdo->prepare('INSERT INTO posts (user_id, content) VALUES (?, ?)');
-        $stmt->execute([$uid, $content]);
-        $postId = (int)$pdo->lastInsertId();
-
-        foreach ($images as $index => $rawPath) {
-            $path = is_string($rawPath) ? trim($rawPath) : '';
-            if ($path === '') continue;
-            if (!preg_match('#^/uploads/enews/[A-Za-z0-9._/-]+\.(jpg|jpeg|png|webp)$#i', $path)) {
-                fail(422, 'INVALID_IMAGE_PATH', 'Đường dẫn ảnh không hợp lệ.');
-            }
-            $storagePath = __DIR__ . '/../../public' . $path;
-            if (!is_file($storagePath)) fail(422, 'INVALID_IMAGE_PATH', 'File ảnh không tồn tại trên máy chủ.');
-            $mime = mime_content_type($storagePath) ?: 'image/jpeg';
-            if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                fail(422, 'INVALID_FILE_TYPE', 'File ảnh không hợp lệ.');
-            }
-            $fileName = basename($storagePath);
-            execSql($pdo, 'INSERT INTO post_media (post_id, user_id, mime_type, file_name, file_path, file_size, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)', [$postId, $uid, $mime, $fileName, $path, (int)filesize($storagePath), $index]);
-        }
-
-        $pdo->commit();
-        return enewsPostDetail($pdo, $uid, $postId);
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        throw $e;
-    }
+    return enewsInteractionCreatePost($pdo, $uid, $p);
 }
 
 function enewsUpdatePost(PDO $pdo, int $uid, int $postId, array $p): array {
-    $post = one($pdo, 'SELECT user_id, content FROM posts WHERE id=?', [$postId]);
-    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
-    if ((int)$post['user_id'] !== $uid) fail(403, 'FORBIDDEN', 'Bạn không có quyền sửa bài viết này.');
-
-    $content = trim((string)($p['content'] ?? $post['content']));
-    if ($content === '') fail(422, 'EMPTY_POST', 'Bài viết không được để trống.');
-    if (mb_strlen($content) > 2000) fail(422, 'CONTENT_TOO_LONG', 'Nội dung bài viết tối đa 2000 ký tự.');
-
-    execSql($pdo, 'UPDATE posts SET content=? WHERE id=? AND user_id=?', [$content, $postId, $uid]);
-    return enewsPostDetail($pdo, $uid, $postId);
+    return enewsInteractionUpdatePost($pdo, $uid, $postId, $p);
 }
 
 function enewsDeletePost(PDO $pdo, int $uid, int $postId): array {
-    $post = one($pdo, 'SELECT user_id FROM posts WHERE id=?', [$postId]);
-    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
-    if ((int)$post['user_id'] !== $uid) fail(403, 'FORBIDDEN', 'Bạn không có quyền xóa bài viết này.');
-
-    execSql($pdo, 'DELETE FROM posts WHERE id=? AND user_id=?', [$postId, $uid]);
-    return ['deleted' => true, 'post_id' => $postId];
+    return enewsInteractionDeletePost($pdo, $uid, $postId);
 }
 
 function enewsToggleLike(PDO $pdo, int $uid, int $postId, bool $liked): array {
-    $post = one($pdo, 'SELECT id FROM posts WHERE id=?', [$postId]);
-    if (!$post) fail(404, 'POST_NOT_FOUND', 'Không tìm thấy bài viết.');
-
-    if ($liked) {
-        $exists = one($pdo, 'SELECT 1 FROM post_likes WHERE post_id=? AND user_id=? LIMIT 1', [$postId, $uid]);
-        if (!$exists) {
-            execSql($pdo, 'INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)', [$postId, $uid]);
-        }
-        return ['liked' => true, 'likes_count' => (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0)];
-    }
-
-    execSql($pdo, 'DELETE FROM post_likes WHERE post_id=? AND user_id=?', [$postId, $uid]);
-    return ['liked' => false, 'likes_count' => (int)(one($pdo, 'SELECT COUNT(*) c FROM post_likes WHERE post_id=?', [$postId])['c'] ?? 0)];
+    return enewsInteractionToggleLike($pdo, $uid, $postId, $liked);
 }
 
 function executeRoute(string $route,string $method): never {
@@ -583,86 +373,8 @@ function executeRoute(string $route,string $method): never {
         try { ensureBudget($pdo,$uid,$day); $pdo->commit(); } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
         response(['budget'=>budgetView($pdo,$uid,$day),'meals'=>mealList($pdo,$uid,$day),'workouts'=>workoutList($pdo,$uid,$day),'profile'=>profileRow($pdo,$uid)]);
     }
-    if ($route === '/enews/feed' && $method === 'GET') {
-        $limit = max(1, min(25, (int)num($_GET, 'limit', 1, 25, 12)));
-        $offset = max(0, (int)num($_GET, 'offset', 0, 5000, 0));
-        response(enewsInteractionFeed($pdo, $uid, $limit, $offset));
-    }
-    if ($route === '/enews/profile' && $method === 'GET') {
-        $limit = (int)num($_GET, 'limit', 1, 25, 12);
-        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
-        response(enewsInteractionProfile($pdo, $uid, $uid, $limit, $offset));
-    }
-    if (preg_match('~^/enews/profile/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
-        $limit = (int)num($_GET, 'limit', 1, 25, 12);
-        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
-        response(enewsInteractionProfile($pdo, $uid, (int)$m[1], $limit, $offset));
-    }
-    if ($route === '/enews/profile' && $method === 'PATCH') {
-        response(enewsInteractionUpdatePublicProfile($pdo, $uid, body()));
-    }
-    if ($route === '/enews/friends/requests' && $method === 'GET') {
-        response(enewsFriendshipRequests($pdo, $uid));
-    }
-    if ($route === '/enews/friends' && $method === 'GET') {
-        response(enewsFriendshipList($pdo, $uid));
-    }
-    if (preg_match('~^/enews/friends/([1-9][0-9]*)/request$~D', $route, $m) && $method === 'POST') {
-        response(enewsFriendshipRequest($pdo, $uid, (int)$m[1]), 201);
-    }
-    if (preg_match('~^/enews/friends/([1-9][0-9]*)/request$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsFriendshipCancel($pdo, $uid, (int)$m[1]));
-    }
-    if (preg_match('~^/enews/friends/requests/([1-9][0-9]*)/(accept|decline)$~D', $route, $m) && $method === 'POST') {
-        response(enewsFriendshipRespond($pdo, $uid, (int)$m[1], $m[2] === 'accept'));
-    }
-    if (preg_match('~^/enews/friends/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsFriendshipRemove($pdo, $uid, (int)$m[1]));
-    }
-    if (preg_match('~^/enews/media/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
-        enewsInteractionServeMedia($pdo, $uid, (int)$m[1]);
-    }
-    if ($route === '/enews/media' && $method === 'POST') response(enewsInteractionUpload($pdo, $uid));
-    if ($route === '/enews/posts' && $method === 'POST') response(enewsInteractionCreatePost($pdo, $uid, body()), 201);
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
-        response(enewsInteractionPostDetail($pdo, $uid, (int)$m[1]));
-    }
-    if ($route === '/enews/notifications' && $method === 'GET') {
-        $limit = (int)num($_GET, 'limit', 1, 50, 20);
-        $offset = (int)num($_GET, 'offset', 0, 5000, 0);
-        response(enewsInteractionNotifications($pdo, $uid, $limit, $offset));
-    }
-    if (preg_match('~^/enews/notifications/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
-        response(enewsInteractionReadNotification($pdo, $uid, (int)$m[1]));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)/comments$~D', $route, $m) && $method === 'GET') {
-        $limit = (int)num($_GET, 'limit', 1, 50, 30);
-        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
-        response(enewsInteractionCommentList($pdo, $uid, (int)$m[1], $limit, $offset));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)/comments$~D', $route, $m) && $method === 'POST') {
-        response(enewsInteractionCreateComment($pdo, $uid, (int)$m[1], body()), 201);
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)/share$~D', $route, $m) && $method === 'POST') {
-        response(enewsInteractionShare($pdo, $uid, (int)$m[1], body()), 201);
-    }
-    if (preg_match('~^/enews/comments/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
-        response(enewsInteractionUpdateComment($pdo, $uid, (int)$m[1], body()));
-    }
-    if (preg_match('~^/enews/comments/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsInteractionDeleteComment($pdo, $uid, (int)$m[1]));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
-        response(enewsInteractionUpdatePost($pdo, $uid, (int)$m[1], body()));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsInteractionDeletePost($pdo, $uid, (int)$m[1]));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'POST') {
-        response(enewsInteractionToggleLike($pdo, $uid, (int)$m[1], true));
-    }
-    if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsInteractionToggleLike($pdo, $uid, (int)$m[1], false));
+    if (str_starts_with($route, '/enews/')) {
+        if (ENewsController::handle($pdo, $uid, $route, $method)) exit;
     }
     if ($route === '/foods' && $method === 'GET') FoodController::searchFoods($pdo, $uid);
     if (preg_match('~^/foods/([1-9][0-9]*)/recipe$~D', $route, $m) && $method === 'GET') {
