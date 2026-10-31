@@ -39,8 +39,9 @@ class FoodController {
 
     public static function getSuggestions(PDO $pdo, int $uid): void {
         $tag = (string)($_GET['tag'] ?? 'all');
-        $meal = isset($_GET['meal']) ? (string)$_GET['meal'] : null;
-        response(FoodService::getSmartSuggestions($pdo, $uid, $tag, $meal));
+        $meal = (string)($_GET['meal'] ?? 'all');
+        $origin = (string)($_GET['origin'] ?? 'all');
+        response(FoodService::getSmartSuggestions($pdo, $uid, $tag, $meal, $origin));
     }
 }
 

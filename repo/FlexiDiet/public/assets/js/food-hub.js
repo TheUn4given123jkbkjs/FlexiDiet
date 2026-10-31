@@ -10,6 +10,12 @@ const FoodHub = (() => {
     activeSubtab: 'scanner',
     catalogDishes: [],
     catalogFilter: 'all',
+    filterNutri: 'all',
+    filterMeal: 'all',
+    filterOrigin: 'all',
+    filterNutri: 'all',
+    filterMeal: 'all',
+    filterOrigin: 'all',
     suggestionsTag: 'all',
     currentDish: null,
     composer: {
@@ -803,9 +809,24 @@ const FoodHub = (() => {
   }
 
 
-    // 6.5. Smart Food Suggestions (UC-Recommendation)
-  async function loadSmartSuggestions(tag = 'all') {
-    state.suggestionsTag = tag;
+      // 6.5. Smart Food Suggestions Multi-Filter
+  async function loadSmartSuggestions(tag, meal, origin) {
+    const sNutri = document.getElementById('filterNutriSelect');
+    const sMeal = document.getElementById('filterMealSelect');
+    const sOrigin = document.getElementById('filterOriginSelect');
+
+    const activeNutri = tag !== undefined ? tag : (sNutri ? sNutri.value : (state.filterNutri || 'all'));
+    const activeMeal = meal !== undefined ? meal : (sMeal ? sMeal.value : (state.filterMeal || 'all'));
+    const activeOrigin = origin !== undefined ? origin : (sOrigin ? sOrigin.value : (state.filterOrigin || 'all'));
+
+    state.filterNutri = activeNutri;
+    state.filterMeal = activeMeal;
+    state.filterOrigin = activeOrigin;
+
+    if (sNutri && sNutri.value !== activeNutri) sNutri.value = activeNutri;
+    if (sMeal && sMeal.value !== activeMeal) sMeal.value = activeMeal;
+    if (sOrigin && sOrigin.value !== activeOrigin) sOrigin.value = activeOrigin;
+
     const grid = document.getElementById('suggestionsGrid');
     if (!grid) return;
 
@@ -816,7 +837,8 @@ const FoodHub = (() => {
 
     let suggestions = [];
     try {
-      const res = await FlexiAPI.request('/foods/suggestions?tag=' + encodeURIComponent(tag));
+      const query = 'tag=' + encodeURIComponent(activeNutri) + '&meal=' + encodeURIComponent(activeMeal) + '&origin=' + encodeURIComponent(activeOrigin);
+      const res = await FlexiAPI.request('/foods/suggestions?' + query);
       if (res && Array.isArray(res.suggestions)) {
         suggestions = res.suggestions;
       } else if (res && Array.isArray(res.data)) {
@@ -828,86 +850,23 @@ const FoodHub = (() => {
       console.warn('Backend suggestions API unverified or session offline:', e);
     }
 
-    // Fallback if empty (e.g. offline demo mode or cold start)
-    if (!suggestions.length) {
+    // Fallback if empty and in offline/demo mode
+    if (!suggestions.length && (activeNutri === 'all' && activeMeal === 'all' && activeOrigin === 'all')) {
       suggestions = [
-        {
-          dish_id: 1,
-          name: 'Salad Ức Gà Áp Chảo Rau Củ Healthy',
-          origin: 'system',
-          kcal: 340,
-          protein_g: 38,
-          carb_g: 14,
-          fat_g: 8,
-          match_pct: 95,
-          match_reason: 'Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.',
-          image_url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop&q=80'
-        },
-        {
-          dish_id: 14,
-          name: 'Bún Chả Hà Nội Nướng Than Hoa',
-          origin: 'system',
-          kcal: 510,
-          protein_g: 28,
-          carb_g: 64,
-          fat_g: 16,
-          match_pct: 88,
-          match_reason: 'Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.',
-          image_url: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=500&auto=format&fit=crop&q=80'
-        },
-        {
-          dish_id: 31,
-          name: 'Gỏi Cuốn Tôm Thịt Nạc (3 Cuốn)',
-          origin: 'system',
-          kcal: 280,
-          protein_g: 22,
-          carb_g: 34,
-          fat_g: 6,
-          match_pct: 91,
-          match_reason: 'Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.',
-          image_url: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80'
-        },
-        {
-          dish_id: 27,
-          name: 'Cơm Tấm Sườn Nướng Chả Trứng',
-          origin: 'system',
-          kcal: 580,
-          protein_g: 32,
-          carb_g: 75,
-          fat_g: 15,
-          match_pct: 84,
-          match_reason: 'Sườn nướng mật ong đậm đà, chả trứng hấp mềm xốp, dưa chuột cà chua giải ngấy.',
-          image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80'
-        }
+        { dish_id: 1, name: 'Salad Ức Gà Áp Chảo Rau Củ Healthy', origin: 'system', kcal: 340, protein_g: 38, carb_g: 14, fat_g: 8, match_pct: 95, match_reason: 'Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.', image_url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop&q=80' },
+        { dish_id: 14, name: 'Bún Chả Hà Nội Nướng Than Hoa', origin: 'system', kcal: 510, protein_g: 28, carb_g: 64, fat_g: 16, match_pct: 88, match_reason: 'Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.', image_url: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=500&auto=format&fit=crop&q=80' },
+        { dish_id: 31, name: 'Gỏi Cuốn Tôm Thịt Nạc (3 Cuốn)', origin: 'system', kcal: 280, protein_g: 22, carb_g: 34, fat_g: 6, match_pct: 91, match_reason: 'Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.', image_url: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
+        { dish_id: 27, name: 'Cơm Tấm Sườn Nướng Chả Trứng', origin: 'system', kcal: 580, protein_g: 32, carb_g: 75, fat_g: 15, match_pct: 84, match_reason: 'Sườn nướng mật ong đậm đà, chả trứng hấp mềm xốp, dưa chuột cà chua giải ngấy.', image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80' }
       ];
-
-      if (tag === 'high_prot') {
-        suggestions = suggestions.filter(d => (d.protein_g ?? d.protein ?? 0) >= 25);
-      } else if (tag === 'low_cal') {
-        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 350);
-      } else if (tag === 'low_carb') {
-        suggestions = suggestions.filter(d => (d.carb_g ?? d.carbs ?? 0) <= 30);
-      } else if (tag === 'low_fat') {
-        suggestions = suggestions.filter(d => (d.fat_g ?? d.fat ?? 0) <= 10);
-      } else if (tag === 'high_energy') {
-        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) >= 500);
-      } else if (tag === 'custom') {
-        suggestions = suggestions.filter(d => d.origin === 'custom');
-      } else if (tag === 'viet') {
-        suggestions = suggestions.filter(d => d.origin === 'system');
-      } else if (tag === 'breakfast') {
-        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 550);
-      } else if (tag === 'main_meal') {
-        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) >= 450);
-      } else if (tag === 'snack') {
-        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 300);
-      }
     }
 
     if (!suggestions.length) {
-      const emptyMsg = (tag === 'custom')
-        ? 'Bạn chưa tạo món ăn cá nhân nào. Hãy chuyển sang tab "3. Tùy chỉnh & Phối món" để tự phối món ruột của riêng bạn!'
-        : 'Không tìm thấy món ăn phù hợp với tiêu chí lọc này.';
+      let emptyMsg = 'Không tìm thấy món ăn nào thỏa mãn đồng thời các tiêu chí lọc đã chọn.';
+      if (activeOrigin === 'custom') {
+        emptyMsg = 'Bạn chưa tạo món ăn cá nhân nào. Hãy chuyển sang tab "3. Tùy chỉnh & Phối món" để tự phối món ruột của riêng bạn!';
+      } else if (activeNutri !== 'all' && activeMeal !== 'all') {
+        emptyMsg = 'Không có món ăn nào đồng thời khớp cả mục tiêu dinh dưỡng và bữa ăn này. Bạn hãy thử nới lỏng một tiêu chí nhé!';
+      }
       grid.innerHTML = `
         <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: var(--text-muted);">
           <i class="fa-solid fa-circle-info" style="font-size: 24px; margin-bottom: 8px;"></i>
@@ -963,6 +922,23 @@ const FoodHub = (() => {
 
       grid.appendChild(card);
     }
+  }
+
+  function applyMultiFilter() {
+    loadSmartSuggestions();
+  }
+
+  function resetMultiFilter() {
+    const sNutri = document.getElementById('filterNutriSelect');
+    const sMeal = document.getElementById('filterMealSelect');
+    const sOrigin = document.getElementById('filterOriginSelect');
+    if (sNutri) sNutri.value = 'all';
+    if (sMeal) sMeal.value = 'all';
+    if (sOrigin) sOrigin.value = 'all';
+    state.filterNutri = 'all';
+    state.filterMeal = 'all';
+    state.filterOrigin = 'all';
+    loadSmartSuggestions('all', 'all', 'all');
   }
 
   async function saveSuggestedMeal(dishId, name) {
@@ -1040,7 +1016,9 @@ const FoodHub = (() => {
     submitComposerToMealLog,
     submitComposerAsMyDish,
     loadSmartSuggestions,
-    saveSuggestedMeal
+    saveSuggestedMeal,
+    applyMultiFilter,
+    resetMultiFilter
   };
 })();
 

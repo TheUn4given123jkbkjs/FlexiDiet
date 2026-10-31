@@ -225,7 +225,22 @@ class FoodService {
         }
     }
 
-    public static function getSmartSuggestions(PDO $pdo, int $uid, string $tag = 'all', ?string $meal = null): array {
+    public static function getSmartSuggestions(
+        PDO $pdo,
+        int $uid,
+        string $tag = 'all',
+        string $meal = 'all',
+        string $origin = 'all'
+    ): array {
+        // Tương thích ngược nếu tag truyền vào là giá trị của origin hoặc meal
+        if (in_array($tag, ['viet', 'custom'], true) && $origin === 'all') {
+            $origin = $tag;
+            $tag = 'all';
+        } elseif (in_array($tag, ['breakfast', 'main_meal', 'snack'], true) && $meal === 'all') {
+            $meal = $tag;
+            $tag = 'all';
+        }
+
         // 1. Lấy thông tin mục tiêu và ngân sách hôm nay
         ensureBudget($pdo, $uid, today());
         $budget = budgetView($pdo, $uid, today());
@@ -241,75 +256,80 @@ class FoodService {
         $candidates = FoodModel::getCandidateDishesForRecommendation($pdo, $uid);
         if (empty($candidates)) {
             return [
-                'budget' => ['remaining_kcal' => $remainingKcal, 'target_kcal' => $targetKcal, 'goal' => $goal],
+                'budget' => ['remaining_kcal' => $remainingKcal, 'target_kcal' => $targetKcal, 'consumed_kcal' => $consumedKcal, 'goal' => $goal],
                 'suggestions' => []
             ];
         }
 
-        // 3. Truy vấn dữ liệu lịch sử cá nhân và xu hướng cộng đồng
+        // 3. Multi-filter Tiêu chí 1: Nguồn gốc món ăn ($origin)
+        if ($origin === 'custom') {
+            $candidates = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'custom'));
+        } elseif ($origin === 'system' || $origin === 'viet') {
+            $candidates = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'system'));
+        }
+
+        if (empty($candidates)) {
+            return [
+                'budget' => ['remaining_kcal' => $remainingKcal, 'target_kcal' => $targetKcal, 'consumed_kcal' => $consumedKcal, 'goal' => $goal],
+                'suggestions' => []
+            ];
+        }
+
+        // 4. Lấy dữ liệu lịch sử cá nhân và xu hướng cộng đồng
         $user7dMap = FoodModel::getUserDishCountsInDays($pdo, $uid, 7);
         $userAllMap = FoodModel::getUserAllTimeDishCounts($pdo, $uid);
         $userTotalMeals = FoodModel::getUserTotalMealsCount($pdo, $uid);
         $peerMap = FoodModel::getPeerDishCountsByGoal($pdo, $goal, 30);
         $maxPeerCount = max(1, ...array_values($peerMap) ?: [1]);
 
-        // 4. Giai đoạn 1: Sàng lọc theo Calo (Cascade Filter by Kcal)
+        // 5. Giai đoạn 1: Sàng lọc theo Calo (Cascade Filter by Kcal)
         $filtered = [];
-        $kcalCap = $remainingKcal > 0 ? max(350.0, 1.3 * $remainingKcal) : 250.0;
+        $kcalCap = ($remainingKcal > 0) ? max(350.0, 1.3 * $remainingKcal) : 250.0;
+        if ($tag === 'high_energy' || $meal === 'main_meal') {
+            $kcalCap = 1200.0; // Nới lỏng trần calo nếu tìm món năng lượng cao hoặc bữa chính
+        }
         foreach ($candidates as $dish) {
             $kcal = (float)$dish['kcal'];
-            if ($remainingKcal <= 0) {
+            if ($remainingKcal <= 0 && $tag !== 'high_energy') {
                 if ($kcal <= 250.0) $filtered[] = $dish;
             } else {
                 if ($kcal <= $kcalCap) $filtered[] = $dish;
             }
         }
         if (empty($filtered)) {
-            usort($candidates, fn($a, $b) => (float)$a['kcal'] <=> (float)$b['kcal']);
-            $filtered = array_slice($candidates, 0, 15);
+            $filtered = $candidates;
         }
 
-        // Tùy chọn lọc theo Tag dinh dưỡng / Nguồn món / Bữa ăn nếu người dùng chọn
+        // 6. Multi-filter Tiêu chí 2: Mục tiêu Dinh dưỡng ($tag)
         if ($tag === 'high_prot') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['protein_g'] >= 25.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['protein_g'] >= 25.0));
         } elseif ($tag === 'low_cal') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 350.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 350.0));
         } elseif ($tag === 'low_carb') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['carb_g'] <= 30.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['carb_g'] <= 30.0));
         } elseif ($tag === 'low_fat') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['fat_g'] <= 10.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['fat_g'] <= 10.0));
         } elseif ($tag === 'high_energy') {
-            // Món năng lượng cao (>= 600 kcal)
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 600.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
-            else {
-                // Nếu giai đoạn 1 lọc dưới 600, lấy từ danh sách candidate ban đầu
-                $tagFiltered = array_values(array_filter($candidates, fn($d) => (float)$d['kcal'] >= 550.0));
-                if (!empty($tagFiltered)) $filtered = $tagFiltered;
-            }
-        } elseif ($tag === 'viet') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => $d['origin'] === 'system'));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
-        } elseif ($tag === 'custom') {
-            // Lọc riêng món custom do user tự tạo
-            $tagFiltered = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'custom'));
-            $filtered = $tagFiltered;
-        } elseif ($tag === 'breakfast') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 200.0 && (float)$d['kcal'] <= 550.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
-        } elseif ($tag === 'main_meal') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 450.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
-        } elseif ($tag === 'snack') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 300.0));
-            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 550.0));
         }
 
-        // 5. Giai đoạn 2: Chấm điểm 3 thành phần (Component Scoring)
+        // 7. Multi-filter Tiêu chí 3: Phân loại Bữa ăn ($meal)
+        if ($meal === 'breakfast') {
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 200.0 && (float)$d['kcal'] <= 550.0));
+        } elseif ($meal === 'main_meal' || $meal === 'lunch') {
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 450.0));
+        } elseif ($meal === 'snack') {
+            $filtered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 300.0));
+        }
+
+        if (empty($filtered)) {
+            return [
+                'budget' => ['remaining_kcal' => $remainingKcal, 'target_kcal' => $targetKcal, 'consumed_kcal' => $consumedKcal, 'goal' => $goal],
+                'suggestions' => []
+            ];
+        }
+
+        // 8. Giai đoạn 2: Chấm điểm 3 thành phần (Component Scoring)
         $idealMealKcal = $remainingKcal > 0 ? min($remainingKcal, max(300.0, $targetKcal * 0.35)) : 150.0;
         $scored = [];
 
@@ -389,18 +409,21 @@ class FoodService {
             // 7. Giai đoạn 4: Ranking & Match Reason
             $matchPct = (int)round(min(99.0, max(50.0, $sFinal * 10.0)));
 
-            if ($tag === 'low_carb') {
-                $reason = "Hàm lượng tinh bột thấp ({$carb}g Carb) — Phù hợp chế độ Low-Carb/Keto";
-            } elseif ($tag === 'low_fat') {
-                $reason = "Hàm lượng chất béo thấp ({$fat}g Fat) — Thanh lọc cơ thể, hạn chế dầu mỡ";
-            } elseif ($tag === 'high_energy') {
-                $reason = "Năng lượng dồi dào ({$kcal} kcal) — Tối ưu phục hồi và xả cơ";
-            } elseif ($tag === 'breakfast') {
-                $reason = "Khởi đầu ngày mới tràn đầy năng lượng ({$kcal} kcal, {$prot}g Protein)";
-            } elseif ($tag === 'snack') {
-                $reason = "Ăn nhẹ nạp nhanh ({$kcal} kcal) — Không lo vượt ngân sách";
-            } elseif ($isCustom) {
-                $reason = "Món ăn ruột do chính bạn tự tạo khẩu phần";
+            $reasonParts = [];
+            if ($tag === 'high_prot') $reasonParts[] = "Giàu đạm ({$prot}g Protein)";
+            elseif ($tag === 'low_carb') $reasonParts[] = "Ít tinh bột ({$carb}g Carb)";
+            elseif ($tag === 'low_fat') $reasonParts[] = "Ít chất béo ({$fat}g Fat)";
+            elseif ($tag === 'low_cal') $reasonParts[] = "Thanh nhẹ ({$kcal} kcal)";
+            elseif ($tag === 'high_energy') $reasonParts[] = "Năng lượng dồi dào ({$kcal} kcal)";
+
+            if ($meal === 'breakfast') $reasonParts[] = "thích hợp điểm tâm sáng";
+            elseif ($meal === 'main_meal' || $meal === 'lunch') $reasonParts[] = "no lâu cho bữa chính";
+            elseif ($meal === 'snack') $reasonParts[] = "cho bữa ăn nhẹ";
+
+            if ($origin === 'custom' || $isCustom) $reasonParts[] = "(món ruột tự tạo)";
+
+            if (!empty($reasonParts)) {
+                $reason = implode(' — ', $reasonParts);
             } elseif ($prot >= 25.0) {
                 $reason = "Giàu đạm ({$prot}g Protein) — Tối ưu phát triển cơ bắp";
             } elseif ($remainingKcal <= 0) {

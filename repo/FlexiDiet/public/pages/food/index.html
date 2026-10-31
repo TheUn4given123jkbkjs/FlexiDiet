@@ -297,27 +297,42 @@
           </div>
         </div>
 
-        <!-- Dedicated Filter Bar (No Icons) -->
+        <!-- Dedicated Multi-Filter Bar (Dropdown Menus, Multi-criteria, No Icons) -->
         <div class="suggestions-filter-container">
-          <div class="s-filter-row">
-            <span class="s-filter-title">Dinh dưỡng:</span>
-            <div class="s-filter-group">
-              <button class="s-filter-btn active" type="button" onclick="filterSuggestions('all', this)">Tất Cả</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_prot', this)">Nhiều Đạm (&ge; 25g)</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_carb', this)">Ít Tinh Bột (&le; 30g)</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_fat', this)">Ít Chất Béo (&le; 10g)</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_cal', this)">Ít Calo (&le; 350 kcal)</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_energy', this)">Năng Lượng Cao (&ge; 600 kcal)</button>
+          <div class="s-filter-dropdowns-row">
+            <div class="s-dropdown-field">
+              <label for="filterNutriSelect" class="s-dropdown-label">Mục tiêu dinh dưỡng</label>
+              <select id="filterNutriSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả dinh dưỡng</option>
+                <option value="high_prot">Nhiều Đạm (&ge; 25g Protein)</option>
+                <option value="low_carb">Ít Tinh Bột (&le; 30g Carb)</option>
+                <option value="low_fat">Ít Chất Béo (&le; 10g Fat)</option>
+                <option value="low_cal">Ít Calo (&le; 350 kcal)</option>
+                <option value="high_energy">Năng Lượng Cao (&ge; 600 kcal)</option>
+              </select>
             </div>
-          </div>
-          <div class="s-filter-row">
-            <span class="s-filter-title">Bữa ăn &amp; Nguồn:</span>
-            <div class="s-filter-group">
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('custom', this)">Món Ruột Tự Tạo</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('viet', this)">Món Việt Chuẩn Vị</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('breakfast', this)">Bữa Sáng</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('main_meal', this)">Bữa Trưa &amp; Tối</button>
-              <button class="s-filter-btn" type="button" onclick="filterSuggestions('snack', this)">Bữa Phụ / Ăn Nhẹ</button>
+
+            <div class="s-dropdown-field">
+              <label for="filterMealSelect" class="s-dropdown-label">Bữa ăn</label>
+              <select id="filterMealSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả bữa ăn</option>
+                <option value="breakfast">Bữa Sáng</option>
+                <option value="main_meal">Bữa Trưa &amp; Tối (Bữa chính)</option>
+                <option value="snack">Bữa Phụ / Ăn Nhẹ</option>
+              </select>
+            </div>
+
+            <div class="s-dropdown-field">
+              <label for="filterOriginSelect" class="s-dropdown-label">Nguồn món</label>
+              <select id="filterOriginSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả nguồn món</option>
+                <option value="viet">Món Việt Chuẩn Vị (Hệ thống)</option>
+                <option value="custom">Món Ruột Của Tôi (Tự tạo)</option>
+              </select>
+            </div>
+
+            <div class="s-dropdown-actions">
+              <button type="button" class="btn-filter-reset" onclick="FoodHub.resetMultiFilter()">Đặt lại</button>
             </div>
           </div>
         </div>
