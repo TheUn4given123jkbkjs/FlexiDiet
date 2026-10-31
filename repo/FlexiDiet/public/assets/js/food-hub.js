@@ -412,6 +412,7 @@ const FoodHub = (() => {
 
   // 4. Composer Engine (UC05)
   async function loadDishToComposer(dishId, suggestedMeal = null) {
+    if (typeof switchTab === 'function') switchTab('food');
     try {
       const recipeData = await FlexiAPI.request(`/foods/${dishId}/recipe`);
       if (!recipeData || !recipeData.dish) throw new Error('Không có dữ liệu công thức.');
@@ -458,6 +459,34 @@ const FoodHub = (() => {
       }
     } catch (e) {
       showToast(`Không thể tải công thức món: ${e.message}`, 'warning');
+    }
+  }
+
+  async function loadDishByName(name, suggestedMeal = null) {
+    if (!name || typeof name !== 'string') return;
+    const clean = name.trim();
+    if (!clean) return;
+    if (typeof switchTab === 'function') switchTab('food');
+
+    try {
+      const matches = await FlexiAPI.request('/foods?q=' + encodeURIComponent(clean));
+      if (matches && matches.length > 0) {
+        const exact = matches.find(m => m.name.toLowerCase() === clean.toLowerCase()) || matches[0];
+        await loadDishToComposer(exact.id, suggestedMeal);
+      } else {
+        state.composer.dishId = null;
+        state.composer.name = clean;
+        state.composer.servingLabel = '1 phần';
+        state.composer.imageUrl = null;
+        state.composer.origin = 'saved';
+        state.composer.ingredients = [];
+        if (suggestedMeal) state.composer.mealType = suggestedMeal;
+        populateComposerUI();
+        switchSubtab('composer');
+        toggleAddIngredientPanel(true);
+      }
+    } catch (e) {
+      console.warn('loadDishByName error:', e);
     }
   }
 
@@ -1238,6 +1267,7 @@ const FoodHub = (() => {
     goToManualComposer,
     triggerPromptAnalysis,
     loadDishToComposer,
+    loadDishByName,
     startNewCustomDish,
     handleSliderChange,
     handleGramInputChange,
