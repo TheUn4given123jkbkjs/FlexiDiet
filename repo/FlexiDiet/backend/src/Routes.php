@@ -167,6 +167,9 @@ function executeRoute(string $route, string $method): never {
     }
     if ($route === '/ingredients' && $method === 'GET') FoodController::searchIngredients($pdo, $uid);
     if ($route === '/dishes' && $method === 'POST') FoodController::createCustomDish($pdo, $uid, body());
+    if (preg_match('~^/dishes/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
+        FoodController::deleteCustomDish($pdo, $uid, (int)$m[1]);
+    }
     if ($route === '/meals' && $method === 'GET') FoodController::listMeals($pdo, $uid);
     if ($route === '/meals' && $method === 'POST') FoodController::createMeal($pdo, $uid, body());
     if (preg_match('~^/meals/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {

@@ -310,6 +310,39 @@
 .fh-dc-macro-item.f strong { color: #f59e0b; }
 .fh-dc-actions {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fh-dc-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.fh-dc-btn-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+:root[data-theme="dark"] .fh-dc-btn-delete {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.35);
+  color: #f87171;
+}
+:root[data-theme="dark"] .fh-dc-btn-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
 }
 .fh-dc-btn-customize {
   display: inline-flex;
@@ -637,6 +670,32 @@
 .btn-jira-outline:hover {
   background: var(--bg-hover, #f1f5f9);
   color: var(--text-primary, #0f172a);
+}
+.btn-jira-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-jira-danger:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+:root[data-theme="dark"] .btn-jira-danger {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.35);
+  color: #f87171;
+}
+:root[data-theme="dark"] .btn-jira-danger:hover {
+  background: #dc2626;
+  color: #ffffff;
 }
 
 @media (max-width: 900px) {

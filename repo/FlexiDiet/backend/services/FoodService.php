@@ -80,6 +80,23 @@ class FoodService {
         return ['id' => $dishId, 'name' => $name, 'serving_label' => $label, 'origin' => 'saved'];
     }
 
+    public static function deleteCustomDish(PDO $pdo, int $dishId, int $uid): array {
+        $dish = FoodModel::findDishById($pdo, $dishId, $uid);
+        if (!$dish) {
+            fail(404, 'NOT_FOUND', 'Không tìm thấy món ăn này hoặc bạn không có quyền xóa.');
+        }
+        if ($dish['origin'] === 'system') {
+            fail(403, 'FORBIDDEN', 'Không thể xóa các món ăn chuẩn của hệ thống.');
+        }
+
+        $ok = FoodModel::deleteCustomDish($pdo, $dishId, $uid);
+        if (!$ok) {
+            fail(400, 'DELETE_FAILED', 'Không thể xóa món ăn này.');
+        }
+
+        return ['success' => true, 'deleted_id' => $dishId, 'name' => $dish['name']];
+    }
+
     public static function listMeals(PDO $pdo, int $uid, string $date): array {
         $day = dateValue($date);
         return FoodModel::listMeals($pdo, $uid, $day);

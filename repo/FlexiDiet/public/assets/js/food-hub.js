@@ -110,7 +110,7 @@ const FoodHub = (() => {
       const card = document.createElement('div');
       card.className = 'fh-dish-card';
 
-      const isSaved = dish.origin === 'saved';
+      const isSaved = dish.origin === 'saved' || dish.origin === 'custom';
       const badgeHtml = isSaved
         ? '<span class="fh-dc-badge saved"><i class="fa-solid fa-bookmark"></i> Món Của Tôi</span>'
         : '<span class="fh-dc-badge system"><i class="fa-solid fa-check"></i> 67 Món Chuẩn</span>';
@@ -138,6 +138,11 @@ const FoodHub = (() => {
             <span class="btn-text-full">Tùy chỉnh &amp; Ghi món</span>
             <span class="btn-text-short">Tùy chỉnh</span>
           </button>
+          ${isSaved ? `
+          <button class="fh-dc-btn-delete" type="button" title="Xóa món khỏi Món của tôi" onclick="FoodHub.deleteDishFromCatalog(${dish.id})">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+          ` : ''}
         </div>
       `;
       grid.appendChild(card);
@@ -475,6 +480,12 @@ const FoodHub = (() => {
     if (elMeal) elMeal.value = state.composer.mealType;
     if (elLabel) elLabel.value = state.composer.servingLabel;
 
+    const btnDeleteDish = document.getElementById('btnComposerDeleteDish');
+    if (btnDeleteDish) {
+      const isCustomExistingDish = Boolean(state.composer.dishId) && (state.composer.origin === 'saved' || state.composer.origin === 'custom');
+      btnDeleteDish.style.display = isCustomExistingDish ? 'inline-flex' : 'none';
+    }
+
     renderComposerIngredients();
     recalculateComposerTotals();
   }
@@ -804,6 +815,94 @@ const FoodHub = (() => {
     }
   }
 
+  async function deleteCurrentCustomDish() {
+    const dishId = state.composer.dishId;
+    const dishName = state.composer.name || 'Món ăn này';
+    if (!dishId || !(state.composer.origin === 'saved' || state.composer.origin === 'custom')) {
+      showToast('Chỉ có thể xóa món tự tạo của bạn, không thể xóa món chuẩn hệ thống.', 'warning');
+      return;
+    }
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa "${dishName}" khỏi danh sách Món của tôi không?\nHành động này không thể hoàn tác.`)) {
+      return;
+    }
+
+    try {
+      await FlexiAPI.request(`/dishes/${dishId}`, { method: 'DELETE' });
+      showToast(`Đã xóa món "${dishName}" thành công!`, 'success');
+      if (typeof window.refreshQuickFoodDishesCache === 'function') window.refreshQuickFoodDishesCache();
+
+      state.composer.dishId = null;
+      state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+      state.composer.servingLabel = '1 phần';
+      state.composer.origin = 'saved';
+      state.composer.ingredients = [];
+      populateComposerUI();
+      const badge = document.getElementById('fhDraftBadge');
+      if (badge) {
+        badge.style.display = 'none';
+        badge.textContent = '0';
+      }
+
+      await loadCatalog();
+      switchSubtab('catalog');
+    } catch (e) {
+      showToast(`Lỗi khi xóa món: ${e.message}`, 'warning');
+    }
+  }
+
+  async function deleteDishFromCatalog(dishId) {
+    const dish = state.catalogDishes.find(d => Number(d.id) === Number(dishId));
+    const name = dish ? dish.name : 'món ăn này';
+    if (!confirm(`Bạn có chắc chắn muốn xóa món "${name}" khỏi danh sách Món của tôi không?\nHành động này không thể hoàn tác.`)) {
+      return;
+    }
+
+    try {
+      await FlexiAPI.request(`/dishes/${dishId}`, { method: 'DELETE' });
+      showToast(`Đã xóa món "${name}" thành công!`, 'success');
+      if (typeof window.refreshQuickFoodDishesCache === 'function') window.refreshQuickFoodDishesCache();
+
+      if (state.composer.dishId === dishId) {
+        state.composer.dishId = null;
+        state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+        state.composer.servingLabel = '1 phần';
+        state.composer.origin = 'saved';
+        state.composer.ingredients = [];
+        populateComposerUI();
+        const badge = document.getElementById('fhDraftBadge');
+        if (badge) {
+          badge.style.display = 'none';
+          badge.textContent = '0';
+        }
+      }
+
+      await loadCatalog();
+    } catch (e) {
+      showToast(`Lỗi khi xóa món: ${e.message}`, 'warning');
+    }
+  }
+
+  function resetComposer() {
+    if (state.composer.ingredients.length > 0) {
+      if (!confirm('Bạn có chắc chắn muốn làm mới và xóa tất cả nguyên liệu đang phối không?')) {
+        return;
+      }
+    }
+    state.composer.dishId = null;
+    state.composer.name = 'Món Ăn Tự Phối Của Tôi';
+    state.composer.servingLabel = '1 phần';
+    state.composer.origin = 'saved';
+    state.composer.ingredients = [];
+    populateComposerUI();
+    const badge = document.getElementById('fhDraftBadge');
+    if (badge) {
+      badge.style.display = 'none';
+      badge.textContent = '0';
+    }
+    showToast('Đã làm mới bảng phối món.', 'info');
+  }
+
   function escapeHtml(str) {
     return String(str || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
@@ -1018,7 +1117,10 @@ const FoodHub = (() => {
     loadSmartSuggestions,
     saveSuggestedMeal,
     applyMultiFilter,
-    resetMultiFilter
+    resetMultiFilter,
+    deleteCurrentCustomDish,
+    deleteDishFromCatalog,
+    resetComposer
   };
 })();
 
@@ -1034,6 +1136,9 @@ function submitComposerToMealLog() { FoodHub.submitComposerToMealLog(); }
 function submitComposerAsMyDish() { FoodHub.submitComposerAsMyDish(); }
 function loadSmartSuggestions(tag) { FoodHub.loadSmartSuggestions(tag); }
 function saveSuggestedMeal(dishId, name) { FoodHub.saveSuggestedMeal(dishId, name); }
+function deleteCurrentCustomDish() { FoodHub.deleteCurrentCustomDish(); }
+function deleteDishFromCatalog(dishId) { FoodHub.deleteDishFromCatalog(dishId); }
+function resetComposer() { FoodHub.resetComposer(); }
 
 document.addEventListener('flexidiet:pages-ready', () => {
   FoodHub.init();

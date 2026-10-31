@@ -245,7 +245,7 @@
           <div class="box-head fh-ing-box-head">
             <div>
               <h3><i class="fa-solid fa-list-check text-green"></i> Bóc Tách Nguyên Liệu &amp; Thanh Trượt 3 Dải Màu (S/M/L)</h3>
-              <p class="sub-muted">Thanh trượt chia 3 vùng màu: <span class="zone-tag green">Xanh (Nhỏ)</span>, <span class="zone-tag yellow">Vàng (Vừa)</span>, <span class="zone-tag red">Đỏ (Lớn)</span>. Đồng bộ 2 chiều với ô nhập gram.</p>
+              <p class="sub-muted">Thanh trượt chia 3 vùng màu: <span class="zone-tag green">Xanh (Nhỏ)</span>, <span class="zone-tag yellow">Vàng (Vừa)</span>, <span class="zone-tag red">Đỏ (Lớn)</span></p>
             </div>
             <button class="btn-jira-tool" type="button" onclick="toggleAddIngredientPanel()">
               <i class="fa-solid fa-plus"></i> Thêm nguyên liệu / topping
@@ -277,6 +277,12 @@
           </button>
           <button class="btn-jira-tool btn-lg" id="btnComposerSaveMyDish" type="button" onclick="submitComposerAsMyDish()">
             <i class="fa-solid fa-bookmark"></i> Lưu thành "Món của tôi"
+          </button>
+          <button class="btn-jira-danger btn-lg" id="btnComposerDeleteDish" type="button" style="display:none;" onclick="FoodHub.deleteCurrentCustomDish()">
+            <i class="fa-solid fa-trash-can"></i> Xóa món này khỏi Món của tôi
+          </button>
+          <button class="btn-jira-outline btn-lg" id="btnComposerReset" type="button" onclick="FoodHub.resetComposer()">
+            <i class="fa-solid fa-rotate-left"></i> Làm mới / Xóa trắng
           </button>
           <button class="btn-jira-outline btn-lg" type="button" onclick="switchFoodSubtab('catalog')">
             <i class="fa-solid fa-arrow-left"></i> Quay lại Danh mục

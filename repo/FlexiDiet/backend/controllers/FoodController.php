@@ -23,6 +23,10 @@ class FoodController {
         response(FoodService::createCustomDish($pdo, $uid, $params), 201);
     }
 
+    public static function deleteCustomDish(PDO $pdo, int $uid, int $dishId): void {
+        response(FoodService::deleteCustomDish($pdo, $dishId, $uid));
+    }
+
     public static function listMeals(PDO $pdo, int $uid): void {
         $date = (string)($_GET['date'] ?? today());
         response(FoodService::listMeals($pdo, $uid, $date));

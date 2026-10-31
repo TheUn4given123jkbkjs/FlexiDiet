@@ -157,6 +157,12 @@ class FoodModel {
         return (int)$pdo->lastInsertId();
     }
 
+    public static function deleteCustomDish(PDO $pdo, int $dishId, int $uid): bool {
+        $stmt = $pdo->prepare('DELETE FROM dishes WHERE id = ? AND owner_user_id = ? AND origin IN ("saved", "custom")');
+        $stmt->execute([$dishId, $uid]);
+        return $stmt->rowCount() > 0;
+    }
+
     public static function addDishIngredient(PDO $pdo, int $dishId, int $ingredientId, float $grams, int $sortOrder): void {
         execSql($pdo, '
             INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, sort_order) 
