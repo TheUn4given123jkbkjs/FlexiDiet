@@ -79,3 +79,4 @@ const FoodCore = (() => {
 })();
 
 window.FoodCore = FoodCore;
+

@@ -644,3 +644,4 @@ const FoodComposer = (() => {
 })();
 
 window.FoodComposer = FoodComposer;
+

@@ -317,3 +317,4 @@ const FoodScanner = (() => {
 })();
 
 window.FoodScanner = FoodScanner;
+

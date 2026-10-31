@@ -224,3 +224,4 @@ const FoodSuggestions = (() => {
 })();
 
 window.FoodSuggestions = FoodSuggestions;
+

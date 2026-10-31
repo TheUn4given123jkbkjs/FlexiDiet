@@ -38,7 +38,16 @@ const FoodCatalog = (() => {
     if (FoodCore.state.catalogFilter === 'system') {
       list = list.filter(d => d.origin === 'system');
     } else if (FoodCore.state.catalogFilter === 'saved') {
-      list = list.filter(d => d.origin === 'saved');
+      list = list.filter(d => d.origin === 'saved' || d.origin === 'custom');
+    } else {
+      // In 'all' tab: Explicitly pin custom/saved dishes to the top!
+      list = [...list].sort((a, b) => {
+        const aIsCustom = (a.origin !== 'system') ? 1 : 0;
+        const bIsCustom = (b.origin !== 'system') ? 1 : 0;
+        if (bIsCustom !== aIsCustom) return bIsCustom - aIsCustom;
+        if (aIsCustom && bIsCustom) return (Number(b.id) || 0) - (Number(a.id) || 0);
+        return (a.name || '').localeCompare(b.name || '', 'vi', { sensitivity: 'base' });
+      });
     }
 
     if (!list.length) {
@@ -150,3 +159,4 @@ const FoodCatalog = (() => {
 })();
 
 window.FoodCatalog = FoodCatalog;
+

@@ -391,7 +391,12 @@ async function handleQuickFoodSearch(e) {
     matches = dishes
       .map(d => ({ dish: d, score: scoreQuickFoodMatch(d, cleanQ, query) }))
       .filter(x => x.score > 0)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aIsCustom = a.dish.origin !== 'system' ? 1 : 0;
+        const bIsCustom = b.dish.origin !== 'system' ? 1 : 0;
+        return bIsCustom - aIsCustom;
+      })
       .map(x => x.dish);
   }
 
