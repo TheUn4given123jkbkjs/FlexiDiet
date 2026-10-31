@@ -269,18 +269,43 @@ class FoodService {
             $filtered = array_slice($candidates, 0, 15);
         }
 
-        // Tùy chọn lọc theo Tag dinh dưỡng nếu người dùng chọn
+        // Tùy chọn lọc theo Tag dinh dưỡng / Nguồn món / Bữa ăn nếu người dùng chọn
         if ($tag === 'high_prot') {
             $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['protein_g'] >= 25.0));
             if (!empty($tagFiltered)) $filtered = $tagFiltered;
         } elseif ($tag === 'low_cal') {
             $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 350.0));
             if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'low_carb') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['carb_g'] <= 30.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'low_fat') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['fat_g'] <= 10.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'high_energy') {
+            // Món năng lượng cao (>= 600 kcal)
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 600.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            else {
+                // Nếu giai đoạn 1 lọc dưới 600, lấy từ danh sách candidate ban đầu
+                $tagFiltered = array_values(array_filter($candidates, fn($d) => (float)$d['kcal'] >= 550.0));
+                if (!empty($tagFiltered)) $filtered = $tagFiltered;
+            }
         } elseif ($tag === 'viet') {
             $tagFiltered = array_values(array_filter($filtered, fn($d) => $d['origin'] === 'system'));
             if (!empty($tagFiltered)) $filtered = $tagFiltered;
-        } elseif ($tag === 'quick') {
-            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 400.0));
+        } elseif ($tag === 'custom') {
+            // Lọc riêng món custom do user tự tạo
+            $tagFiltered = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'custom'));
+            $filtered = $tagFiltered;
+        } elseif ($tag === 'breakfast') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 200.0 && (float)$d['kcal'] <= 550.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'main_meal') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] >= 450.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'snack') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 300.0));
             if (!empty($tagFiltered)) $filtered = $tagFiltered;
         }
 
@@ -364,8 +389,18 @@ class FoodService {
             // 7. Giai đoạn 4: Ranking & Match Reason
             $matchPct = (int)round(min(99.0, max(50.0, $sFinal * 10.0)));
 
-            if ($isCustom) {
-                $reason = "Món của bạn — Rất phù hợp mục tiêu hôm nay";
+            if ($tag === 'low_carb') {
+                $reason = "Hàm lượng tinh bột thấp ({$carb}g Carb) — Phù hợp chế độ Low-Carb/Keto";
+            } elseif ($tag === 'low_fat') {
+                $reason = "Hàm lượng chất béo thấp ({$fat}g Fat) — Thanh lọc cơ thể, hạn chế dầu mỡ";
+            } elseif ($tag === 'high_energy') {
+                $reason = "Năng lượng dồi dào ({$kcal} kcal) — Tối ưu phục hồi và xả cơ";
+            } elseif ($tag === 'breakfast') {
+                $reason = "Khởi đầu ngày mới tràn đầy năng lượng ({$kcal} kcal, {$prot}g Protein)";
+            } elseif ($tag === 'snack') {
+                $reason = "Ăn nhẹ nạp nhanh ({$kcal} kcal) — Không lo vượt ngân sách";
+            } elseif ($isCustom) {
+                $reason = "Món ăn ruột do chính bạn tự tạo khẩu phần";
             } elseif ($prot >= 25.0) {
                 $reason = "Giàu đạm ({$prot}g Protein) — Tối ưu phát triển cơ bắp";
             } elseif ($remainingKcal <= 0) {

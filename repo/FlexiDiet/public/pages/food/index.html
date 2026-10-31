@@ -293,20 +293,33 @@
           <div class="sab-icon"><i class="fa-solid fa-lightbulb"></i></div>
           <div class="sab-content">
             <h3>Gợi Ý Món Ăn Theo Khoảng Calo &amp; Dinh Dưỡng</h3>
-            <p>Hệ thống tự động đề xuất các món ăn tối ưu dựa trên mục tiêu calo còn lại trong ngày và tỷ lệ dinh dưỡng (Macro) của bạn. <span class="fh-optional-badge"><i class="fa-solid fa-sparkles"></i> Tính năng tùy chọn</span></p>
-          </div>
-          <div class="sab-actions">
-            <button class="btn-jira-tool" type="button" onclick="filterSuggestions('high_prot', this)"><i class="fa-solid fa-dna"></i> Lọc Nhiều Đạm</button>
+            <p>Hệ thống tự động đề xuất các món ăn tối ưu dựa trên mục tiêu calo còn lại trong ngày và tỷ lệ dinh dưỡng (Macro) của bạn.</p>
           </div>
         </div>
 
-        <!-- Quick Filters -->
-        <div class="suggestions-filter-bar">
-          <button class="s-filter-btn active" type="button" onclick="filterSuggestions('all', this)">Tất Cả Món Gợi Ý</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_prot', this)">🍗 Nhiều Đạm (&gt; 25g Protein)</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('viet', this)">🇻🇳 Món Việt Chuẩn Vị</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('quick', this)">⚡ Nhanh Gọn (&lt; 15 Phút)</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_cal', this)">🥗 Ít Calo (&lt; 350 kcal)</button>
+        <!-- Dedicated Filter Bar (No Icons) -->
+        <div class="suggestions-filter-container">
+          <div class="s-filter-row">
+            <span class="s-filter-title">Dinh dưỡng:</span>
+            <div class="s-filter-group">
+              <button class="s-filter-btn active" type="button" onclick="filterSuggestions('all', this)">Tất Cả</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_prot', this)">Nhiều Đạm (&ge; 25g)</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_carb', this)">Ít Tinh Bột (&le; 30g)</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_fat', this)">Ít Chất Béo (&le; 10g)</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_cal', this)">Ít Calo (&le; 350 kcal)</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_energy', this)">Năng Lượng Cao (&ge; 600 kcal)</button>
+            </div>
+          </div>
+          <div class="s-filter-row">
+            <span class="s-filter-title">Bữa ăn &amp; Nguồn:</span>
+            <div class="s-filter-group">
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('custom', this)">Món Ruột Tự Tạo</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('viet', this)">Món Việt Chuẩn Vị</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('breakfast', this)">Bữa Sáng</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('main_meal', this)">Bữa Trưa &amp; Tối</button>
+              <button class="s-filter-btn" type="button" onclick="filterSuggestions('snack', this)">Bữa Phụ / Ăn Nhẹ</button>
+            </div>
+          </div>
         </div>
 
         <!-- Suggestions Cards Grid (Rendered dynamically by FoodHub.loadSmartSuggestions) -->

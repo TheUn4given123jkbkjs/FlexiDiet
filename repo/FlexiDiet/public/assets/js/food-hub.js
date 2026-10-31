@@ -880,11 +880,40 @@ const FoodHub = (() => {
           image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80'
         }
       ];
+
       if (tag === 'high_prot') {
         suggestions = suggestions.filter(d => (d.protein_g ?? d.protein ?? 0) >= 25);
       } else if (tag === 'low_cal') {
         suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 350);
+      } else if (tag === 'low_carb') {
+        suggestions = suggestions.filter(d => (d.carb_g ?? d.carbs ?? 0) <= 30);
+      } else if (tag === 'low_fat') {
+        suggestions = suggestions.filter(d => (d.fat_g ?? d.fat ?? 0) <= 10);
+      } else if (tag === 'high_energy') {
+        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) >= 500);
+      } else if (tag === 'custom') {
+        suggestions = suggestions.filter(d => d.origin === 'custom');
+      } else if (tag === 'viet') {
+        suggestions = suggestions.filter(d => d.origin === 'system');
+      } else if (tag === 'breakfast') {
+        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 550);
+      } else if (tag === 'main_meal') {
+        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) >= 450);
+      } else if (tag === 'snack') {
+        suggestions = suggestions.filter(d => (d.kcal ?? d.calories ?? 0) <= 300);
       }
+    }
+
+    if (!suggestions.length) {
+      const emptyMsg = (tag === 'custom')
+        ? 'Bạn chưa tạo món ăn cá nhân nào. Hãy chuyển sang tab "3. Tùy chỉnh & Phối món" để tự phối món ruột của riêng bạn!'
+        : 'Không tìm thấy món ăn phù hợp với tiêu chí lọc này.';
+      grid.innerHTML = `
+        <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: var(--text-muted);">
+          <i class="fa-solid fa-circle-info" style="font-size: 24px; margin-bottom: 8px;"></i>
+          <p>${escapeHtml(emptyMsg)}</p>
+        </div>`;
+      return;
     }
 
     grid.replaceChildren();
