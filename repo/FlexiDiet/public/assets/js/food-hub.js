@@ -421,6 +421,7 @@ const FoodHub = (() => {
       state.composer.name = dish.name;
       state.composer.dishCode = dish.dish_code || null;
       state.composer.servingLabel = dish.serving_label || '1 phần';
+      state.composer.imageUrl = dish.image_url || null;
       state.composer.origin = dish.origin || 'system';
       if (suggestedMeal) state.composer.mealType = suggestedMeal;
 
@@ -465,6 +466,7 @@ const FoodHub = (() => {
     state.composer.dishId = null;
     state.composer.name = '';
     state.composer.servingLabel = '1 phần';
+    state.composer.imageUrl = null;
     state.composer.origin = 'saved';
     state.composer.ingredients = [];
 
@@ -501,6 +503,7 @@ const FoodHub = (() => {
 
     renderComposerIngredients();
     recalculateComposerTotals();
+    updateComposerAvatarUI();
   }
 
   function renderComposerIngredients() {
@@ -812,6 +815,7 @@ const FoodHub = (() => {
       const payload = {
         name,
         serving_label: label || '1 phần',
+        image_url: state.composer.imageUrl || null,
         ingredients: state.composer.ingredients.map(i => ({
           ingredient_id: i.ingredient_id,
           grams: i.grams
@@ -907,6 +911,7 @@ const FoodHub = (() => {
     state.composer.dishId = null;
     state.composer.name = '';
     state.composer.servingLabel = '1 phần';
+    state.composer.imageUrl = null;
     state.composer.origin = 'saved';
     state.composer.ingredients = [];
     populateComposerUI();
@@ -916,6 +921,49 @@ const FoodHub = (() => {
       badge.textContent = '0';
     }
     showToast('Đã làm mới bảng phối món.', 'info');
+  }
+
+    function handleComposerAvatarChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Vui lòng chọn tệp hình ảnh hợp lệ.", "warning");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Kích thước ảnh tối đa là 2MB.", "warning");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      state.composer.imageUrl = evt.target.result;
+      updateComposerAvatarUI();
+      showToast("Đã chọn ảnh đại diện cho món ăn!", "info");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeComposerAvatar() {
+    state.composer.imageUrl = null;
+    const input = document.getElementById("composerAvatarInput");
+    if (input) input.value = "";
+    updateComposerAvatarUI();
+    showToast("Đã gỡ ảnh đại diện.", "info");
+  }
+
+  function updateComposerAvatarUI() {
+    const preview = document.getElementById("composerAvatarPreview");
+    const img = document.getElementById("composerAvatarImg");
+    const hint = document.getElementById("composerAvatarHint");
+    if (state.composer.imageUrl) {
+      if (preview) preview.style.display = "block";
+      if (img) img.src = state.composer.imageUrl;
+      if (hint) hint.textContent = "Đã chọn ảnh đại diện riêng cho món.";
+    } else {
+      if (preview) preview.style.display = "none";
+      if (img) img.src = "";
+      if (hint) hint.textContent = "Tùy chọn — nếu không chọn, món ăn sẽ hiển thị dạng thẻ gọn không kèm ảnh minh họa.";
+    }
   }
 
   function escapeHtml(str) {
@@ -1006,12 +1054,22 @@ const FoodHub = (() => {
       const carb = Math.round(dish.carb_g ?? dish.carbs ?? 0);
       const fat = Math.round(dish.fat_g ?? dish.fat ?? 0);
 
-      card.innerHTML = `
+      const hasImage = Boolean(dish.image_url);
+      const imgSection = hasImage ? `
         <div class="sc-img-wrap">
-          <img alt="${escapeHtml(dish.name)}" src="${escapeHtml(dish.image_url || defaultImg)}" onerror="this.src='${defaultImg}'" loading="lazy" />
+          <img alt="${escapeHtml(dish.name)}" src="${escapeHtml(dish.image_url)}" onerror="this.src='${defaultImg}'" loading="lazy" />
           <span class="sc-badge ${badgeClass}">${badgeIcon}${escapeHtml(badgeLabel)}</span>
           <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15-20 phút</span>
         </div>
+      ` : `
+        <div class="sc-no-img-header">
+          <span class="sc-badge ${badgeClass}">${badgeIcon}${escapeHtml(badgeLabel)}</span>
+          <span class="sc-no-img-tag"><i class="fa-solid fa-user-pen"></i> Món tự tạo</span>
+        </div>
+      `;
+
+      card.innerHTML = `
+        ${imgSection}
         <div class="sc-body">
           <h4>${escapeHtml(dish.name)}</h4>
           <p class="sc-desc">${escapeHtml(dish.match_reason || '')}</p>
@@ -1148,6 +1206,8 @@ const FoodHub = (() => {
     saveSuggestedMeal,
     applyMultiFilter,
     resetMultiFilter,
+    handleComposerAvatarChange,
+    removeComposerAvatar,
     deleteCurrentCustomDish,
     deleteDishFromCatalog,
     resetComposer
@@ -1166,6 +1226,8 @@ function submitComposerToMealLog() { FoodHub.submitComposerToMealLog(); }
 function submitComposerAsMyDish() { FoodHub.submitComposerAsMyDish(); }
 function loadSmartSuggestions(tag) { FoodHub.loadSmartSuggestions(tag); }
 function saveSuggestedMeal(dishId, name) { FoodHub.saveSuggestedMeal(dishId, name); }
+function handleComposerAvatarChange(e) { FoodHub.handleComposerAvatarChange(e); }
+function removeComposerAvatar() { FoodHub.removeComposerAvatar(); }
 function deleteCurrentCustomDish() { FoodHub.deleteCurrentCustomDish(); }
 function deleteDishFromCatalog(dishId) { FoodHub.deleteDishFromCatalog(dishId); }
 function resetComposer() { FoodHub.resetComposer(); }

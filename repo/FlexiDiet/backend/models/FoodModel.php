@@ -8,7 +8,7 @@ class FoodModel {
     public static function searchDishes(PDO $pdo, int $uid, string $term): array {
         return all($pdo, '
             SELECT 
-                d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin,
+                d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.image_url,
                 ROUND(SUM(di.grams * i.kcal_100g / 100), 1) AS kcal,
                 ROUND(SUM(di.grams * i.protein_100g / 100), 1) AS protein_g,
                 ROUND(SUM(di.grams * i.carb_100g / 100), 1) AS carb_g,
@@ -20,7 +20,7 @@ class FoodModel {
               AND i.is_active = 1 
               AND (d.owner_user_id IS NULL OR d.owner_user_id = ?)
               AND (d.name LIKE ? OR d.name_norm LIKE ? OR d.dish_code LIKE ?)
-            GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin
+            GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.image_url
             ORDER BY d.origin DESC, d.name
             LIMIT 300',
             [$uid, $term, $term, $term]
@@ -30,7 +30,7 @@ class FoodModel {
     public static function getCandidateDishesForRecommendation(PDO $pdo, int $uid): array {
         return all($pdo, '
             SELECT 
-                d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.owner_user_id,
+                d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.image_url, d.owner_user_id,
                 ROUND(SUM(di.grams * i.kcal_100g / 100), 1) AS kcal,
                 ROUND(SUM(di.grams * i.protein_100g / 100), 1) AS protein_g,
                 ROUND(SUM(di.grams * i.carb_100g / 100), 1) AS carb_g,
@@ -41,7 +41,7 @@ class FoodModel {
             WHERE d.is_active = 1 
               AND i.is_active = 1 
               AND (d.owner_user_id IS NULL OR d.owner_user_id = ?)
-            GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.owner_user_id
+            GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.image_url, d.owner_user_id
         ', [$uid]);
     }
 
@@ -90,7 +90,7 @@ class FoodModel {
 
     public static function findDishById(PDO $pdo, int $dishId, int $uid): ?array {
         return one($pdo, '
-            SELECT d.id, d.name, d.serving_label, d.dish_code, d.origin 
+            SELECT d.id, d.name, d.serving_label, d.dish_code, d.origin, d.image_url 
             FROM dishes d 
             WHERE d.id = ? AND d.is_active = 1 AND (d.owner_user_id IS NULL OR d.owner_user_id = ?)',
             [$dishId, $uid]
@@ -148,11 +148,11 @@ class FoodModel {
         return one($pdo, 'SELECT id FROM dishes WHERE owner_user_id = ? AND name_norm = ? AND is_active = 1', [$uid, $nameNorm]);
     }
 
-    public static function createDish(PDO $pdo, int $uid, string $name, string $nameNorm, string $servingLabel): int {
+    public static function createDish(PDO $pdo, int $uid, string $name, string $nameNorm, string $servingLabel, ?string $imageUrl = null): int {
         execSql($pdo, '
-            INSERT INTO dishes (owner_user_id, name, name_norm, origin, serving_label, is_active) 
-            VALUES (?, ?, ?, "saved", ?, 1)',
-            [$uid, $name, $nameNorm, $servingLabel]
+            INSERT INTO dishes (owner_user_id, name, name_norm, origin, serving_label, image_url, is_active) 
+            VALUES (?, ?, ?, "saved", ?, ?, 1)',
+            [$uid, $name, $nameNorm, $servingLabel, $imageUrl]
         );
         return (int)$pdo->lastInsertId();
     }

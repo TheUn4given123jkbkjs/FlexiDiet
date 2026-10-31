@@ -210,6 +210,20 @@
               </select>
             </div>
           </div>
+          <!-- Optional Dish Avatar Row -->
+          <div class="fh-composer-avatar-row">
+            <div class="fh-composer-avatar-preview" id="composerAvatarPreview" style="display:none;">
+              <img id="composerAvatarImg" src="" alt="Avatar món" />
+              <button type="button" class="btn-remove-avatar" onclick="FoodHub.removeComposerAvatar()" title="Gỡ ảnh đại diện"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="fh-composer-avatar-controls">
+              <label class="btn-jira-outline btn-sm" for="composerAvatarInput">
+                <i class="fa-regular fa-image"></i> Chọn ảnh đại diện món (Tùy chọn)
+              </label>
+              <input type="file" id="composerAvatarInput" accept="image/*" style="display:none;" onchange="FoodHub.handleComposerAvatarChange(event)" />
+              <span class="sub-muted font-12" id="composerAvatarHint">Tùy chọn — nếu không chọn, món ăn sẽ hiển thị dạng thẻ gọn không kèm ảnh minh họa.</span>
+            </div>
+          </div>
           <!-- Live Recalculated Nutrition Summary Bar -->
           <div class="fh-nutrition-summary-bar">
             <div class="ns-item cal">

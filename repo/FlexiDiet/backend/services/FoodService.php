@@ -51,6 +51,8 @@ class FoodService {
         }
 
         $norm = self::normalizeVietnamese($name);
+        $imageUrl = isset($params['image_url']) ? trim((string)$params['image_url']) : null;
+        if ($imageUrl === '') $imageUrl = null;
 
         $pdo->beginTransaction();
         try {
@@ -59,7 +61,7 @@ class FoodService {
                 fail(409, 'DISH_EXISTS', 'Bạn đã có món ăn với tên này trong danh mục cá nhân.');
             }
 
-            $dishId = FoodModel::createDish($pdo, $uid, $name, $norm, $label);
+            $dishId = FoodModel::createDish($pdo, $uid, $name, $norm, $label, $imageUrl);
 
             foreach ($items as $idx => $it) {
                 $ingId = (int)num($it, 'ingredient_id', 1, 999999999);
@@ -357,15 +359,73 @@ class FoodService {
 
         // Bản đồ ảnh đại diện mẫu cho các món ăn
         $imageMap = [
-            'pho_bo' => 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500&auto=format&fit=crop&q=80',
-            'com_tam' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80',
-            'bun_cha' => 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=500&auto=format&fit=crop&q=80',
-            'banh_mi' => 'https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=500&auto=format&fit=crop&q=80',
-            'salad_ga' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop&q=80',
-            'goi_cuon' => 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80',
-            'banh_cuon' => 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500&auto=format&fit=crop&q=80',
-            'bun_bo_hue' => 'https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=500&auto=format&fit=crop&q=80',
-            'canh_chua' => 'https://images.unsplash.com/photo-1547592180-85f173990554?w=500&auto=format&fit=crop&q=80'
+            'banh_canh' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Banh-Canh-Noodle-Soup.jpg/500px-Banh-Canh-Noodle-Soup.jpg',
+            'banh_chung' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Banh_chung_vuong.jpg/500px-Banh_chung_vuong.jpg',
+            'banh_cuon' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Banh_cuon.jpg/500px-Banh_cuon.jpg',
+            'banh_khot' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/B%C3%A1nh_kh%E1%BB%8Dt.jpg/500px-B%C3%A1nh_kh%E1%BB%8Dt.jpg',
+            'banh_mi' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/13-08-31-Kochtreffen-Wien-RalfR-N3S_7849-024.jpg/500px-13-08-31-Kochtreffen-Wien-RalfR-N3S_7849-024.jpg',
+            'banh_trang' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/B%C3%A1nh_tr%C3%A1ng_1.jpg/500px-B%C3%A1nh_tr%C3%A1ng_1.jpg',
+            'banh_trang_tron' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Vietnamese_%22banh_trang_tron%22.JPG/500px-Vietnamese_%22banh_trang_tron%22.JPG',
+            'banh_xeo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/B%C3%A1nh_x%C3%A8o_with_n%C6%B0%E1%BB%9Bc_m%E1%BA%AFm.jpg/500px-B%C3%A1nh_x%C3%A8o_with_n%C6%B0%E1%BB%9Bc_m%E1%BA%AFm.jpg',
+            'bo_kho' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Bo_kho_mien_Bac.jpg/500px-Bo_kho_mien_Bac.jpg',
+            'bo_la_lot' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/B%C3%B2_n%C6%B0%E1%BB%9Bng_l%C3%A1_l%E1%BB%91t_t%E1%BA%A1i_Manchester.jpg/500px-B%C3%B2_n%C6%B0%E1%BB%9Bng_l%C3%A1_l%E1%BB%91t_t%E1%BA%A1i_Manchester.jpg',
+            'bun' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Rice_vermicelli.jpg/500px-Rice_vermicelli.jpg',
+            'bun_bo_hue' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Bun-Bo-Hue-from-Huong-Giang-2011.jpg/500px-Bun-Bo-Hue-from-Huong-Giang-2011.jpg',
+            'bun_cha' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg/500px-B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg',
+            'bun_mam' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/B%C3%BAn_m%E1%BA%AFm.jpg/500px-B%C3%BAn_m%E1%BA%AFm.jpg',
+            'bun_rieu' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/B%C3%BAn_ri%C3%AAu_cua_n%C6%B0%E1%BB%9Bc.jpg/500px-B%C3%BAn_ri%C3%AAu_cua_n%C6%B0%E1%BB%9Bc.jpg',
+            'bun_dau' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/B%C3%BAn_%C4%91%E1%BA%ADu_m%E1%BA%AFm_t%C3%B4m_%282019%29.jpg/500px-B%C3%BAn_%C4%91%E1%BA%ADu_m%E1%BA%AFm_t%C3%B4m_%282019%29.jpg',
+            'ca_chua' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Bright_red_tomato_and_cross_section02.jpg/500px-Bright_red_tomato_and_cross_section02.jpg',
+            'ca_phao' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Solanum_macrocarpon_HabitusFruits_BotGardBln0906a.JPG/500px-Solanum_macrocarpon_HabitusFruits_BotGardBln0906a.JPG',
+            'canh' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Canhchua2.jpg/500px-Canhchua2.jpg',
+            'chanh' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/16-09-17-WikiLovesCocktails-Zutaten-Img0144.jpg/500px-16-09-17-WikiLovesCocktails-Zutaten-Img0144.jpg',
+            'cua' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Blue_crab_on_market_in_Piraeus_-_Callinectes_sapidus_Rathbun_20020819-317.jpg/500px-Blue_crab_on_market_in_Piraeus_-_Callinectes_sapidus_Rathbun_20020819-317.jpg',
+            'ca_rot' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Baby_carrots_-_jules.jpg/500px-Baby_carrots_-_jules.jpg',
+            'com' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Meshi.jpg/500px-Meshi.jpg',
+            'com_tam' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/C%C6%A1m_T%E1%BA%A5m%2C_Da_Nang%2C_Vietnam.jpg/500px-C%C6%A1m_T%E1%BA%A5m%2C_Da_Nang%2C_Vietnam.jpg',
+            'dua_leo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Cucumber_BNC.jpg/500px-Cucumber_BNC.jpg',
+            'dua_chua' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Sayur_asin_pickles.JPG/500px-Sayur_asin_pickles.JPG',
+            'cha' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Gi%C3%B2_l%E1%BB%A5a_2.jpg/500px-Gi%C3%B2_l%E1%BB%A5a_2.jpg',
+            'goi_cuon' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Summer_roll.jpg/500px-Summer_roll.jpg',
+            'hamburger' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/NCI_Visuals_Food_Hamburger.jpg/500px-NCI_Visuals_Food_Hamburger.jpg',
+            'hu_tieu' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg/500px-H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg',
+            'khoai_tay_chien' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/%E3%83%9E%E3%83%83%E3%82%AF%E3%83%95%E3%83%A9%E3%82%A4%E3%83%9D%E3%83%86%E3%83%88_%E3%83%9E%E3%82%AF%E3%83%89%E3%83%8A%E3%83%AB%E3%83%89%E6%B8%8B%E8%B0%B7MIYASHITA_PARK%E5%BA%97_2024%E5%B9%B411%E6%9C%8812%E6%97%A5%E3%81%AE%E6%B8%8B%E8%B0%B7_202411121301_IMG_9087.jpg/500px-%E3%83%9E%E3%83%83%E3%82%AF%E3%83%95%E3%83%A9%E3%82%A4%E3%83%9D%E3%83%86%E3%83%88_%E3%83%9E%E3%82%AF%E3%83%89%E3%83%8A%E3%83%AB%E3%83%89%E6%B8%8B%E8%B0%B7MIYASHITA_PARK%E5%BA%97_2024%E5%B9%B411%E6%9C%8812%E6%97%A5%E3%81%AE%E6%B8%8B%E8%B0%B7_202411121301_IMG_9087.jpg',
+            'long_heo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Tr%C3%A0ng_l%E1%BB%A3n_lu%E1%BB%99c.jpg/500px-Tr%C3%A0ng_l%E1%BB%A3n_lu%E1%BB%99c.jpg',
+            'lau' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Day177lilybday.JPG/500px-Day177lilybday.JPG',
+            'cha_gio' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Cha_gio.jpg/500px-Cha_gio.jpg',
+            'dau_hu' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Japanese_SilkyTofu_%28Kinugoshi_Tofu%29.JPG/500px-Japanese_SilkyTofu_%28Kinugoshi_Tofu%29.JPG',
+            'banh_beo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/B%C3%A1nh_b%C3%A8o.jpg/500px-B%C3%A1nh_b%C3%A8o.jpg',
+            'cao_lau' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Cao_l%E1%BA%A7u_%28144854_994%29.jpg/500px-Cao_l%E1%BA%A7u_%28144854_994%29.jpg',
+            'mi_quang' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Mi_Quang_1A_Danang.jpg/500px-Mi_Quang_1A_Danang.jpg',
+            'mi' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Misua_noodle_making_Taiwan.jpg/500px-Misua_noodle_making_Taiwan.jpg',
+            'nam' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/StrawMushroom.jpg/500px-StrawMushroom.jpg',
+            'pho' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Ph%E1%BB%9F_b%C3%B2%2C_C%E1%BA%A7u_Gi%E1%BA%A5y%2C_H%C3%A0_N%E1%BB%99i.jpg/500px-Ph%E1%BB%9F_b%C3%B2%2C_C%E1%BA%A7u_Gi%E1%BA%A5y%2C_H%C3%A0_N%E1%BB%99i.jpg',
+            'rau' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Ipomoea_aquatica_%282%29.JPG/500px-Ipomoea_aquatica_%282%29.JPG',
+            'thit_bo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Standing-rib-roast.jpg/500px-Standing-rib-roast.jpg',
+            'thit_ga' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Chickens_in_market.jpg/500px-Chickens_in_market.jpg',
+            'thit_heo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Th%E1%BB%8Bt_heo_quay_c%C3%BAng.jpg/500px-Th%E1%BB%8Bt_heo_quay_c%C3%BAng.jpg',
+            'salad' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/X%C3%A0_l%C3%A1ch.jpg/500px-X%C3%A0_l%C3%A1ch.jpg',
+            'xoi' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/X%C3%B4i_%C4%91%E1%BB%97_xanh.jpg/500px-X%C3%B4i_%C4%91%E1%BB%97_xanh.jpg',
+            'ot_chuong' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Poivrons_Luc_Viatour.jpg/500px-Poivrons_Luc_Viatour.jpg',
+            'bun_cha_ca' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/B%C3%BAn_ch%E1%BA%A3_c%C3%A1%2C_th%C3%A1ng_8_n%C4%83m_2018.JPG/500px-B%C3%BAn_ch%E1%BA%A3_c%C3%A1%2C_th%C3%A1ng_8_n%C4%83m_2018.JPG',
+            'chao_long' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Ch%C3%A1o_l%C3%B2ng.jpg/500px-Ch%C3%A1o_l%C3%B2ng.jpg',
+            'com_chien_duong_chau' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Chinese_fried_rice_by_stu_spivack_in_Cleveland%2C_OH.jpg/500px-Chinese_fried_rice_by_stu_spivack_in_Cleveland%2C_OH.jpg',
+            'com_chien_ga' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Lunch_plate_with_salads.jpg/500px-Lunch_plate_with_salads.jpg',
+            'nui_xao_bo' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Macaroni_closeup.jpg/500px-Macaroni_closeup.jpg',
+            'nom_hoa_chuoi' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/N%E1%BB%99m_hoa_chu%E1%BB%91i.png/500px-N%E1%BB%99m_hoa_chu%E1%BB%91i.png',
+            'cu_kieu' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Allium_chinense1.jpg/500px-Allium_chinense1.jpg',
+            'bong_cai' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Broccoli_and_cross_section_edit.jpg/500px-Broccoli_and_cross_section_edit.jpg',
+            'ca' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Fish_stuffed_with_Thai_herbs.jpg/500px-Fish_stuffed_with_Thai_herbs.jpg',
+            'sup_cua' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/She-Crab_Soup.jpg/500px-She-Crab_Soup.jpg',
+            'heo_quay' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/RoastPig.jpg/500px-RoastPig.jpg',
+            'muc' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Babbo-_Squid_Ink_pasta_with_green_chilis%2C_rock_shrimp_and_guanciale.jpg/500px-Babbo-_Squid_Ink_pasta_with_green_chilis%2C_rock_shrimp_and_guanciale.jpg',
+            'thit_kho' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Th%E1%BB%8Bt_kho_T%C3%A0u.jpg/500px-Th%E1%BB%8Bt_kho_T%C3%A0u.jpg',
+            'thit_nuong' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Bun_thit_nuong.jpg/500px-Bun_thit_nuong.jpg',
+            'tom' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Nh%C3%A0_m%C3%ACnh_L%E1%BB%85_30th4n2023_%28m%C3%B3n_t%C3%B4m_h%E1%BA%A5p%29_%282%29.jpg/500px-Nh%C3%A0_m%C3%ACnh_L%E1%BB%85_30th4n2023_%28m%C3%B3n_t%C3%B4m_h%E1%BA%A5p%29_%282%29.jpg',
+            'oc' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Escargot_de_bourgogne.jpg/500px-Escargot_de_bourgogne.jpg',
+            'kho_qua_thit' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Bittergourd.jpg/500px-Bittergourd.jpg',
+            'pho_mai' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Reblochon_AOC.jpg/500px-Reblochon_AOC.jpg',
+            'trung' => 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Eggs_in_basket_2020_G1.jpg/500px-Eggs_in_basket_2020_G1.jpg'
         ];
         $defaultImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80';
 
@@ -459,16 +519,13 @@ class FoodService {
             }
 
             $code = (string)($dish['dish_code'] ?? '');
+            $img = null;
             if ($isCustom) {
-                $norm = $dish['name_norm'] ?? '';
-                if (str_contains($norm, 'banh mi')) $img = $imageMap['banh_mi'];
-                elseif (str_contains($norm, 'pho')) $img = $imageMap['pho_bo'];
-                elseif (str_contains($norm, 'salad')) $img = $imageMap['salad_ga'];
-                elseif (str_contains($norm, 'bun')) $img = $imageMap['bun_cha'];
-                elseif (str_contains($norm, 'com')) $img = $imageMap['com_tam'];
-                else $img = $defaultImage;
+                // Món custom: chỉ hiển thị ảnh nếu người dùng chủ động chọn avatar món
+                $img = !empty($dish['image_url']) ? $dish['image_url'] : null;
             } else {
-                $img = $imageMap[$code] ?? $defaultImage;
+                // Món hệ thống: lấy từ DB hoặc bản đồ 67 ảnh chuẩn Wikimedia
+                $img = !empty($dish['image_url']) ? $dish['image_url'] : ($imageMap[$code] ?? null);
             }
 
             $scored[] = [

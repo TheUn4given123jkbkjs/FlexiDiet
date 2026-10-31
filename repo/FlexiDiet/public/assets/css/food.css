@@ -1151,3 +1151,69 @@
   color: var(--text-primary, #0f172a);
 }
 
+
+/* Composer Optional Avatar Picker */
+.fh-composer-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--sunken, #f8fafc);
+  border: 1px dashed var(--border, #cbd5e1);
+  border-radius: 10px;
+}
+.fh-composer-avatar-preview {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 1px solid var(--border, #cbd5e1);
+}
+.fh-composer-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.btn-remove-avatar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+}
+.btn-remove-avatar:hover {
+  background: #dc2626;
+}
+.fh-composer-avatar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Suggestion Card Without Image */
+.suggest-card .sc-no-img-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 0;
+}
+.sc-no-img-tag {
+  font-size: 11.5px;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
