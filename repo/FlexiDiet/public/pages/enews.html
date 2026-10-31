@@ -5,11 +5,24 @@
       <h1>eNews</h1>
       <p>Chia sẻ cập nhật của bạn, động lực mỗi ngày và những khoảnh khắc đáng nhớ.</p>
     </div>
-    <button class="fd-date-chip" type="button" aria-label="Trạng thái tin tức"><i class="fa-solid fa-bolt"></i><span>Live feed</span></button>
+    <div class="fd-enews-page-actions">
+      <button class="fd-enews-notifications-toggle" id="enewsOpenOwnProfile" type="button">
+        <i class="fa-regular fa-user"></i><span>Trang cá nhân</span>
+      </button>
+      <button class="fd-enews-notifications-toggle" id="enewsNotificationsToggle" type="button" aria-expanded="false">
+        <i class="fa-regular fa-bell"></i><span>Thông báo</span><strong id="enewsUnreadCount" hidden>0</strong>
+      </button>
+      <button class="fd-date-chip" type="button" aria-label="Trạng thái tin tức"><i class="fa-solid fa-bolt"></i><span>Live feed</span></button>
+    </div>
   </div>
 
   <div class="fd-enews-shell">
     <aside class="fd-enews-sidebar">
+      <section class="fd-enews-card fd-enews-notifications" id="enewsNotificationsPanel" hidden aria-label="Thông báo tương tác">
+        <div class="fd-enews-card-heading"><h3>Thông báo</h3><span id="enewsNotificationsStatus"></span></div>
+        <div id="enewsNotificationsList" class="fd-enews-notifications-list"></div>
+        <button type="button" id="enewsNotificationsMore" class="fd-enews-more" hidden>Tải thêm thông báo</button>
+      </section>
       <div class="fd-enews-card fd-enews-card-highlight">
         <span class="fd-section-kicker">SỐNG MẠNH HƠN</span>
         <h2>Khám phá cộng đồng</h2>
@@ -40,12 +53,20 @@
 
           <div class="fd-enews-upload-bar">
             <label class="fd-enews-upload-button" for="enewsMediaInput">
-              <i class="fa-solid fa-image"></i>
+              <i class="fa-solid fa-circle-plus"></i>
               <span>Thêm ảnh</span>
             </label>
             <input id="enewsMediaInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
             <button type="button" class="fd-enews-clear-button" id="enewsClearDraft" hidden>Xóa nháp</button>
           </div>
+          <label class="fd-enews-privacy">
+            <span><i class="fa-solid fa-lock"></i> Ai có thể xem?</span>
+            <select id="enewsPrivacy">
+              <option value="public">Công khai</option>
+              <option value="private">Chỉ mình tôi</option>
+            </select>
+          </label>
+          <small class="fd-enews-privacy-note">Chưa bật tùy chọn “Bạn bè” vì dự án hiện chưa có module kết bạn.</small>
 
           <div id="enewsPreview" class="fd-enews-preview" aria-live="polite"></div>
 
@@ -60,6 +81,7 @@
       </div>
 
       <div id="enewsFeed" class="fd-enews-feed" aria-live="polite"></div>
+      <button type="button" id="enewsFeedMore" class="fd-enews-more fd-enews-feed-more" hidden>Tải thêm bài viết</button>
       <div id="enewsEmptyState" class="fd-enews-empty" hidden>
         <i class="fa-solid fa-newspaper"></i>
         <h3>Chưa có bài viết nào</h3>

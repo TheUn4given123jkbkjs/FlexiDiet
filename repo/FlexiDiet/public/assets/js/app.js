@@ -163,7 +163,7 @@ function switchTab(tabId) {
     view.classList.toggle('active', view.id === `view-${tabId}`);
   });
   const pageNames = {
-    'dashboard':'Tổng quan', 'enews':'eNews',
+    'dashboard':'Tổng quan', 'enews':'eNews', 'enews-profile':'Hồ sơ eNews',
     'food':'Ăn uống (Food Hub)', 'workout':'Luyện tập',
     'history':'Nhật ký chi tiết', 'profile':'Hồ sơ cá nhân'
   };

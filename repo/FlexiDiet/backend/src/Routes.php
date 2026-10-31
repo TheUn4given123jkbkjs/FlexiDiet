@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/AdminRoutes.php';
+require_once __DIR__ . '/ENews.php';
 
 function authData(PDO $pdo, int $uid): array {
     $user = one($pdo, 'SELECT id,display_name,email,role FROM users WHERE id=?', [$uid]);
@@ -857,6 +858,9 @@ function executeRoute(string $route,string $method): never {
     }
     if ($route === '/auth/me' && $method === 'GET') { $uid=currentUserId(); response(authData(db(),$uid)); }
     $uid = currentUserId(); $pdo = db();
+    if (preg_match('~^/profile/avatar/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
+        enewsInteractionAvatar($pdo, $uid, (int)$m[1]);
+    }
     if ($route === '/profile/avatar' && $method === 'GET') serveProfileAvatar($pdo, $uid);
     if ($route === '/profile/avatar' && $method === 'POST') response(uploadProfileAvatar($pdo, $uid));
     if ($route === '/profile/avatar' && $method === 'DELETE') response(deleteProfileAvatar($pdo, $uid));
@@ -878,21 +882,83 @@ function executeRoute(string $route,string $method): never {
     if ($route === '/enews/feed' && $method === 'GET') {
         $limit = max(1, min(25, (int)num($_GET, 'limit', 1, 25, 12)));
         $offset = max(0, (int)num($_GET, 'offset', 0, 5000, 0));
-        response(enewsFeed($pdo, $uid, $limit, $offset));
+        response(enewsInteractionFeed($pdo, $uid, $limit, $offset));
     }
-    if ($route === '/enews/media' && $method === 'POST') response(enewsUploadMedia($pdo, $uid));
-    if ($route === '/enews/posts' && $method === 'POST') response(enewsCreatePost($pdo, $uid, body()), 201);
+    if ($route === '/enews/profile' && $method === 'GET') {
+        $limit = (int)num($_GET, 'limit', 1, 25, 12);
+        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
+        response(enewsInteractionProfile($pdo, $uid, $uid, $limit, $offset));
+    }
+    if (preg_match('~^/enews/profile/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
+        $limit = (int)num($_GET, 'limit', 1, 25, 12);
+        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
+        response(enewsInteractionProfile($pdo, $uid, (int)$m[1], $limit, $offset));
+    }
+    if ($route === '/enews/profile' && $method === 'PATCH') {
+        response(enewsInteractionUpdatePublicProfile($pdo, $uid, body()));
+    }
+    if ($route === '/enews/friends/requests' && $method === 'GET') {
+        response(enewsFriendshipRequests($pdo, $uid));
+    }
+    if ($route === '/enews/friends' && $method === 'GET') {
+        response(enewsFriendshipList($pdo, $uid));
+    }
+    if (preg_match('~^/enews/friends/([1-9][0-9]*)/request$~D', $route, $m) && $method === 'POST') {
+        response(enewsFriendshipRequest($pdo, $uid, (int)$m[1]), 201);
+    }
+    if (preg_match('~^/enews/friends/([1-9][0-9]*)/request$~D', $route, $m) && $method === 'DELETE') {
+        response(enewsFriendshipCancel($pdo, $uid, (int)$m[1]));
+    }
+    if (preg_match('~^/enews/friends/requests/([1-9][0-9]*)/(accept|decline)$~D', $route, $m) && $method === 'POST') {
+        response(enewsFriendshipRespond($pdo, $uid, (int)$m[1], $m[2] === 'accept'));
+    }
+    if (preg_match('~^/enews/friends/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
+        response(enewsFriendshipRemove($pdo, $uid, (int)$m[1]));
+    }
+    if (preg_match('~^/enews/media/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
+        enewsInteractionServeMedia($pdo, $uid, (int)$m[1]);
+    }
+    if ($route === '/enews/media' && $method === 'POST') response(enewsInteractionUpload($pdo, $uid));
+    if ($route === '/enews/posts' && $method === 'POST') response(enewsInteractionCreatePost($pdo, $uid, body()), 201);
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'GET') {
+        response(enewsInteractionPostDetail($pdo, $uid, (int)$m[1]));
+    }
+    if ($route === '/enews/notifications' && $method === 'GET') {
+        $limit = (int)num($_GET, 'limit', 1, 50, 20);
+        $offset = (int)num($_GET, 'offset', 0, 5000, 0);
+        response(enewsInteractionNotifications($pdo, $uid, $limit, $offset));
+    }
+    if (preg_match('~^/enews/notifications/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
+        response(enewsInteractionReadNotification($pdo, $uid, (int)$m[1]));
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)/comments$~D', $route, $m) && $method === 'GET') {
+        $limit = (int)num($_GET, 'limit', 1, 50, 30);
+        $offset = (int)num($_GET, 'offset', 0, 100000, 0);
+        response(enewsInteractionCommentList($pdo, $uid, (int)$m[1], $limit, $offset));
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)/comments$~D', $route, $m) && $method === 'POST') {
+        response(enewsInteractionCreateComment($pdo, $uid, (int)$m[1], body()), 201);
+    }
+    if (preg_match('~^/enews/posts/([1-9][0-9]*)/share$~D', $route, $m) && $method === 'POST') {
+        response(enewsInteractionShare($pdo, $uid, (int)$m[1], body()), 201);
+    }
+    if (preg_match('~^/enews/comments/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
+        response(enewsInteractionUpdateComment($pdo, $uid, (int)$m[1], body()));
+    }
+    if (preg_match('~^/enews/comments/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
+        response(enewsInteractionDeleteComment($pdo, $uid, (int)$m[1]));
+    }
     if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'PATCH') {
-        response(enewsUpdatePost($pdo, $uid, (int)$m[1], body()));
+        response(enewsInteractionUpdatePost($pdo, $uid, (int)$m[1], body()));
     }
     if (preg_match('~^/enews/posts/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsDeletePost($pdo, $uid, (int)$m[1]));
+        response(enewsInteractionDeletePost($pdo, $uid, (int)$m[1]));
     }
     if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'POST') {
-        response(enewsToggleLike($pdo, $uid, (int)$m[1], true));
+        response(enewsInteractionToggleLike($pdo, $uid, (int)$m[1], true));
     }
     if (preg_match('~^/enews/posts/([1-9][0-9]*)/like$~D', $route, $m) && $method === 'DELETE') {
-        response(enewsToggleLike($pdo, $uid, (int)$m[1], false));
+        response(enewsInteractionToggleLike($pdo, $uid, (int)$m[1], false));
     }
     if ($route === '/foods' && $method === 'GET') {
         $q = trim((string)($_GET['q'] ?? ''));

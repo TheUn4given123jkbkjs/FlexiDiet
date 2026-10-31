@@ -1,0 +1,53 @@
+<section class="page-view fd-enews fd-enews-profile-view" id="view-enews-profile">
+  <div class="fd-enews-profile-top">
+    <button class="fd-enews-more fd-enews-back" type="button" onclick="switchTab('enews')">
+      <i class="fa-solid fa-arrow-left"></i> Quay lại eNews
+    </button>
+  </div>
+  <section class="fd-enews-profile-card" aria-label="Hồ sơ eNews">
+    <div class="fd-enews-profile-summary">
+      <span class="fd-enews-avatar fd-enews-profile-avatar" id="enewsProfileAvatar">N</span>
+      <div>
+        <h1 id="enewsProfileName">Hồ sơ người dùng</h1>
+        <small id="enewsProfileJoined"></small>
+        <p id="enewsProfileBio">Đang tải thông tin...</p>
+      </div>
+      <div class="fd-enews-profile-controls">
+        <button type="button" class="fd-enews-primary" id="enewsProfileEdit" hidden>Chỉnh sửa giới thiệu</button>
+        <button type="button" class="fd-enews-secondary" id="enewsProfileFriend" hidden>Kết bạn</button>
+        <div class="fd-enews-friend-response" id="enewsProfileFriendResponse" hidden>
+          <button type="button" class="fd-enews-primary" data-action="accept-profile-friend">Chấp nhận</button>
+          <button type="button" class="fd-enews-secondary" data-action="decline-profile-friend">Từ chối</button>
+        </div>
+      </div>
+    </div>
+    <p class="fd-enews-profile-status" id="enewsProfileRelationshipStatus"></p>
+    <section class="fd-enews-friend-requests" id="enewsFriendRequestsPanel" hidden aria-label="Lời mời kết bạn">
+      <h2>Lời mời kết bạn</h2>
+      <div id="enewsFriendRequestsList"></div>
+    </section>
+    <section class="fd-enews-friend-requests" id="enewsFriendsPanel" hidden aria-label="Danh sách bạn bè">
+      <h2>Bạn bè</h2>
+      <div id="enewsFriendsList"></div>
+    </section>
+    <form id="enewsProfileEditForm" class="fd-enews-profile-edit" hidden>
+      <label for="enewsProfileBioInput">Thông tin giới thiệu công khai (tối đa 500 ký tự)</label>
+      <textarea id="enewsProfileBioInput" maxlength="500" rows="3"></textarea>
+      <div>
+        <span id="enewsProfileStatus" role="status"></span>
+        <button type="button" class="fd-enews-secondary" id="enewsProfileCancel">Hủy</button>
+        <button type="submit" class="fd-enews-primary">Lưu</button>
+      </div>
+    </form>
+  </section>
+  <div class="fd-enews-profile-list-heading">
+    <h2>Bài viết</h2>
+    <div id="enewsProfileFilters" class="fd-enews-profile-filters">
+      <button type="button" class="active" data-profile-filter="all">Tất cả</button>
+      <button type="button" data-profile-filter="public">Công khai</button>
+      <button type="button" data-profile-filter="private" data-profile-private hidden>Chỉ mình tôi</button>
+    </div>
+  </div>
+  <div id="enewsProfileFeed" class="fd-enews-profile-feed" aria-live="polite"></div>
+  <button type="button" id="enewsProfileFeedMore" class="fd-enews-more fd-enews-feed-more" hidden>Tải thêm bài viết</button>
+</section>
