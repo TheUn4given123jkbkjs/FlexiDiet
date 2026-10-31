@@ -192,49 +192,67 @@
           <div class="form-row fh-composer-meta-row">
             <div class="form-group flex-2">
               <label for="composerDishName"><i class="fa-solid fa-bowl-food"></i> Tên Món Ăn</label>
-              <input class="jira-input" id="composerDishName" placeholder="Tên món ăn..." type="text" value="Phở Bò Tái Nạm"/>
+              <input class="jira-input" id="composerDishName" placeholder="Nhập tên món ăn..." type="text" value=""/>
             </div>
-            <div class="form-group">
-              <label for="composerMealType"><i class="fa-regular fa-clock"></i> Bữa Ăn</label>
-              <select class="jira-select" id="composerMealType">
-                <option value="breakfast" selected>Bữa Sáng</option>
-                <option value="lunch">Bữa Trưa</option>
-                <option value="dinner">Bữa Tối</option>
-                <option value="snack">Bữa Phụ</option>
+            <div class="form-group flex-1">
+              <label for="composerServingLabel"><i class="fa-solid fa-tag"></i> Khẩu Phần</label>
+              <select class="jira-select" id="composerServingLabel">
+                <option value="1 phần" selected>1 phần</option>
+                <option value="1 tô">1 tô</option>
+                <option value="1 tô lớn">1 tô lớn</option>
+                <option value="1 đĩa">1 đĩa</option>
+                <option value="1 bát">1 bát</option>
+                <option value="1 ổ">1 ổ</option>
+                <option value="1 suất">1 suất</option>
+                <option value="1 cái">1 cái</option>
+                <option value="1 ly">1 ly</option>
+                <option value="100g">100g</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="composerServingLabel"><i class="fa-solid fa-tag"></i> Khẩu Phần</label>
-              <input class="jira-input" id="composerServingLabel" readonly type="text" value="1 tô vừa"/>
+          </div>
+          <!-- Optional Dish Avatar Row -->
+          <div class="fh-composer-avatar-row">
+            <div class="fh-composer-avatar-preview" id="composerAvatarPreview" style="display:none;">
+              <img id="composerAvatarImg" src="" alt="Avatar món" />
+              <button type="button" class="btn-remove-avatar" onclick="FoodHub.removeComposerAvatar()" title="Gỡ ảnh đại diện"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="fh-composer-avatar-controls">
+              <label class="btn-jira-outline btn-sm" for="composerAvatarInput">
+                <i class="fa-regular fa-image"></i> Chọn ảnh đại diện món (Tùy chọn)
+              </label>
+              <input type="file" id="composerAvatarInput" accept="image/*" style="display:none;" onchange="FoodHub.handleComposerAvatarChange(event)" />
+              <span class="sub-muted font-12" id="composerAvatarHint">Tùy chọn — nếu không chọn, món ăn sẽ hiển thị dạng thẻ gọn không kèm ảnh minh họa.</span>
             </div>
           </div>
           <!-- Live Recalculated Nutrition Summary Bar -->
           <div class="fh-nutrition-summary-bar">
             <div class="ns-item cal">
               <span class="ns-label">Tổng Calo</span>
-              <strong class="ns-val" id="composerTotalCal">485</strong>
+              <strong class="ns-val" id="composerTotalCal">0</strong>
               <small>kcal</small>
             </div>
             <div class="ns-divider"></div>
             <div class="ns-item p">
               <span class="ns-label">Protein</span>
-              <strong class="ns-val" id="composerTotalProt">32.5</strong>
+              <strong class="ns-val" id="composerTotalProt">0</strong>
               <small>g</small>
             </div>
+            <div class="ns-divider"></div>
             <div class="ns-item c">
               <span class="ns-label">Carbs</span>
-              <strong class="ns-val" id="composerTotalCarb">68.0</strong>
+              <strong class="ns-val" id="composerTotalCarb">0</strong>
               <small>g</small>
             </div>
+            <div class="ns-divider"></div>
             <div class="ns-item f">
               <span class="ns-label">Fat</span>
-              <strong class="ns-val" id="composerTotalFat">11.2</strong>
+              <strong class="ns-val" id="composerTotalFat">0</strong>
               <small>g</small>
             </div>
             <div class="ns-divider"></div>
             <div class="ns-item w">
               <span class="ns-label">Khối lượng</span>
-              <strong class="ns-val" id="composerTotalWeight">450</strong>
+              <strong class="ns-val" id="composerTotalWeight">0</strong>
               <small>g</small>
             </div>
           </div>
@@ -245,7 +263,7 @@
           <div class="box-head fh-ing-box-head">
             <div>
               <h3><i class="fa-solid fa-list-check text-green"></i> Bóc Tách Nguyên Liệu &amp; Thanh Trượt 3 Dải Màu (S/M/L)</h3>
-              <p class="sub-muted">Thanh trượt chia 3 vùng màu: <span class="zone-tag green">Xanh (Nhỏ)</span>, <span class="zone-tag yellow">Vàng (Vừa)</span>, <span class="zone-tag red">Đỏ (Lớn)</span>. Đồng bộ 2 chiều với ô nhập gram.</p>
+              <p class="sub-muted">Thanh trượt chia 3 vùng màu: <span class="zone-tag green">Xanh (Nhỏ)</span>, <span class="zone-tag yellow">Vàng (Vừa)</span>, <span class="zone-tag red">Đỏ (Lớn)</span></p>
             </div>
             <button class="btn-jira-tool" type="button" onclick="toggleAddIngredientPanel()">
               <i class="fa-solid fa-plus"></i> Thêm nguyên liệu / topping
@@ -278,6 +296,12 @@
           <button class="btn-jira-tool btn-lg" id="btnComposerSaveMyDish" type="button" onclick="submitComposerAsMyDish()">
             <i class="fa-solid fa-bookmark"></i> Lưu thành "Món của tôi"
           </button>
+          <button class="btn-jira-danger btn-lg" id="btnComposerDeleteDish" type="button" style="display:none;" onclick="FoodHub.deleteCurrentCustomDish()">
+            <i class="fa-solid fa-trash-can"></i> Xóa món này khỏi Món của tôi
+          </button>
+          <button class="btn-jira-outline btn-lg" id="btnComposerReset" type="button" onclick="FoodHub.resetComposer()">
+            <i class="fa-solid fa-rotate-left"></i> Làm mới / Xóa trắng
+          </button>
           <button class="btn-jira-outline btn-lg" type="button" onclick="switchFoodSubtab('catalog')">
             <i class="fa-solid fa-arrow-left"></i> Quay lại Danh mục
           </button>
@@ -293,118 +317,54 @@
           <div class="sab-icon"><i class="fa-solid fa-lightbulb"></i></div>
           <div class="sab-content">
             <h3>Gợi Ý Món Ăn Theo Khoảng Calo &amp; Dinh Dưỡng</h3>
-            <p>Hệ thống tự động đề xuất các món ăn tối ưu dựa trên mục tiêu calo còn lại trong ngày và tỷ lệ dinh dưỡng (Macro) của bạn. <span class="fh-optional-badge"><i class="fa-solid fa-sparkles"></i> Tính năng tùy chọn</span></p>
-          </div>
-          <div class="sab-actions">
-            <button class="btn-jira-tool" type="button" onclick="filterSuggestions('high_prot', this)"><i class="fa-solid fa-dna"></i> Lọc Nhiều Đạm</button>
+            <p>Hệ thống tự động đề xuất các món ăn tối ưu dựa trên mục tiêu calo còn lại trong ngày và tỷ lệ dinh dưỡng (Macro) của bạn.</p>
           </div>
         </div>
 
-        <!-- Quick Filters -->
-        <div class="suggestions-filter-bar">
-          <button class="s-filter-btn active" type="button" onclick="filterSuggestions('all', this)">Tất Cả Món Gợi Ý</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('high_prot', this)">🍗 Nhiều Đạm (&gt; 25g Protein)</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('viet', this)">🇻🇳 Món Việt Chuẩn Vị</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('quick', this)">⚡ Nhanh Gọn (&lt; 15 Phút)</button>
-          <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_cal', this)">🥗 Ít Calo (&lt; 350 kcal)</button>
+        <!-- Dedicated Multi-Filter Bar (Dropdown Menus, Multi-criteria, No Icons) -->
+        <div class="suggestions-filter-container">
+          <div class="s-filter-dropdowns-row">
+            <div class="s-dropdown-field">
+              <label for="filterNutriSelect" class="s-dropdown-label">Mục tiêu dinh dưỡng</label>
+              <select id="filterNutriSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả dinh dưỡng</option>
+                <option value="high_prot">Nhiều Đạm (&ge; 25g Protein)</option>
+                <option value="low_carb">Ít Tinh Bột (&le; 30g Carb)</option>
+                <option value="low_fat">Ít Chất Béo (&le; 10g Fat)</option>
+                <option value="low_cal">Ít Calo (&le; 350 kcal)</option>
+                <option value="high_energy">Năng Lượng Cao (&ge; 600 kcal)</option>
+              </select>
+            </div>
+
+            <div class="s-dropdown-field">
+              <label for="filterMealSelect" class="s-dropdown-label">Bữa ăn</label>
+              <select id="filterMealSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả bữa ăn</option>
+                <option value="breakfast">Bữa Sáng</option>
+                <option value="main_meal">Bữa Trưa &amp; Tối (Bữa chính)</option>
+                <option value="snack">Bữa Phụ / Ăn Nhẹ</option>
+              </select>
+            </div>
+
+            <div class="s-dropdown-field">
+              <label for="filterOriginSelect" class="s-dropdown-label">Nguồn món</label>
+              <select id="filterOriginSelect" class="s-dropdown-select" onchange="FoodHub.applyMultiFilter()">
+                <option value="all">Tất cả nguồn món</option>
+                <option value="viet">Món Việt Chuẩn Vị (Hệ thống)</option>
+                <option value="custom">Món Ruột Của Tôi (Tự tạo)</option>
+              </select>
+            </div>
+
+            <div class="s-dropdown-actions">
+              <button type="button" class="btn-filter-reset" onclick="FoodHub.resetMultiFilter()">Đặt lại</button>
+            </div>
+          </div>
         </div>
 
-        <!-- Suggestions Cards Grid -->
+        <!-- Suggestions Cards Grid (Rendered dynamically by FoodHub.loadSmartSuggestions) -->
         <div class="suggestions-cards-grid" id="suggestionsGrid">
-          <!-- Card 1: Salad Ức Gà -->
-          <div class="suggest-card" data-tags="high_prot quick low_cal">
-            <div class="sc-img-wrap">
-              <img alt="Salad Ức Gà" src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-high">Khớp 99% Mục Tiêu</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Salad Ức Gà Áp Chảo Rau Củ Healthy</h4>
-              <p class="sc-desc">Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
-                <span class="snc snc-prot">P: 38g</span>
-                <span class="snc snc-carb">C: 14g</span>
-                <span class="snc snc-fat">F: 8g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Salad Ức Gà Áp Chảo', 340, 38, 14, 8)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 2: Bún Chả -->
-          <div class="suggest-card" data-tags="viet high_prot">
-            <div class="sc-img-wrap">
-              <img alt="Bún Chả" src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-med">Món Việt Quen Thuộc</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 20 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Bún Chả Hà Nội Nướng Than Hoa</h4>
-              <p class="sc-desc">Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 510 kcal</span>
-                <span class="snc snc-prot">P: 28g</span>
-                <span class="snc snc-carb">C: 64g</span>
-                <span class="snc snc-fat">F: 16g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Bún Chả Hà Nội', 510, 28, 64, 16)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 3: Gỏi Cuốn Tôm Thịt -->
-          <div class="suggest-card" data-tags="viet quick low_cal">
-            <div class="sc-img-wrap">
-              <img alt="Gỏi Cuốn" src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-high">Ăn Nhẹ &amp; Thanh Lọc</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 10 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Gỏi Cuốn Tôm Thịt (3 Cuốn)</h4>
-              <p class="sc-desc">Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 280 kcal</span>
-                <span class="snc snc-prot">P: 22g</span>
-                <span class="snc snc-carb">C: 34g</span>
-                <span class="snc snc-fat">F: 6g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Gỏi Cuốn Tôm Thịt', 280, 22, 34, 6)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 4: Cơm Tấm Sườn Nạc -->
-          <div class="suggest-card" data-tags="viet high_prot">
-            <div class="sc-img-wrap">
-              <img alt="Cơm Tấm Sườn Nạc" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-med">Năng Lượng Đầy Đủ</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 25 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Cơm Tấm Sườn Nướng Chả Trứng</h4>
-              <p class="sc-desc">Sườn nướng mật ong đậm đà, chả trứng hấp mềm xốp, dưa chuột cà chua giải ngấy.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 580 kcal</span>
-                <span class="snc snc-prot">P: 32g</span>
-                <span class="snc snc-carb">C: 75g</span>
-                <span class="snc snc-fat">F: 15g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Cơm Tấm Sườn Nướng', 580, 32, 75, 15)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
+          <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích ngân sách và tính toán gợi ý món ăn tối ưu...
           </div>
         </div>
       </div>
