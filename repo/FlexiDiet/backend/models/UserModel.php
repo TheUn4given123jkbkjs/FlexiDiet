@@ -121,3 +121,4 @@ class UserModel {
         execSql($pdo, 'DELETE FROM password_reset_otps WHERE email = ?', [$email]);
     }
 }
+

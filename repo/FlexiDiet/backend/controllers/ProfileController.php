@@ -90,3 +90,4 @@ class ProfileController {
         response(profileInsights($pdo, $uid, $weightDays, $energyDays));
     }
 }
+

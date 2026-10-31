@@ -29,3 +29,4 @@ class AuthController {
         response(AuthService::resetPassword($pdo, $params));
     }
 }
+
