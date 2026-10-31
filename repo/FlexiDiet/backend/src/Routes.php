@@ -272,40 +272,13 @@ function mealList(PDO $pdo, int $uid, string $day): array {
     return FoodService::listMeals($pdo, $uid, $day);
 }
 function workoutList(PDO $pdo, int $uid, ?string $date = null, ?int $year = null): array {
-    if ($year !== null) return all($pdo, 'SELECT w.id,w.workout_date,w.duration_min,w.distance_km,w.raw_kcal,w.calorie_source,w.confidence,w.note,w.created_at,t.code exercise_code,t.name_vi exercise_name FROM workouts w JOIN exercise_types t ON t.id=w.exercise_type_id WHERE w.user_id=? AND w.workout_date BETWEEN ? AND ? ORDER BY w.workout_date DESC,w.id DESC LIMIT 1000', [$uid,"$year-01-01", "$year-12-31"]);
-    return all($pdo, 'SELECT w.id,w.workout_date,w.duration_min,w.distance_km,w.raw_kcal,w.calorie_source,w.confidence,w.note,w.created_at,t.code exercise_code,t.name_vi exercise_name FROM workouts w JOIN exercise_types t ON t.id=w.exercise_type_id WHERE w.user_id=? AND w.workout_date=? ORDER BY w.id DESC', [$uid,$date]);
+    return WorkoutService::listWorkouts($pdo, $uid, $date, $year);
 }
 function createWorkout(PDO $pdo, int $uid, array $p): array {
-    $day = dateValue($p['workout_date'] ?? today());
-    $code = choice($p, 'exercise_code', ['running','cycling','gym','swimming','hiit','jump_rope','walking','yoga','badminton','football']);
-    $duration = num($p,'duration_min',1,600);
-    $distance = isset($p['distance_km']) && $p['distance_km'] !== '' ? num($p,'distance_km',0,500) : null;
-    $source = choice($p,'calorie_source',['met','device'],'met');
-    $type = one($pdo, 'SELECT t.id, r.met FROM exercise_types t LEFT JOIN exercise_met_rules r ON r.exercise_type_id=t.id WHERE t.code=? AND t.is_active=1 ORDER BY r.id LIMIT 1', [$code]);
-    if (!$type || ($source === 'met' && $type['met'] === null)) fail(422,'EXERCISE_SEEDS_REQUIRED','Cần import database/seeds/06_exercise_types.sql.');
-    $note = isset($p['note']) ? mb_substr(trim((string)$p['note']),0,255) : null;
-    $weight = $source === 'met' ? weightOn($pdo,$uid,$day) : null;
-    $met = $source === 'met' ? (float)$type['met'] : null;
-    $raw = $source === 'met' ? workoutKcal($met,$weight,$duration) : num($p,'raw_kcal',0,5000);
-    $pdo->beginTransaction();
-    try {
-        if ($day === today()) ensureBudget($pdo,$uid,$day);
-        execSql($pdo,'INSERT INTO workouts (user_id,workout_date,exercise_type_id,duration_min,distance_km,calorie_source,confidence,met_value,weight_kg_used,raw_kcal,note) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$uid,$day,$type['id'],$duration,$distance,$source,$source === 'met' ? 'medium':'high',$met,$weight,$raw,$note]);
-        $id = (int)$pdo->lastInsertId();
-        if ($day === today() || one($pdo, 'SELECT id FROM daily_budgets WHERE user_id=? AND budget_date=?', [$uid,$day])) ensureBudget($pdo,$uid,$day);
-        $pdo->commit();
-    } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
-    return one($pdo,'SELECT w.id,w.workout_date,w.duration_min,w.raw_kcal,w.calorie_source,t.code exercise_code,t.name_vi exercise_name FROM workouts w JOIN exercise_types t ON t.id=w.exercise_type_id WHERE w.id=?', [$id]);
+    return WorkoutService::createWorkout($pdo, $uid, $p);
 }
-function deleteWorkout(PDO $pdo,int $uid,int $id): void {
-    $pdo->beginTransaction();
-    try {
-        $old = one($pdo, 'SELECT workout_date FROM workouts WHERE id=? AND user_id=? FOR UPDATE', [$id,$uid]);
-        if (!$old) fail(404,'NOT_FOUND','Không tìm thấy buổi tập.');
-        execSql($pdo,'DELETE FROM workouts WHERE id=? AND user_id=?',[$id,$uid]);
-        if ($old['workout_date'] === today() || one($pdo, 'SELECT id FROM daily_budgets WHERE user_id=? AND budget_date=?', [$uid,$old['workout_date']])) ensureBudget($pdo,$uid,$old['workout_date']);
-        $pdo->commit();
-    } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
+function deleteWorkout(PDO $pdo, int $uid, int $id): void {
+    WorkoutService::deleteWorkout($pdo, $uid, $id);
 }
 function normalizeVietnamese(string $str): string {
     return FoodService::normalizeVietnamese($str);
@@ -805,24 +778,14 @@ function executeRoute(string $route,string $method): never {
     if (preg_match('~^/meals/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
         FoodController::deleteMeal($pdo, $uid, (int)$m[1]);
     }
-    if ($route === '/exercises' && $method === 'GET') response(all($pdo,'SELECT t.id,t.code,t.name_vi,t.uses_distance,(SELECT r.met FROM exercise_met_rules r WHERE r.exercise_type_id=t.id ORDER BY r.id LIMIT 1) default_met FROM exercise_types t WHERE t.is_active=1 ORDER BY t.id'));
-    if ($route === '/workouts' && $method === 'GET') {
-        if (isset($_GET['year'])) {
-            $year = (int)num($_GET,'year',2000,(int)date('Y')); response(workoutList($pdo,$uid,null,$year));
-        }
-        response(workoutList($pdo,$uid,dateValue($_GET['date'] ?? today())));
+    if ($route === '/exercises' && $method === 'GET') WorkoutController::listExercises($pdo);
+    if ($route === '/workouts' && $method === 'GET') WorkoutController::listWorkouts($pdo, $uid);
+    if ($route === '/workouts/heatmap' && $method === 'GET') WorkoutController::getHeatmap($pdo, $uid);
+    if ($route === '/workouts' && $method === 'POST') WorkoutController::createWorkout($pdo, $uid, body());
+    if (preg_match('~^/workouts/([1-9][0-9]*)$~D', $route, $m) && $method === 'DELETE') {
+        WorkoutController::deleteWorkout($pdo, $uid, (int)$m[1]);
     }
-    if ($route === '/workouts/heatmap' && $method === 'GET') {
-        $year=(int)num($_GET,'year',2000,(int)date('Y'),(float)date('Y'));
-        response(all($pdo,'SELECT workout_date date,COUNT(*) sessions,SUM(duration_min) minutes,ROUND(SUM(raw_kcal),1) raw_kcal FROM workouts WHERE user_id=? AND workout_date BETWEEN ? AND ? GROUP BY workout_date ORDER BY workout_date',[$uid,"$year-01-01","$year-12-31"]));
-    }
-    if ($route === '/workouts' && $method === 'POST') response(createWorkout($pdo,$uid,body()),201);
-    if (preg_match('~^/workouts/([1-9][0-9]*)$~D',$route,$m) && $method==='DELETE') {deleteWorkout($pdo,$uid,(int)$m[1]);response(['deleted'=>true]);}
-    if ($route === '/water' && $method === 'POST') {
-        $p=body(); $ml=(int)num($p,'amount_ml',1,3000); $day=dateValue($p['log_date'] ?? today());
-        execSql($pdo,'INSERT INTO water_logs (user_id,log_date,amount_ml) VALUES (?,?,?)',[$uid,$day,$ml]);
-        response(['amount_ml'=>$ml,'water_total_ml'=>(int)one($pdo,'SELECT SUM(amount_ml) total FROM water_logs WHERE user_id=? AND log_date=?',[$uid,$day])['total']],201);
-    }
+    if ($route === '/water' && $method === 'POST') WorkoutController::recordWater($pdo, $uid, body());
     if ($route === '/ai/recognize' && $method === 'POST') response(recognizeFood($pdo, $uid));
     if ($route === '/ai/feedback' && $method === 'POST') {
         $p = body();
