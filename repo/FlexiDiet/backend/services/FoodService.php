@@ -250,7 +250,7 @@ class FoodService {
         string $origin = 'all'
     ): array {
         // Tương thích ngược nếu tag truyền vào là giá trị của origin hoặc meal
-        if (in_array($tag, ['viet', 'custom'], true) && $origin === 'all') {
+        if (in_array($tag, ['viet', 'custom', 'saved'], true) && $origin === 'all') {
             $origin = $tag;
             $tag = 'all';
         } elseif (in_array($tag, ['breakfast', 'main_meal', 'snack'], true) && $meal === 'all') {
@@ -279,10 +279,10 @@ class FoodService {
         }
 
         // 3. Multi-filter Tiêu chí 1: Nguồn gốc món ăn ($origin)
-        if ($origin === 'custom') {
-            $candidates = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'custom'));
+        if ($origin === 'custom' || $origin === 'saved') {
+            $candidates = array_values(array_filter($candidates, fn($d) => in_array($d['origin'], ['custom', 'saved'], true) || (!empty($d['owner_user_id']) && (int)$d['owner_user_id'] === $uid)));
         } elseif ($origin === 'system' || $origin === 'viet') {
-            $candidates = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'system'));
+            $candidates = array_values(array_filter($candidates, fn($d) => $d['origin'] === 'system' && empty($d['owner_user_id'])));
         }
 
         if (empty($candidates)) {
@@ -301,20 +301,25 @@ class FoodService {
 
         // 5. Giai đoạn 1: Sàng lọc theo Calo (Cascade Filter by Kcal)
         $filtered = [];
-        $kcalCap = ($remainingKcal > 0) ? max(350.0, 1.3 * $remainingKcal) : 250.0;
-        if ($tag === 'high_energy' || $meal === 'main_meal') {
-            $kcalCap = 1200.0; // Nới lỏng trần calo nếu tìm món năng lượng cao hoặc bữa chính
-        }
-        foreach ($candidates as $dish) {
-            $kcal = (float)$dish['kcal'];
-            if ($remainingKcal <= 0 && $tag !== 'high_energy') {
-                if ($kcal <= 250.0) $filtered[] = $dish;
-            } else {
-                if ($kcal <= $kcalCap) $filtered[] = $dish;
-            }
-        }
-        if (empty($filtered)) {
+        if ($origin === 'custom' || $origin === 'saved') {
+            // Khi lọc riêng món ruột tự tạo, giữ trọn vẹn các món của user để chấm điểm và xếp hạng
             $filtered = $candidates;
+        } else {
+            $kcalCap = ($remainingKcal > 0) ? max(350.0, 1.3 * $remainingKcal) : 250.0;
+            if ($tag === 'high_energy' || $meal === 'main_meal') {
+                $kcalCap = 1200.0; // Nới lỏng trần calo nếu tìm món năng lượng cao hoặc bữa chính
+            }
+            foreach ($candidates as $dish) {
+                $kcal = (float)$dish['kcal'];
+                if ($remainingKcal <= 0 && $tag !== 'high_energy') {
+                    if ($kcal <= 250.0) $filtered[] = $dish;
+                } else {
+                    if ($kcal <= $kcalCap) $filtered[] = $dish;
+                }
+            }
+            if (empty($filtered)) {
+                $filtered = $candidates;
+            }
         }
 
         // 6. Multi-filter Tiêu chí 2: Mục tiêu Dinh dưỡng ($tag)
@@ -370,7 +375,7 @@ class FoodService {
             $prot = (float)$dish['protein_g'];
             $carb = (float)$dish['carb_g'];
             $fat = (float)$dish['fat_g'];
-            $isCustom = ($dish['origin'] === 'custom');
+            $isCustom = in_array($dish['origin'], ['custom', 'saved'], true) || (!empty($dish['owner_user_id']) && (int)$dish['owner_user_id'] === $uid);
 
             // 5.1 Điểm dinh dưỡng (S_nutri)
             $sCal = max(0.0, 10.0 - 10.0 * (abs($kcal - $idealMealKcal) / max($idealMealKcal, 200.0)));
@@ -437,7 +442,7 @@ class FoodService {
             elseif ($meal === 'main_meal' || $meal === 'lunch') $reasonParts[] = "no lâu cho bữa chính";
             elseif ($meal === 'snack') $reasonParts[] = "cho bữa ăn nhẹ";
 
-            if ($origin === 'custom' || $isCustom) $reasonParts[] = "(món ruột tự tạo)";
+            if ($origin === 'custom' || $origin === 'saved' || $isCustom) $reasonParts[] = "(món ruột tự tạo)";
 
             if (!empty($reasonParts)) {
                 $reason = implode(' — ', $reasonParts);
@@ -454,7 +459,17 @@ class FoodService {
             }
 
             $code = (string)($dish['dish_code'] ?? '');
-            $img = $imageMap[$code] ?? $defaultImage;
+            if ($isCustom) {
+                $norm = $dish['name_norm'] ?? '';
+                if (str_contains($norm, 'banh mi')) $img = $imageMap['banh_mi'];
+                elseif (str_contains($norm, 'pho')) $img = $imageMap['pho_bo'];
+                elseif (str_contains($norm, 'salad')) $img = $imageMap['salad_ga'];
+                elseif (str_contains($norm, 'bun')) $img = $imageMap['bun_cha'];
+                elseif (str_contains($norm, 'com')) $img = $imageMap['com_tam'];
+                else $img = $defaultImage;
+            } else {
+                $img = $imageMap[$code] ?? $defaultImage;
+            }
 
             $scored[] = [
                 'dish_id' => $id,

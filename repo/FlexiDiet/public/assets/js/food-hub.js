@@ -976,7 +976,7 @@ const FoodHub = (() => {
 
     if (!suggestions.length) {
       let emptyMsg = 'Không tìm thấy món ăn nào thỏa mãn đồng thời các tiêu chí lọc đã chọn.';
-      if (activeOrigin === 'custom') {
+      if (activeOrigin === 'custom' || activeOrigin === 'saved') {
         emptyMsg = 'Bạn chưa tạo món ăn cá nhân nào. Hãy chuyển sang tab "3. Tùy chỉnh & Phối món" để tự phối món ruột của riêng bạn!';
       } else if (activeNutri !== 'all' && activeMeal !== 'all') {
         emptyMsg = 'Không có món ăn nào đồng thời khớp cả mục tiêu dinh dưỡng và bữa ăn này. Bạn hãy thử nới lỏng một tiêu chí nhé!';
@@ -995,7 +995,7 @@ const FoodHub = (() => {
       card.className = 'suggest-card';
       card.setAttribute('data-dish-id', dish.dish_id);
 
-      const isCustom = dish.origin === 'custom';
+      const isCustom = dish.origin === 'custom' || dish.origin === 'saved';
       const badgeClass = isCustom ? 'match-custom' : (dish.match_pct >= 85 ? 'match-high' : 'match-med');
       const badgeIcon = isCustom ? '<i class="fa-solid fa-star"></i> ' : '<i class="fa-solid fa-bullseye"></i> ';
       const badgeLabel = isCustom ? `Món Ruột (${dish.match_pct}%)` : `Khớp ${dish.match_pct}% Mục Tiêu`;
