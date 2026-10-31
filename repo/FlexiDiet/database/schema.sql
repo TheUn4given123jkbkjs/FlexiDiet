@@ -31,7 +31,14 @@ DROP TABLE IF EXISTS exercise_met_rules;
 DROP TABLE IF EXISTS exercise_types;
 DROP TABLE IF EXISTS daily_budgets;
 DROP TABLE IF EXISTS weight_logs;
+<<<<<<< HEAD
 DROP TABLE IF EXISTS profile_avatars;
+=======
+<<<<<<< HEAD
+DROP TABLE IF EXISTS profile_avatars;
+=======
+>>>>>>> e4a7cad67eae5f63f84a010e5e032e4a90042b0b
+>>>>>>> 0918a3caea53f6c797ca5863a24af26eaca4e173
 DROP TABLE IF EXISTS password_reset_otps;
 DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS users;
@@ -53,6 +60,7 @@ CREATE TABLE users (
   UNIQUE KEY uq_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+<<<<<<< HEAD
 CREATE TABLE posts (
   id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id    BIGINT UNSIGNED NOT NULL,
@@ -93,6 +101,9 @@ CREATE TABLE post_likes (
   CONSTRAINT fk_post_likes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+=======
+<<<<<<< HEAD
+>>>>>>> 0918a3caea53f6c797ca5863a24af26eaca4e173
 CREATE TABLE profile_avatars (
   user_id    BIGINT UNSIGNED NOT NULL,
   mime_type  VARCHAR(32)     NOT NULL,
@@ -102,6 +113,11 @@ CREATE TABLE profile_avatars (
   CONSTRAINT fk_profile_avatars_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> e4a7cad67eae5f63f84a010e5e032e4a90042b0b
+>>>>>>> 0918a3caea53f6c797ca5863a24af26eaca4e173
 CREATE TABLE password_reset_otps (
   email      VARCHAR(255)    NOT NULL,
   user_id    BIGINT UNSIGNED NOT NULL,
