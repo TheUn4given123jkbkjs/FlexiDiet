@@ -728,7 +728,9 @@ const FoodHub = (() => {
     const elName = document.getElementById('composerDishName');
     const elMeal = document.getElementById('composerMealType');
     const name = elName ? elName.value.trim() : state.composer.name;
-    const meal = elMeal ? elMeal.value : state.composer.mealType;
+    const hour = new Date().getHours();
+    const defaultMeal = hour < 10 ? 'breakfast' : (hour < 14 ? 'lunch' : (hour < 17 ? 'snack' : 'dinner'));
+    const meal = (elMeal && elMeal.value) ? elMeal.value : (state.composer.mealType || defaultMeal);
 
     if (!name) {
       showToast('Vui lòng nhập tên món ăn.', 'warning');

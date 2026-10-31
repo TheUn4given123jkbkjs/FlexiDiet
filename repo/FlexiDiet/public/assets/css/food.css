@@ -388,6 +388,10 @@
   flex: 2;
   min-width: 220px;
 }
+.flex-1 {
+  flex: 1;
+  min-width: 160px;
+}
 
 /* Sticky Live Nutrition Summary Bar */
 .fh-nutrition-summary-bar {
