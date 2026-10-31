@@ -28,9 +28,7 @@ rem 2. Tu dong tim PHP
 set "PHP_BIN="
 where php >nul 2>nul
 if %errorlevel% equ 0 set "PHP_BIN=php"
-if "%PHP_BIN%"=="" if exist "F:\xampp\php\php.exe" set "PHP_BIN=F:\xampp\php\php.exe"
-if "%PHP_BIN%"=="" if exist "C:\xampp\php\php.exe" set "PHP_BIN=C:\xampp\php\php.exe"
-if "%PHP_BIN%"=="" if exist "E:\xampp\php\php.exe" set "PHP_BIN=E:\xampp\php\php.exe"
+for %%D in (C D E F) do if "%PHP_BIN%"=="" if exist "%%D:\xampp\php\php.exe" set "PHP_BIN=%%D:\xampp\php\php.exe"
 
 if "%PHP_BIN%"=="" (
     echo [LOI] Khong tim thay PHP! Vui long kiem tra XAMPP da cai dat o o C: hoac D:.
@@ -42,10 +40,7 @@ rem 3. Tu dong tim MySQL
 set "MYSQL_BIN="
 where mysql >nul 2>nul
 if %errorlevel% equ 0 set "MYSQL_BIN=mysql"
-if "%MYSQL_BIN%"=="" if exist "D:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=D:\xampp\mysql\bin\mysql.exe"
-if "%MYSQL_BIN%"=="" if exist "C:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=C:\xampp\mysql\bin\mysql.exe"
-if "%MYSQL_BIN%"=="" if exist "E:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=E:\xampp\mysql\bin\mysql.exe"
-if "%MYSQL_BIN%"=="" if exist "F:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=F:\xampp\mysql\bin\mysql.exe"
+for %%D in (C D E F) do if "%MYSQL_BIN%"=="" if exist "%%D:\xampp\mysql\bin\mysql.exe" set "MYSQL_BIN=%%D:\xampp\mysql\bin\mysql.exe"
 
 if "%MYSQL_BIN%"=="" (
     echo [LOI] Khong tim thay mysql.exe! Vui long kiem tra XAMPP da cai dat o o C: hoac D:.
@@ -87,7 +82,7 @@ if errorlevel 1 (
 goto :MYSQL_READY
 
 :WAIT_FOR_MYSQL
-timeout /t 1 /nobreak >nul
+ping -n 2 127.0.0.1 >nul
 "%MYSQL_BIN%" -u root -e "SELECT 1;" >nul 2>nul
 if not errorlevel 1 goto :MYSQL_READY
 set /a MYSQL_WAIT+=1
@@ -167,7 +162,7 @@ powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -U
 if not errorlevel 1 goto :WEB_READY
 set /a WEB_WAIT+=1
 if %WEB_WAIT% lss 15 (
-    timeout /t 1 /nobreak >nul
+    ping -n 2 127.0.0.1 >nul
     goto :WAIT_FOR_WEB
 )
 echo.
