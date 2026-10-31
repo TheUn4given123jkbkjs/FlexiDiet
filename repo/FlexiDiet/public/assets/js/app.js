@@ -895,15 +895,9 @@ function filterSuggestions(tag, el) {
     document.querySelectorAll('.s-filter-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
   }
-  const cards = document.querySelectorAll('.suggest-card');
-  cards.forEach(c => {
-    const tags = c.getAttribute('data-tags') || '';
-    if (tag === 'all' || tags.includes(tag)) {
-      c.style.display = 'flex';
-    } else {
-      c.style.display = 'none';
-    }
-  });
+  if (typeof FoodHub !== 'undefined' && typeof FoodHub.loadSmartSuggestions === 'function') {
+    FoodHub.loadSmartSuggestions(tag);
+  }
 }
 
 // ==============================================================================

@@ -224,5 +224,194 @@ class FoodService {
             fail(404, 'NOT_FOUND', 'Không tìm thấy món đã ghi.');
         }
     }
+
+    public static function getSmartSuggestions(PDO $pdo, int $uid, string $tag = 'all', ?string $meal = null): array {
+        // 1. Lấy thông tin mục tiêu và ngân sách hôm nay
+        ensureBudget($pdo, $uid, today());
+        $budget = budgetView($pdo, $uid, today());
+        $profile = profileRow($pdo, $uid);
+
+        $targetKcal = (float)$budget['target_kcal'];
+        $creditKcal = (float)$budget['exercise_credit_kcal'];
+        $consumedKcal = (float)$budget['consumed_kcal'];
+        $remainingKcal = round(($targetKcal + $creditKcal) - $consumedKcal, 1);
+        $goal = (string)($profile['goal'] ?? 'lose');
+
+        // 2. Lấy không gian ứng viên (67 món hệ thống + món custom của chính user)
+        $candidates = FoodModel::getCandidateDishesForRecommendation($pdo, $uid);
+        if (empty($candidates)) {
+            return [
+                'budget' => ['remaining_kcal' => $remainingKcal, 'target_kcal' => $targetKcal, 'goal' => $goal],
+                'suggestions' => []
+            ];
+        }
+
+        // 3. Truy vấn dữ liệu lịch sử cá nhân và xu hướng cộng đồng
+        $user7dMap = FoodModel::getUserDishCountsInDays($pdo, $uid, 7);
+        $userAllMap = FoodModel::getUserAllTimeDishCounts($pdo, $uid);
+        $userTotalMeals = FoodModel::getUserTotalMealsCount($pdo, $uid);
+        $peerMap = FoodModel::getPeerDishCountsByGoal($pdo, $goal, 30);
+        $maxPeerCount = max(1, ...array_values($peerMap) ?: [1]);
+
+        // 4. Giai đoạn 1: Sàng lọc theo Calo (Cascade Filter by Kcal)
+        $filtered = [];
+        $kcalCap = $remainingKcal > 0 ? max(350.0, 1.3 * $remainingKcal) : 250.0;
+        foreach ($candidates as $dish) {
+            $kcal = (float)$dish['kcal'];
+            if ($remainingKcal <= 0) {
+                if ($kcal <= 250.0) $filtered[] = $dish;
+            } else {
+                if ($kcal <= $kcalCap) $filtered[] = $dish;
+            }
+        }
+        if (empty($filtered)) {
+            usort($candidates, fn($a, $b) => (float)$a['kcal'] <=> (float)$b['kcal']);
+            $filtered = array_slice($candidates, 0, 15);
+        }
+
+        // Tùy chọn lọc theo Tag dinh dưỡng nếu người dùng chọn
+        if ($tag === 'high_prot') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['protein_g'] >= 25.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'low_cal') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 350.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'viet') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => $d['origin'] === 'system'));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        } elseif ($tag === 'quick') {
+            $tagFiltered = array_values(array_filter($filtered, fn($d) => (float)$d['kcal'] <= 400.0));
+            if (!empty($tagFiltered)) $filtered = $tagFiltered;
+        }
+
+        // 5. Giai đoạn 2: Chấm điểm 3 thành phần (Component Scoring)
+        $idealMealKcal = $remainingKcal > 0 ? min($remainingKcal, max(300.0, $targetKcal * 0.35)) : 150.0;
+        $scored = [];
+
+        // Bản đồ ảnh đại diện mẫu cho các món ăn
+        $imageMap = [
+            'pho_bo' => 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500&auto=format&fit=crop&q=80',
+            'com_tam' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80',
+            'bun_cha' => 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=500&auto=format&fit=crop&q=80',
+            'banh_mi' => 'https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=500&auto=format&fit=crop&q=80',
+            'salad_ga' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop&q=80',
+            'goi_cuon' => 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80',
+            'banh_cuon' => 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500&auto=format&fit=crop&q=80',
+            'bun_bo_hue' => 'https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=500&auto=format&fit=crop&q=80',
+            'canh_chua' => 'https://images.unsplash.com/photo-1547592180-85f173990554?w=500&auto=format&fit=crop&q=80'
+        ];
+        $defaultImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80';
+
+        foreach ($filtered as $dish) {
+            $id = (int)$dish['id'];
+            $kcal = (float)$dish['kcal'];
+            $prot = (float)$dish['protein_g'];
+            $carb = (float)$dish['carb_g'];
+            $fat = (float)$dish['fat_g'];
+            $isCustom = ($dish['origin'] === 'custom');
+
+            // 5.1 Điểm dinh dưỡng (S_nutri)
+            $sCal = max(0.0, 10.0 - 10.0 * (abs($kcal - $idealMealKcal) / max($idealMealKcal, 200.0)));
+            $sMacro = 8.0;
+            if ($goal === 'build_muscle') {
+                $sMacro = min(10.0, ($prot / 30.0) * 10.0);
+            } elseif ($goal === 'lose') {
+                $protScore = min(6.0, ($prot / 20.0) * 6.0);
+                $fatPenalty = ($fat <= 15.0) ? 4.0 : max(0.0, 4.0 - ($fat - 15.0) * 0.3);
+                $sMacro = min(10.0, $protScore + $fatPenalty);
+            } elseif ($goal === 'gain') {
+                $sMacro = min(10.0, ($kcal / 500.0) * 5.0 + ($carb / 50.0) * 5.0);
+            }
+            $sNutri = round(0.5 * $sCal + 0.5 * $sMacro, 2);
+
+            // 5.2 Điểm sở thích cá nhân (S_history) theo đúng quy tắc
+            if ($isCustom) {
+                $timesAll = (int)($userAllMap[$id] ?? 0);
+                if ($timesAll >= 3) $sHist = 10.0;
+                elseif ($timesAll >= 1) $sHist = 9.0;
+                else $sHist = 8.0; // Khởi điểm mặc định 8 điểm
+            } else {
+                $times7d = (int)($user7dMap[$id] ?? 0);
+                if ($times7d >= 3) $sHist = 10.0; // Món khoái khẩu tuần qua
+                elseif ($times7d >= 1) $sHist = 6.0; // Đã ăn 1-2 lần
+                else $sHist = 4.0; // Chưa từng ăn
+            }
+
+            // 5.3 Điểm xu hướng cộng đồng (S_peer)
+            if ($isCustom) {
+                $sPeer = 0.0;
+            } else {
+                $peerCnt = (int)($peerMap[$id] ?? 0);
+                if (empty($peerMap)) {
+                    $sPeer = 5.0; // Mức trung tính khi hệ thống chưa có dữ liệu đám đông
+                } else {
+                    $sPeer = $peerCnt > 0 ? round(($peerCnt / $maxPeerCount) * 10.0, 2) : 4.0;
+                }
+            }
+
+            // 6. Giai đoạn 3: Adaptive Weighting & Switching
+            if ($isCustom) {
+                $sFinal = round(0.6 * $sNutri + 0.4 * $sHist, 2);
+            } else {
+                if ($userTotalMeals < 3) {
+                    // Chế độ Cold-Start cho người dùng mới
+                    $sFinal = round(0.7 * $sNutri + 0.3 * $sPeer, 2);
+                } else {
+                    $sFinal = round(0.5 * $sNutri + 0.3 * $sHist + 0.2 * $sPeer, 2);
+                }
+            }
+
+            // 7. Giai đoạn 4: Ranking & Match Reason
+            $matchPct = (int)round(min(99.0, max(50.0, $sFinal * 10.0)));
+
+            if ($isCustom) {
+                $reason = "Món của bạn — Rất phù hợp mục tiêu hôm nay";
+            } elseif ($prot >= 25.0) {
+                $reason = "Giàu đạm ({$prot}g Protein) — Tối ưu phát triển cơ bắp";
+            } elseif ($remainingKcal <= 0) {
+                $reason = "Thanh đạm ({$kcal} kcal) — Giúp kiểm soát năng lượng";
+            } elseif (($user7dMap[$id] ?? 0) >= 3) {
+                $reason = "Món khoái khẩu tuần qua của bạn";
+            } elseif ($goal === 'lose') {
+                $reason = "Món thanh nhẹ ({$kcal} kcal) — Tối ưu giảm cân";
+            } else {
+                $reason = "Cân đối dinh dưỡng, được cộng đồng ưa chuộng";
+            }
+
+            $code = (string)($dish['dish_code'] ?? '');
+            $img = $imageMap[$code] ?? $defaultImage;
+
+            $scored[] = [
+                'dish_id' => $id,
+                'name' => $dish['name'],
+                'dish_code' => $code,
+                'origin' => $dish['origin'],
+                'serving_label' => $dish['serving_label'],
+                'kcal' => $kcal,
+                'protein_g' => $prot,
+                'carb_g' => $carb,
+                'fat_g' => $fat,
+                'match_pct' => $matchPct,
+                'match_reason' => $reason,
+                'image_url' => $img,
+                'score_final' => $sFinal
+            ];
+        }
+
+        // Sắp xếp điểm số từ cao xuống thấp và lấy Top 6
+        usort($scored, fn($a, $b) => $b['score_final'] <=> $a['score_final']);
+        $top6 = array_slice($scored, 0, 6);
+
+        return [
+            'budget' => [
+                'remaining_kcal' => $remainingKcal,
+                'target_kcal' => $targetKcal,
+                'consumed_kcal' => $consumedKcal,
+                'goal' => $goal
+            ],
+            'filter_tag' => $tag,
+            'suggestions' => $top6
+        ];
+    }
 }
 

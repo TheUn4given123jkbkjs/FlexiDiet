@@ -10,6 +10,7 @@ const FoodHub = (() => {
     activeSubtab: 'scanner',
     catalogDishes: [],
     catalogFilter: 'all',
+    suggestionsTag: 'all',
     currentDish: null,
     composer: {
       dishId: null,
@@ -54,6 +55,9 @@ const FoodHub = (() => {
 
     if (subtabName === 'catalog' && !state.catalogDishes.length) {
       loadCatalog();
+    }
+    if (subtabName === 'suggestions') {
+      loadSmartSuggestions(state.suggestionsTag || 'all');
     }
   }
 
@@ -798,6 +802,105 @@ const FoodHub = (() => {
     return String(str || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
 
+
+  // 6.5. Smart Food Suggestions (UC-Recommendation)
+  async function loadSmartSuggestions(tag = 'all') {
+    state.suggestionsTag = tag;
+    const grid = document.getElementById('suggestionsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = `
+      <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích ngân sách và tính toán gợi ý món ăn tối ưu...
+      </div>`;
+
+    try {
+      const res = await FlexiAPI.request('/foods/suggestions?tag=' + encodeURIComponent(tag));
+      const suggestions = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+
+      if (!suggestions.length) {
+        grid.innerHTML = `
+          <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: var(--text-muted);">
+            <i class="fa-solid fa-circle-info" style="font-size: 24px; margin-bottom: 8px;"></i>
+            <p>Không có gợi ý phù hợp với bộ lọc này hoặc ngân sách calo hiện tại.</p>
+          </div>`;
+        return;
+      }
+
+      grid.replaceChildren();
+      for (const dish of suggestions) {
+        const card = document.createElement('div');
+        card.className = 'suggest-card';
+        card.setAttribute('data-dish-id', dish.dish_id);
+
+        const isCustom = dish.origin === 'custom';
+        const badgeClass = isCustom ? 'match-custom' : (dish.match_pct >= 85 ? 'match-high' : 'match-med');
+        const badgeIcon = isCustom ? '<i class="fa-solid fa-star"></i> ' : '<i class="fa-solid fa-bullseye"></i> ';
+        const badgeLabel = isCustom ? `Món Ruột (${dish.match_pct}%)` : `Khớp ${dish.match_pct}% Mục Tiêu`;
+        const defaultImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80';
+
+        card.innerHTML = `
+          <div class="sc-img-wrap">
+            <img alt="${escapeHtml(dish.name)}" src="${escapeHtml(dish.image_url || defaultImg)}" onerror="this.src='${defaultImg}'" loading="lazy" />
+            <span class="sc-badge ${badgeClass}">${badgeIcon}${escapeHtml(badgeLabel)}</span>
+            <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15-20 phút</span>
+          </div>
+          <div class="sc-body">
+            <h4>${escapeHtml(dish.name)}</h4>
+            <p class="sc-desc">${escapeHtml(dish.match_reason || '')}</p>
+            <div class="sc-nutrition-chips">
+              <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> ${Math.round(dish.calories)} kcal</span>
+              <span class="snc snc-prot">P: ${Math.round(dish.protein)}g</span>
+              <span class="snc snc-carb">C: ${Math.round(dish.carbs)}g</span>
+              <span class="snc snc-fat">F: ${Math.round(dish.fat)}g</span>
+            </div>
+          </div>
+          <div class="sc-footer">
+            <button class="btn-jira-create btn-full btn-save-suggestion" type="button">
+              <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
+            </button>
+          </div>
+        `;
+
+        const btnSave = card.querySelector('.btn-save-suggestion');
+        if (btnSave) {
+          btnSave.addEventListener('click', () => saveSuggestedMeal(dish.dish_id, dish.name));
+        }
+
+        grid.appendChild(card);
+      }
+    } catch (e) {
+      grid.innerHTML = `
+        <div class="fh-loading-dishes" style="grid-column: 1 / -1; color: #ef4444; text-align: center; padding: 40px 0;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Không thể tải gợi ý món ăn: ${escapeHtml(e.message)}
+        </div>`;
+    }
+  }
+
+  async function saveSuggestedMeal(dishId, name) {
+    const hour = new Date().getHours();
+    let mealType = 'lunch';
+    if (hour < 10) mealType = 'breakfast';
+    else if (hour < 14) mealType = 'lunch';
+    else if (hour < 17) mealType = 'snack';
+    else mealType = 'dinner';
+
+    if (typeof fdSaveMeal === 'function') {
+      await fdSaveMeal({ dish_id: Number(dishId), meal_type: mealType, serving_factor: 1.0 });
+    } else {
+      try {
+        await FlexiAPI.request('/meals', {
+          method: 'POST',
+          data: { dish_id: Number(dishId), meal_type: mealType, serving_factor: 1.0 }
+        });
+        if (typeof showToast === 'function') showToast(`Đã thêm "${name}" vào thực đơn!`, 'success');
+        if (typeof switchTab === 'function') switchTab('dashboard');
+      } catch (e) {
+        if (typeof showToast === 'function') showToast(`Không thể lưu món: ${e.message}`, 'warning');
+      }
+    }
+  }
+
   // 7. Initialization & Event Listeners
   function init() {
     const catSearch = document.getElementById('foodHubCatalogSearch');
@@ -846,7 +949,9 @@ const FoodHub = (() => {
     removeComposerIngredient,
     toggleAddIngredientPanel,
     submitComposerToMealLog,
-    submitComposerAsMyDish
+    submitComposerAsMyDish,
+    loadSmartSuggestions,
+    saveSuggestedMeal
   };
 })();
 
@@ -860,6 +965,8 @@ function startNewCustomDish() { FoodHub.startNewCustomDish(); }
 function toggleAddIngredientPanel(force) { FoodHub.toggleAddIngredientPanel(force); }
 function submitComposerToMealLog() { FoodHub.submitComposerToMealLog(); }
 function submitComposerAsMyDish() { FoodHub.submitComposerAsMyDish(); }
+function loadSmartSuggestions(tag) { FoodHub.loadSmartSuggestions(tag); }
+function saveSuggestedMeal(dishId, name) { FoodHub.saveSuggestedMeal(dishId, name); }
 
 document.addEventListener('flexidiet:pages-ready', () => {
   FoodHub.init();

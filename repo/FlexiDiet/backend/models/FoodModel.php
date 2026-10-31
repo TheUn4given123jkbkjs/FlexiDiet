@@ -27,6 +27,67 @@ class FoodModel {
         );
     }
 
+    public static function getCandidateDishesForRecommendation(PDO $pdo, int $uid): array {
+        return all($pdo, '
+            SELECT 
+                d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.owner_user_id,
+                ROUND(SUM(di.grams * i.kcal_100g / 100), 1) AS kcal,
+                ROUND(SUM(di.grams * i.protein_100g / 100), 1) AS protein_g,
+                ROUND(SUM(di.grams * i.carb_100g / 100), 1) AS carb_g,
+                ROUND(SUM(di.grams * i.fat_100g / 100), 1) AS fat_g
+            FROM dishes d
+            JOIN dish_ingredients di ON di.dish_id = d.id
+            JOIN ingredients i ON i.id = di.ingredient_id
+            WHERE d.is_active = 1 
+              AND i.is_active = 1 
+              AND (d.owner_user_id IS NULL OR d.owner_user_id = ?)
+            GROUP BY d.id, d.name, d.name_norm, d.serving_label, d.dish_code, d.origin, d.owner_user_id
+        ', [$uid]);
+    }
+
+    public static function getUserDishCountsInDays(PDO $pdo, int $uid, int $days): array {
+        $rows = all($pdo, '
+            SELECT COALESCE(m.source_dish_id, d.id) AS dish_id, COUNT(*) AS cnt
+            FROM meal_entries m
+            LEFT JOIN dishes d ON (d.dish_code = m.ai_dish_code OR d.name = m.name)
+            WHERE m.user_id = ? 
+              AND m.entry_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+              AND COALESCE(m.source_dish_id, d.id) IS NOT NULL
+            GROUP BY dish_id
+        ', [$uid, $days]);
+        return array_column($rows, 'cnt', 'dish_id');
+    }
+
+    public static function getUserAllTimeDishCounts(PDO $pdo, int $uid): array {
+        $rows = all($pdo, '
+            SELECT COALESCE(m.source_dish_id, d.id) AS dish_id, COUNT(*) AS cnt
+            FROM meal_entries m
+            LEFT JOIN dishes d ON (d.dish_code = m.ai_dish_code OR d.name = m.name)
+            WHERE m.user_id = ? 
+              AND COALESCE(m.source_dish_id, d.id) IS NOT NULL
+            GROUP BY dish_id
+        ', [$uid]);
+        return array_column($rows, 'cnt', 'dish_id');
+    }
+
+    public static function getUserTotalMealsCount(PDO $pdo, int $uid): int {
+        return (int)(one($pdo, 'SELECT COUNT(*) AS c FROM meal_entries WHERE user_id = ?', [$uid])['c'] ?? 0);
+    }
+
+    public static function getPeerDishCountsByGoal(PDO $pdo, string $goal, int $days = 30): array {
+        $rows = all($pdo, '
+            SELECT COALESCE(m.source_dish_id, d.id) AS dish_id, COUNT(*) AS cnt
+            FROM meal_entries m
+            JOIN user_profiles p ON p.user_id = m.user_id
+            LEFT JOIN dishes d ON (d.dish_code = m.ai_dish_code OR d.name = m.name)
+            WHERE p.goal = ? 
+              AND m.entry_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+              AND COALESCE(m.source_dish_id, d.id) IS NOT NULL
+            GROUP BY dish_id
+        ', [$goal, $days]);
+        return array_column($rows, 'cnt', 'dish_id');
+    }
+
     public static function findDishById(PDO $pdo, int $dishId, int $uid): ?array {
         return one($pdo, '
             SELECT d.id, d.name, d.serving_label, d.dish_code, d.origin 

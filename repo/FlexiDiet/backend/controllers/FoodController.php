@@ -36,5 +36,11 @@ class FoodController {
         FoodService::deleteMeal($pdo, $uid, $mealId);
         response(['deleted' => true]);
     }
+
+    public static function getSuggestions(PDO $pdo, int $uid): void {
+        $tag = (string)($_GET['tag'] ?? 'all');
+        $meal = isset($_GET['meal']) ? (string)$_GET['meal'] : null;
+        response(FoodService::getSmartSuggestions($pdo, $uid, $tag, $meal));
+    }
 }
 

@@ -309,102 +309,10 @@
           <button class="s-filter-btn" type="button" onclick="filterSuggestions('low_cal', this)">🥗 Ít Calo (&lt; 350 kcal)</button>
         </div>
 
-        <!-- Suggestions Cards Grid -->
+        <!-- Suggestions Cards Grid (Rendered dynamically by FoodHub.loadSmartSuggestions) -->
         <div class="suggestions-cards-grid" id="suggestionsGrid">
-          <!-- Card 1: Salad Ức Gà -->
-          <div class="suggest-card" data-tags="high_prot quick low_cal">
-            <div class="sc-img-wrap">
-              <img alt="Salad Ức Gà" src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-high">Khớp 99% Mục Tiêu</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 15 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Salad Ức Gà Áp Chảo Rau Củ Healthy</h4>
-              <p class="sc-desc">Cung cấp 38g Protein nạc, xà lách giòn, sốt chanh leo ít béo thanh mát.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 340 kcal</span>
-                <span class="snc snc-prot">P: 38g</span>
-                <span class="snc snc-carb">C: 14g</span>
-                <span class="snc snc-fat">F: 8g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Salad Ức Gà Áp Chảo', 340, 38, 14, 8)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 2: Bún Chả -->
-          <div class="suggest-card" data-tags="viet high_prot">
-            <div class="sc-img-wrap">
-              <img alt="Bún Chả" src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-med">Món Việt Quen Thuộc</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 20 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Bún Chả Hà Nội Nướng Than Hoa</h4>
-              <p class="sc-desc">Chả nạc nướng thơm lừng, nước mắm dấm ớt chua ngọt thanh nhẹ kèm rau sống.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 510 kcal</span>
-                <span class="snc snc-prot">P: 28g</span>
-                <span class="snc snc-carb">C: 64g</span>
-                <span class="snc snc-fat">F: 16g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Bún Chả Hà Nội', 510, 28, 64, 16)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 3: Gỏi Cuốn Tôm Thịt -->
-          <div class="suggest-card" data-tags="viet quick low_cal">
-            <div class="sc-img-wrap">
-              <img alt="Gỏi Cuốn" src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-high">Ăn Nhẹ &amp; Thanh Lọc</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 10 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Gỏi Cuốn Tôm Thịt (3 Cuốn)</h4>
-              <p class="sc-desc">Tôm luộc tươi ngọt, thịt nạc, bún tươi và rau thơm cuốn bánh tráng mềm.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 280 kcal</span>
-                <span class="snc snc-prot">P: 22g</span>
-                <span class="snc snc-carb">C: 34g</span>
-                <span class="snc snc-fat">F: 6g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Gỏi Cuốn Tôm Thịt', 280, 22, 34, 6)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 4: Cơm Tấm Sườn Nạc -->
-          <div class="suggest-card" data-tags="viet high_prot">
-            <div class="sc-img-wrap">
-              <img alt="Cơm Tấm Sườn Nạc" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400&amp;auto=format&amp;fit=crop&amp;q=80"/>
-              <span class="sc-badge match-med">Năng Lượng Đầy Đủ</span>
-              <span class="sc-cook-time"><i class="fa-solid fa-clock"></i> 25 phút</span>
-            </div>
-            <div class="sc-body">
-              <h4>Cơm Tấm Sườn Nướng Chả Trứng</h4>
-              <p class="sc-desc">Sườn nướng mật ong đậm đà, chả trứng hấp mềm xốp, dưa chuột cà chua giải ngấy.</p>
-              <div class="sc-nutrition-chips">
-                <span class="snc snc-cal"><i class="fa-solid fa-fire"></i> 580 kcal</span>
-                <span class="snc snc-prot">P: 32g</span>
-                <span class="snc snc-carb">C: 75g</span>
-                <span class="snc snc-fat">F: 15g</span>
-              </div>
-            </div>
-            <div class="sc-footer">
-              <button class="btn-jira-create btn-full" type="button" onclick="quickAddFood('Cơm Tấm Sườn Nướng', 580, 32, 75, 15)">
-                <i class="fa-solid fa-plus"></i> Thêm Vào Thực Đơn Hôm Nay
-              </button>
-            </div>
+          <div class="fh-loading-dishes" style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích ngân sách và tính toán gợi ý món ăn tối ưu...
           </div>
         </div>
       </div>

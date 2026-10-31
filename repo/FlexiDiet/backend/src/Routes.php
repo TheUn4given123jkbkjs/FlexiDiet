@@ -160,6 +160,7 @@ function executeRoute(string $route, string $method): never {
     }
 
     // 5. Foods, Recipes & Meals
+    if ($route === '/foods/suggestions' && $method === 'GET') FoodController::getSuggestions($pdo, $uid);
     if ($route === '/foods' && $method === 'GET') FoodController::searchFoods($pdo, $uid);
     if (preg_match('~^/foods/([1-9][0-9]*)/recipe$~D', $route, $m) && $method === 'GET') {
         FoodController::getRecipe($pdo, $uid, (int)$m[1]);
