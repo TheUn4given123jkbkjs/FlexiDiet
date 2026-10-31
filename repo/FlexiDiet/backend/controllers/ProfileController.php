@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * ProfileController - Bộ điều khiển tiếp nhận các yêu cầu HTTP hồ sơ, avatar, cân nặng
+ * ProfileController - Bộ điều khiển tiếp nhận các yêu cầu HTTP hồ sơ, avatar, cân nặng, dashboard
  */
 class ProfileController {
     public static function getProfile(PDO $pdo, int $uid): void {
@@ -10,39 +10,11 @@ class ProfileController {
     }
 
     public static function updateProfile(PDO $pdo, int $uid, array $params): void {
-        $current = profileRow($pdo, $uid);
-        $name = isset($params['display_name']) ? requiredString($params, 'display_name', 100) : $current['display_name'];
-        $height = isset($params['height_cm']) ? num($params, 'height_cm', 90, 250) : (float)$current['height_cm'];
-        $goal = isset($params['goal']) ? choice($params, 'goal', ['lose', 'maintain', 'gain', 'build_muscle']) : $current['goal'];
-        $policy = isset($params['credit_policy']) ? choice($params, 'credit_policy', ['full', 'partial', 'capped']) : $current['credit_policy'];
-        $target = array_key_exists('target_weight_kg', $params)
-            ? ($params['target_weight_kg'] === null ? null : num($params, 'target_weight_kg', 20, 400))
-            : $current['target_weight_kg'];
-        $weight = isset($params['weight_kg']) ? num($params, 'weight_kg', 20, 400) : null;
-
-        $pdo->beginTransaction();
-        try {
-            UserModel::updateDisplayName($pdo, $uid, $name);
-            UserModel::updateProfile($pdo, $uid, $height, $goal, $target, $policy);
-            if ($weight !== null) {
-                UserModel::recordWeight($pdo, $uid, $weight, today());
-            }
-            ensureBudget($pdo, $uid, today(), true);
-            $pdo->commit();
-        } catch (Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            throw $e;
-        }
-
-        response(profileRow($pdo, $uid));
+        response(ProfileService::updateProfile($pdo, $uid, $params));
     }
 
     public static function recordWeight(PDO $pdo, int $uid, array $params): void {
-        $weight = num($params, 'weight_kg', 20, 400);
-        $date = dateValue($params['log_date'] ?? today());
-        UserModel::recordWeight($pdo, $uid, $weight, $date);
-        ensureBudget($pdo, $uid, $date, true);
-        response(['logged' => true, 'log_date' => $date, 'weight_kg' => $weight], 201);
+        response(ProfileService::recordWeight($pdo, $uid, $params), 201);
     }
 
     public static function getAvatar(PDO $pdo, int $uid): never {
@@ -87,7 +59,10 @@ class ProfileController {
     }
 
     public static function getInsights(PDO $pdo, int $uid, int $weightDays, int $energyDays): void {
-        response(profileInsights($pdo, $uid, $weightDays, $energyDays));
+        response(ProfileService::getInsights($pdo, $uid, $weightDays, $energyDays));
+    }
+
+    public static function getDashboard(PDO $pdo, int $uid, ?string $rawDate = null): void {
+        response(ProfileService::getDashboard($pdo, $uid, $rawDate));
     }
 }
-
